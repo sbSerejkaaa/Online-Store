@@ -1,0 +1,19 @@
+# IDE 
+.idea/ 
+*.iml 
+ 
+# Build 
+target/ 
+build/ 
+bin/ 
+*.jar 
+*.class 
+*.log 
+ 
+# Environment 
+.env 
+*.secret.* 
+ 
+# System 
+.DS_Store 
+Thumbs.db 
