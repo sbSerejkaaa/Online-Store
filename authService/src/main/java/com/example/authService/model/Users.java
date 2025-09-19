@@ -40,5 +40,6 @@ public class Users {
             registrationDate = LocalDateTime.now();
         }
     }
-    
+
+    private String LastName;
 }
