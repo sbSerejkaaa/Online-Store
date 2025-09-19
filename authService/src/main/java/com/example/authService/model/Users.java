@@ -1,14 +1,15 @@
 package com.example.authService.model;
-
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
-
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@ToString(exclude = "password")
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,6 +24,21 @@ public class Users {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "registration_date", nullable = false, updatable = false)
+    private LocalDateTime registrationDate;
 
+    public Users( String userName, String eMail, String password){
+        this.userName = userName;
+        this.eMail = eMail;
+        this.password = password;
+        this.registrationDate = LocalDateTime.now();
+    }
 
+    @PrePersist
+    protected void onCreate() {
+        if (registrationDate == null) {
+            registrationDate = LocalDateTime.now();
+        }
+    }
+    
 }
