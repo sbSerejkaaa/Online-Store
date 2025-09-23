@@ -1,7 +1,8 @@
 package com.example.authService.model;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -12,34 +13,33 @@ import java.time.LocalDateTime;
 @ToString(exclude = "password")
 public class Users {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "user_name", nullable = false, length = 50)
     private String userName;
 
     @Column(name = "email", nullable = false, unique = true, length = 50)
-    private String eMail;
+    private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "registration_date", nullable = false, updatable = false)
-    private LocalDateTime registrationDate;
+    private Instant registrationDate;
 
-    public Users( String userName, String eMail, String password){
+    public Users( String userName, String email, String password){
         this.userName = userName;
-        this.eMail = eMail;
+        this.email = email;
         this.password = password;
-        this.registrationDate = LocalDateTime.now();
+        this.registrationDate = Instant.now();
     }
 
     @PrePersist
     protected void onCreate() {
         if (registrationDate == null) {
-            registrationDate = LocalDateTime.now();
+            registrationDate = Instant.now();
         }
     }
 
-    private String LastName;
 }
