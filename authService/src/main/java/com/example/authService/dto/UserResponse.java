@@ -1,5 +1,4 @@
 package com.example.authService.dto;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

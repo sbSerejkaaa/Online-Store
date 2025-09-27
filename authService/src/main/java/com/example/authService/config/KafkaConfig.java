@@ -36,10 +36,11 @@ public class KafkaConfig {
         configProducer.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProducer.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         configProducer.put(ProducerConfig.ACKS_CONFIG, "all");
-        configProducer.put(ProducerConfig.RETRIES_CONFIG, 3);
-        configProducer.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+        configProducer.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 20000);
         configProducer.put(ProducerConfig.LINGER_MS_CONFIG, 10);
+        configProducer.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 10000);
         configProducer.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
+        configProducer.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
 
         return new DefaultKafkaProducerFactory<>(configProducer);
     }
