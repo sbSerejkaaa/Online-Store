@@ -1,10 +1,13 @@
 package com.example.authService.service;
 import com.example.authService.dto.UserRegistrationRequest;
 import com.example.authService.dto.UserResponse;
-import com.example.authService.event.UserRegisteredEvent;
 import com.example.authService.model.Users;
 import com.example.authService.repository.UserRepository;
+import com.example.core.UserRegisteredEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.errors.AuthenticationException;
+import org.apache.kafka.common.errors.TimeoutException;
+import org.apache.kafka.common.errors.TopicAuthorizationException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -26,7 +29,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse registerUser(UserRegistrationRequest request){
+    public UserResponse registeredUser(UserRegistrationRequest request){
         log.info("Регистрация пользователя: {}", request.getEmail());
 
         if(userRepository.existsByEmail(request.getEmail())){
@@ -37,7 +40,6 @@ public class UserService {
         Users newUsers = new Users(request.getUserName(), request.getEmail(), request.getPassword());
         Users savedUser = userRepository.save(newUsers);
 
-
         sendUserRegisteredEvent(savedUser);
 
         log.info("Пользователь {} успешно зарегистрирован", savedUser.getEmail());
@@ -47,22 +49,26 @@ public class UserService {
 
     private void sendUserRegisteredEvent(Users user) {
         try {
-            UserRegisteredEvent event = new UserRegisteredEvent(
-                    user.getId(),
-                    user.getEmail(),
-                    user.getUserName(),
-                    user.getRegistrationDate()
+            UserRegisteredEvent event = new UserRegisteredEvent(user.getId(), user.getEmail(),
+                    user.getUserName(), user.getRegistrationDate()
             );
-
 
             CompletableFuture<SendResult<String, UserRegisteredEvent>> future =
                     kafkaTemplate.send(USER_REGISTERED_TOPIC, user.getId().toString(), event);
                     future.whenComplete((result, ex) -> {
-                        if (ex == null) {
-                            log.info("✅ Событие отправлено в топик: {}", USER_REGISTERED_TOPIC);
-                            log.info("👤 UserId: {}, 📧 Email: {}", user.getId(), user.getEmail());
+                        if (ex != null) {
+                            if (ex instanceof TimeoutException) {
+                                log.error("Таймаут соединения с Kafka");
+                            } else if (ex instanceof AuthenticationException) {
+                                log.error("Ошибка аутентификации в Kafka");
+                            } else if (ex instanceof TopicAuthorizationException) {
+                                log.error("Нет прав на запись в топик");
+                            } else {
+                                log.error("Другая ошибка: {}", ex.getMessage());
+                            }
                         } else {
-                            log.error("❌ Ошибка отправки события: {}", ex.getMessage());
+                            log.info("Событие отправлено в топик: {}", USER_REGISTERED_TOPIC);
+                            log.info("UserId: {}, 📧 Email: {}", user.getId(), user.getEmail());
                         }
                     });
 

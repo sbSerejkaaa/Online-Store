@@ -1,4 +1,6 @@
 package com.example.authService.config;
+
+import com.example.core.UserRegisteredEvent;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -30,23 +32,31 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ProducerFactory<String, Object> producerFactory(){
+    public ProducerFactory<String, UserRegisteredEvent> producerFactory(){
         Map<String, Object> configProducer = new HashMap<>();
+        //Основа
         configProducer.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProducer.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProducer.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        //Надежность
         configProducer.put(ProducerConfig.ACKS_CONFIG, "all");
-        configProducer.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 20000);
-        configProducer.put(ProducerConfig.LINGER_MS_CONFIG, 10);
-        configProducer.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 10000);
-        configProducer.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
         configProducer.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+        configProducer.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 5);
+        //Таймауты
+        configProducer.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 60000);
+        configProducer.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 5000);
+        configProducer.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 500);
+        //Батч-сайзинг
+        configProducer.put(ProducerConfig.LINGER_MS_CONFIG, 100);
+        configProducer.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
+        configProducer.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
+
 
         return new DefaultKafkaProducerFactory<>(configProducer);
     }
 
     @Bean
-    public KafkaTemplate<String, Object> kafkaTemplate(){
+    public KafkaTemplate<String, UserRegisteredEvent> kafkaTemplate(){
         return new KafkaTemplate<>(producerFactory());
     }
 }

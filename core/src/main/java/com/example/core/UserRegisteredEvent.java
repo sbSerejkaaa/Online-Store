@@ -1,5 +1,6 @@
-package com.example.authService.event;
+package com.example.core;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import java.util.UUID;
 @Setter
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class UserRegisteredEvent {
     //  ОСНОВНЫЕ ДАННЫЕ (бизнес-логика)
     private UUID userId;
