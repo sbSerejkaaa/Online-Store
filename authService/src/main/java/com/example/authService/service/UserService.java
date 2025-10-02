@@ -68,7 +68,7 @@ public class UserService {
                             }
                         } else {
                             log.info("Событие отправлено в топик: {}", USER_REGISTERED_TOPIC);
-                            log.info("UserId: {}, 📧 Email: {}", user.getId(), user.getEmail());
+                            log.info("UserId: {}, Email: {}", user.getId(), user.getEmail());
                         }
                     });
 
