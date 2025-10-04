@@ -1,8 +1,8 @@
 package com.example.notificationService.handler;
 
-import com.example.core.UserRegisteredEvent;
-import com.example.notificationService.exception.NonRetryableException;
-import com.example.notificationService.exception.RetryableException;
+import com.example.core.event.UserRegisteredEvent;
+import com.example.core.exception.NonRetryableException;
+import com.example.core.exception.RetryableException;
 import com.example.notificationService.service.EmailService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -52,7 +52,6 @@ public class UserRegisteredConsumer {
             """, event.getUserId(), event.getEmail(), event.getEventTimestamp());
 
         try {
-            validateEvent(event);
             emailService.sendWelcomeEmail(event);
 
             successCounter.increment();
@@ -73,22 +72,4 @@ public class UserRegisteredConsumer {
 
     }
 
-    private void validateEvent(UserRegisteredEvent event) {
-        if (event.getUserId() == null) {
-            throw new NonRetryableException("User ID не может быть null");
-        }
-
-        if (event.getEmail() == null || event.getEmail().trim().isEmpty()) {
-            throw new NonRetryableException("Email не может быть пустым");
-        }
-
-        if (!isValidEmail(event.getEmail())) {
-            throw new NonRetryableException("Невалидный формат email: " + event.getEmail());
-        }
-    }
-
-    private boolean isValidEmail(String email) {
-        // Простая валидация email, можно заменить на библиотеку
-        return email != null && email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
-    }
 }

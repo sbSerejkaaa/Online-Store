@@ -1,6 +1,4 @@
-package com.example.notificationService.exception;
-
-import org.springframework.mail.MailException;
+package com.example.core.exception;
 
 public class NonRetryableException extends RuntimeException{
     public NonRetryableException(String message) {

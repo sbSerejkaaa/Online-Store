@@ -1,4 +1,4 @@
-package com.example.notificationService.exception;
+package com.example.core.exception;
 
 public class RetryableException extends RuntimeException{
 

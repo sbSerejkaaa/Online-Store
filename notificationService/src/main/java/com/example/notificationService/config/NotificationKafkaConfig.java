@@ -1,7 +1,7 @@
 package com.example.notificationService.config;
 
-import com.example.notificationService.exception.NonRetryableException;
-import com.example.notificationService.exception.RetryableException;
+import com.example.core.exception.NonRetryableException;
+import com.example.core.exception.RetryableException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -24,23 +24,15 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.util.backoff.FixedBackOff;
-import org.springframework.web.client.HttpServerErrorException;
 
 import java.util.HashMap;
 import java.util.Map;
 @Slf4j
 @Configuration
-public class KafkaConfig {
+public class NotificationKafkaConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
-
-    @Bean
-    public KafkaAdmin kafkaAdmin() {
-        Map<String, Object> configs = new HashMap<>();
-        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        return new KafkaAdmin(configs);
-    }
 
     @Bean
     public NewTopic userRegisteredDltTopic() {
@@ -92,7 +84,6 @@ public class KafkaConfig {
         errorHandler.addNotRetryableExceptions(NonRetryableException.class);
         errorHandler.addRetryableExceptions(RetryableException.class);
 
-        // 🔥 ДОБАВЬ ЛОГИРОВАНИЕ РЕТРАЕВ
         errorHandler.setRetryListeners(new RetryListener() {
             @Override
             public void failedDelivery(ConsumerRecord<?, ?> record, Exception ex, int deliveryAttempt) {

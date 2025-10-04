@@ -1,8 +1,8 @@
 package com.example.notificationService.service;
 
-import com.example.core.UserRegisteredEvent;
-import com.example.notificationService.exception.NonRetryableException;
-import com.example.notificationService.exception.RetryableException;
+import com.example.core.event.UserRegisteredEvent;
+import com.example.core.exception.NonRetryableException;
+import com.example.core.exception.RetryableException;
 import com.example.notificationService.model.NotificationLog;
 import com.example.notificationService.repository.NotificationRepository;
 import jakarta.mail.internet.MimeMessage;
