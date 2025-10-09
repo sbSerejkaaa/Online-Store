@@ -1,5 +1,6 @@
 package com.example.core.event;
 
+import com.example.core.status.InventoryStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,7 +1,7 @@
 package com.example.authService.service;
 import com.example.authService.dto.UserRegistrationRequest;
 import com.example.authService.dto.UserResponse;
-import com.example.authService.model.Users;
+import com.example.authService.entity.Users;
 import com.example.authService.repository.UserRepository;
 import com.example.core.event.UserRegisteredEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,6 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
-
 public class UserService {
 
     private final UserRepository userRepository;

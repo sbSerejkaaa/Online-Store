@@ -1,23 +1,21 @@
-package com.example.order.dto;
+package com.example.core.model;
 
-import com.example.core.status.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
 import java.util.UUID;
 
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderResponse {
-
+public class Inventory {
     private UUID id;
     private String productName;
-    private Integer productCount;
-    private OrderStatus status;
+    private Integer quantity;
+
+
 
 }

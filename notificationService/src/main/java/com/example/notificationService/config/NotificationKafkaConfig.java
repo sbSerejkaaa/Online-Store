@@ -54,7 +54,7 @@ public class NotificationKafkaConfig {
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
         config.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
 
-        config.put(JsonDeserializer.TRUSTED_PACKAGES, "com.example.core");
+        config.put(JsonDeserializer.TRUSTED_PACKAGES, "com.example.core.*");
         config.put(ConsumerConfig.GROUP_ID_CONFIG, "notification-group");
 
         return new DefaultKafkaConsumerFactory<>(config);
