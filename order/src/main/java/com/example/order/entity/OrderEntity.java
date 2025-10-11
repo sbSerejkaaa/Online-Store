@@ -16,7 +16,7 @@ public class OrderEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID orderId;
+    private UUID Id;
 
     @Column(name = "user_id")
     private UUID userId;

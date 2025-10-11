@@ -11,7 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @ToString(exclude = "password")
-public class Users {
+public class EntityUsers {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -28,7 +28,7 @@ public class Users {
     @Column(name = "registration_date", nullable = false, updatable = false)
     private Instant registrationDate;
 
-    public Users( String userName, String email, String password){
+    public EntityUsers(String userName, String email, String password){
         this.userName = userName;
         this.email = email;
         this.password = password;

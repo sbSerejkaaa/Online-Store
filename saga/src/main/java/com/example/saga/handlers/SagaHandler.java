@@ -1,7 +1,8 @@
-package com.example.order.saga;
+package com.example.saga.handlers;
 
-import com.example.core.command.ReserveInventoryCommand;
+import com.example.core.command.ReserveProductCommand;
 import com.example.core.event.OrderRegisteredEvent;
+import com.example.saga.mapper.SagaMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -12,22 +13,15 @@ import org.springframework.stereotype.Component;
 @Component
 @KafkaListener(topics = "${order-request-topic}")
 @RequiredArgsConstructor
-public class OrderSaga {
+public class SagaHandler {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    private static final String SAGA_COMMAND_TOPIC = "saga-commands-topic";
+    private static final String SAGA_COMMAND_TOPIC = "saga-product-commands-topic";
 
     @KafkaHandler
     public void handleEvent(@Payload OrderRegisteredEvent event){
-        ReserveInventoryCommand command = new ReserveInventoryCommand(
-                event.getInventoryId(),
-                event.getProductQuantity(),
-                event.getOrderId()
-        );
+        ReserveProductCommand command = SagaMapper.toReserveCommand(event);
 
         kafkaTemplate.send(SAGA_COMMAND_TOPIC, command);
     }
-
-
-
 }

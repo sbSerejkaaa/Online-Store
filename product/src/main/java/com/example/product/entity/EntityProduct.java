@@ -1,6 +1,6 @@
 package com.example.product.entity;
 
-import com.example.core.status.InventoryStatus;
+import com.example.core.status.ProductStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -8,37 +8,37 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "inventory")
+@Table(name = "product")
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
-public class Inventory {
+public class EntityProduct {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
+    
     @Column(name = "product_name")
     private String productName;
 
-    @Column(name = "quantity", nullable = false) // скорей всего не нужно будет null, в процессе разобраться
+    @Column(name = "quantity")
     private Integer quantity;
 
     @Column(name = "price", precision = 10, scale = 2)
     private BigDecimal price;
 
     @Enumerated(EnumType.STRING)
-    private InventoryStatus status;
+    private ProductStatus status;
 
     @Column(name = "created_at")
     private Instant createdAt;
 
-    public Inventory(String productName, Integer quantity, BigDecimal price) {
+    public EntityProduct(String productName, Integer quantity, BigDecimal price) {
         this.productName = productName;
         this.quantity = quantity;
         this.price = price;
-        this.status = InventoryStatus.ACTIVE;
+        this.status = ProductStatus.ACTIVE;
         this.createdAt = Instant.now();
     }
 

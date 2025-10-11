@@ -1,11 +1,9 @@
-package com.example.product.config;
+package com.example.saga.config;
 
 import com.example.core.exception.NonRetryableException;
 import com.example.core.exception.RetryableException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -14,62 +12,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.kafka.listener.RetryListener;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.util.backoff.FixedBackOff;
-
 import java.util.HashMap;
 import java.util.Map;
+
 @Slf4j
 @Configuration
-public class InventoryKafkaConfig {
+public class SagaKafkaConfig {
+
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
-
-    @Bean
-    public NewTopic sagaCommandsTopic() {
-        return TopicBuilder.name("saga-commands-topic")
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas", "2"))
-                .build();
-    }
-
-    @Bean
-    public NewTopic inventoryReservedTopic() {
-        return TopicBuilder.name("inventory-reserved-topic")
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas", "2"))
-                .build();
-    }
-
-    @Bean
-    public NewTopic inventoryFailedTopic() {
-        return TopicBuilder.name("inventory-failed-topic")
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas", "2"))
-                .build();
-    }
-
-    @Bean
-    public NewTopic inventoryReservedDltTopic() {
-        return TopicBuilder.name("inventory-reserved-topic.DLT")
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of(
-                        "retention.ms", "1209600000",
-                        "min.insync.replicas", "2"
-                ))
-                .build();
-    }
 
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
@@ -110,7 +68,7 @@ public class InventoryKafkaConfig {
         config.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
 
         config.put(JsonDeserializer.TRUSTED_PACKAGES, "com.example.core.*");
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, "inventory-service-group");
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, "saga-group");
 
         return new DefaultKafkaConsumerFactory<>(config);
 
@@ -121,8 +79,13 @@ public class InventoryKafkaConfig {
         return new DeadLetterPublishingRecoverer(
                 kafkaTemplate,
                 (record, exception) -> {
-                    // Явно указываем правильное имя DLT топика
-                    return new TopicPartition("inventory-reserved-topic.DLT", record.partition());
+                    // АВТОМАТИЧЕСКОЕ СОЗДАНИЕ DLT ИМЕНИ
+                    String originalTopic = record.topic();
+                    String dltTopic = originalTopic + ".DLT";
+                    log.warn("📨 Отправка в DLT: {} → {}, ошибка: {}",
+                            originalTopic, dltTopic, exception.getMessage());
+
+                    return new TopicPartition(dltTopic, record.partition());
                 }
         );
     }
@@ -139,13 +102,9 @@ public class InventoryKafkaConfig {
         errorHandler.addNotRetryableExceptions(NonRetryableException.class);
         errorHandler.addRetryableExceptions(RetryableException.class);
 
-        errorHandler.setRetryListeners(new RetryListener() {
-            @Override
-            public void failedDelivery(ConsumerRecord<?, ?> record, Exception ex, int deliveryAttempt) {
-                log.info("РЕТРАЙ {} для сообщения: {}, ошибка: {}",
-                        deliveryAttempt, record.key(), ex.getMessage());
-            }
-        });
+        errorHandler.setRetryListeners((record, ex, deliveryAttempt)
+                -> log.info("РЕТРАЙ {} для сообщения: {}, ошибка: {}",
+                deliveryAttempt, record.key(), ex.getMessage()));
 
 
         ConcurrentKafkaListenerContainerFactory<String, Object> factory =
@@ -156,5 +115,4 @@ public class InventoryKafkaConfig {
         return factory;
 
     }
-
 }

@@ -10,10 +10,10 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReserveInventoryCommand {
-
+public class ReserveProductCommand {
+    private UUID orderId;
     private UUID productId;
     private Integer productQuantity;
-    private UUID orderId;
+
 
 }

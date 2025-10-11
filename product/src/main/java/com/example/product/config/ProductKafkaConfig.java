@@ -1,4 +1,4 @@
-package com.example.order.config;
+package com.example.product.config;
 
 import com.example.core.exception.NonRetryableException;
 import com.example.core.exception.RetryableException;
@@ -23,17 +23,27 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.util.backoff.FixedBackOff;
+
 import java.util.HashMap;
 import java.util.Map;
 @Slf4j
 @Configuration
-public class OrderKafkaConfig {
+public class ProductKafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
     @Bean
+    public NewTopic sagaCommandsTopic() {
+        return TopicBuilder.name("saga-commands-topic")
+                .partitions(3)
+                .replicas(3)
+                .configs(Map.of("min.insync.replicas", "2"))
+                .build();
+    }
+
+    @Bean
     public NewTopic inventoryReservedTopic() {
-        return TopicBuilder.name("order-request-topic")
+        return TopicBuilder.name("inventory-reserved-topic")
                 .partitions(3)
                 .replicas(3)
                 .configs(Map.of("min.insync.replicas", "2"))
@@ -42,7 +52,7 @@ public class OrderKafkaConfig {
 
     @Bean
     public NewTopic inventoryFailedTopic() {
-        return TopicBuilder.name("order-failed-topic")
+        return TopicBuilder.name("inventory-failed-topic")
                 .partitions(3)
                 .replicas(3)
                 .configs(Map.of("min.insync.replicas", "2"))
@@ -51,7 +61,7 @@ public class OrderKafkaConfig {
 
     @Bean
     public NewTopic inventoryReservedDltTopic() {
-        return TopicBuilder.name("order-reserved-topic.DLT")
+        return TopicBuilder.name("inventory-reserved-topic.DLT")
                 .partitions(3)
                 .replicas(3)
                 .configs(Map.of(
@@ -100,7 +110,7 @@ public class OrderKafkaConfig {
         config.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
 
         config.put(JsonDeserializer.TRUSTED_PACKAGES, "com.example.core.*");
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, "order-service-group");
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, "inventory-service-group");
 
         return new DefaultKafkaConsumerFactory<>(config);
 
@@ -112,7 +122,7 @@ public class OrderKafkaConfig {
                 kafkaTemplate,
                 (record, exception) -> {
                     // Явно указываем правильное имя DLT топика
-                    return new TopicPartition("order-reserved-topic.DLT", record.partition());
+                    return new TopicPartition("inventory-reserved-topic.DLT", record.partition());
                 }
         );
     }

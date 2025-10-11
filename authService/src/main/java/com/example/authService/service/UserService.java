@@ -1,7 +1,7 @@
 package com.example.authService.service;
 import com.example.authService.dto.UserRegistrationRequest;
 import com.example.authService.dto.UserResponse;
-import com.example.authService.entity.Users;
+import com.example.authService.entity.EntityUsers;
 import com.example.authService.repository.UserRepository;
 import com.example.core.event.UserRegisteredEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -37,8 +37,8 @@ public class UserService {
                     + request.getEmail() + " уже существует.");
         }
 
-        Users newUsers = new Users(request.getUserName(), request.getEmail(), request.getPassword());
-        Users savedUser = userRepository.save(newUsers);
+        EntityUsers newEntityUsers = new EntityUsers(request.getUserName(), request.getEmail(), request.getPassword());
+        EntityUsers savedUser = userRepository.save(newEntityUsers);
 
         sendUserRegisteredEvent(savedUser);
 
@@ -47,7 +47,7 @@ public class UserService {
     }
 
 
-    private void sendUserRegisteredEvent(Users user) {
+    private void sendUserRegisteredEvent(EntityUsers user) {
         try {
             UserRegisteredEvent event = new UserRegisteredEvent(user.getId(), user.getEmail(),
                     user.getUserName(), user.getRegistrationDate()
@@ -78,7 +78,7 @@ public class UserService {
         }
     }
 
-    private UserResponse mapToResponse(Users user){
+    private UserResponse mapToResponse(EntityUsers user){
         UserResponse response = new UserResponse();
         response.setId(user.getId());
         response.setUserName(user.getUserName());

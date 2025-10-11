@@ -1,6 +1,5 @@
 package com.example.product.dto;
 
-import com.example.core.status.InventoryStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,10 +12,10 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class InventoryResponse {
+public class ProductRegistrationRequest {
+
     private UUID id;
     private String nameInventory;
     private Integer quantity;
     private BigDecimal price;
-    private InventoryStatus status;
 }

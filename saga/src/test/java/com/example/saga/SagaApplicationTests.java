@@ -1,10 +1,10 @@
-package com.example.product;
+package com.example.saga;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class InventoryApplicationTests {
+class SagaApplicationTests {
 
 	@Test
 	void contextLoads() {

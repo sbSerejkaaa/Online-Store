@@ -7,11 +7,9 @@ import com.example.order.dto.OrderRegistrationRequest;
 import com.example.order.dto.OrderResponse;
 import com.example.order.entity.OrderEntity;
 import lombok.Builder;
-import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 @Builder
-@Component
 public class OrderMapper {
 
     // DTO → Core Model (для контроллера) Преобразует данные от клиента (DTO) в общую модель для бизнес-логики
@@ -20,14 +18,14 @@ public class OrderMapper {
         //    order.setUserId(request.getUserId());           // Берем ID пользователя из запроса
         order.setProductName(request.getProductName()); // Берем название товара из запроса
         order.setTotalAmount(request.getCount());       // Берем количество товара из запроса
-        order.setStatus(OrderStatus.PENDING);           // Устанавливаем начальный статус "В обработке"
+        order.setStatus(OrderStatus.PENDING); // Устанавливаем начальный статус "В обработке"
         return order;
     }
 
     // Core Model → Entity (для сервиса) Преобразует бизнес-модель в JPA сущность для сохранения в БД
     public OrderEntity toEntity(Orders order) {
         OrderEntity entity = new OrderEntity();
-        entity.setUserId(order.getUserId());            // Переносим ID пользователя
+        // entity.setUserId(order.getUserId());            // Переносим ID пользователя
         entity.setProductName(order.getProductName());  // Переносим название товара
         entity.setTotalAmount(order.getTotalAmount());  // Переносим количество
         entity.setStatus(order.getStatus());            // Переносим статус
@@ -39,7 +37,7 @@ public class OrderMapper {
     public Orders toCoreModel(OrderEntity entity) {
         Orders order = new Orders();
         order.setId(entity.getOrderId());                    // Берем ID сгенерированный БД
-        order.setUserId(entity.getUserId());            // Переносим ID пользователя
+ //       order.setUserId(entity.getUserId());            // Переносим ID пользователя
         order.setProductName(entity.getProductName());  // Переносим название товара
         order.setTotalAmount(entity.getTotalAmount());  // Переносим количество
         order.setStatus(entity.getStatus());            // Переносим статус
@@ -60,9 +58,9 @@ public class OrderMapper {
     public OrderRegisteredEvent toEvent(OrderEntity entity) {
         OrderRegisteredEvent event = new OrderRegisteredEvent();
         event.setOrderId(entity.getOrderId());                   // ID заказа для события
-        event.setUserId(entity.getUserId());           // ID пользователя для события
+  //      event.setUserId(entity.getUserId());           // ID пользователя для события
         event.setProductName(entity.getProductName()); // Название товара для события
-        event.setTotalAmount(entity.getTotalAmount()); // Количество для события
+        event.setProductQuantity(entity.getTotalAmount()); // Количество для события
         event.setStatus(entity.getStatus());           // Статус для события
         event.setCreatedAt(entity.getCreatedAt());     // Время создания для события
         return event;

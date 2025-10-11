@@ -1,6 +1,6 @@
 package com.example.core.event;
 
-import com.example.core.status.InventoryStatus;
+import com.example.core.status.ProductStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,11 +14,12 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class InventoryRegisteredEvent {
+public class ProductRegisteredEvent {
     private UUID inventoryId;
+    private String productName;
     private Integer quantity;
     private BigDecimal price;
-    private InventoryStatus status;
+    private ProductStatus status;
     private Instant createdAt;
 
     //  МЕТАДАННЫЕ СОБЫТИЯ (техническая информация)
@@ -27,9 +28,10 @@ public class InventoryRegisteredEvent {
     private final String EVENT_TYPE = "INVENTORY_REGISTERED";             // Тип события
     private final String EVENT_VERSION = "1.0";
 
-    public InventoryRegisteredEvent(UUID inventoryId, Integer quantity, BigDecimal price,
-                                    InventoryStatus status, Instant createdAt) {
+    public ProductRegisteredEvent(UUID inventoryId, String productName, Integer quantity, BigDecimal price,
+                                  ProductStatus status, Instant createdAt) {
         this.inventoryId = inventoryId;
+        this.productName = productName;
         this.quantity = quantity;
         this.price = price;
         this.status = status;
