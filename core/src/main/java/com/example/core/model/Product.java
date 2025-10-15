@@ -17,4 +17,9 @@ public class Product {
     private String productName;
     private Integer quantity;
     private BigDecimal price;
+
+    public Product(UUID productId, Integer quantity) {
+        this.productId = productId;
+        this.quantity = quantity;
+    }
 }

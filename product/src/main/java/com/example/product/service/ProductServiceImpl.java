@@ -3,6 +3,7 @@ package com.example.product.service;
 import com.example.core.event.OrderRegisteredEvent;
 import com.example.core.event.ProductRegisteredEvent;
 
+import com.example.core.exception.ProductInsufficientQuantityException;
 import com.example.core.model.Product;
 import com.example.core.status.ProductStatus;
 import com.example.product.dto.ProductRegistrationRequest;
@@ -16,12 +17,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.errors.AuthenticationException;
 import org.apache.kafka.common.errors.TimeoutException;
 import org.apache.kafka.common.errors.TopicAuthorizationException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -74,14 +79,37 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public Product save(Product product) {
-        EntityProduct productEntity = new EntityProduct();
-        productEntity.setProductName(product.getProductName());
-        productEntity.setPrice(product.getPrice());
-        productEntity.setQuantity(product.getQuantity());
+    public Product reserve(Product desiredProduct, UUID orderId) {
+        EntityProduct productEntity = productRepository.findById(desiredProduct.getProductId()).orElseThrow();
+        if (desiredProduct.getQuantity() > productEntity.getQuantity()) {
+            throw new ProductInsufficientQuantityException(productEntity.getId(), orderId);
+        }
+
+        productEntity.setQuantity(productEntity.getQuantity() - desiredProduct.getQuantity());
+
         productRepository.save(productEntity);
 
-        return new Product(productEntity.getId(), product.getProductName(), product.getQuantity(), product.getPrice());
+        var reservedProduct = new Product();
+        BeanUtils.copyProperties(productEntity, reservedProduct);
+        reservedProduct.setQuantity(desiredProduct.getQuantity());
+        return reservedProduct;
     }
+
+    @Override
+    public void cancelReservation(Product productToCancel, UUID orderId) {
+
+        EntityProduct productEntity = productRepository.findById(productToCancel.getProductId()).orElseThrow();
+        productEntity.setQuantity(productEntity.getQuantity() + productToCancel.getQuantity());
+        productRepository.save(productEntity);
+
+    }
+
+    @Override
+    public List<Product> findAll() {
+         return productRepository.findAll().stream()
+                .map(entity -> new Product(entity.getId(), entity.getProductName(), entity.getQuantity(), entity.getPrice()))
+                .collect(Collectors.toList());
+    }
+
 }
 

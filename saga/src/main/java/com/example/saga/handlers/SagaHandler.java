@@ -11,17 +11,19 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 @Component
-@KafkaListener(topics = "${order-request-topic}")
+@KafkaListener(topics ={ "${order-request-topic}",
+        "${product-reserved-events-topic}"})
 @RequiredArgsConstructor
 public class SagaHandler {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    private static final String SAGA_COMMAND_TOPIC = "saga-product-commands-topic";
+    private static final String SAGA_COMMAND_TOPIC = "saga-commands-topic";
 
     @KafkaHandler
     public void handleEvent(@Payload OrderRegisteredEvent event){
         ReserveProductCommand command = SagaMapper.toReserveCommand(event);
 
         kafkaTemplate.send(SAGA_COMMAND_TOPIC, command);
+        // RepositoryHistory add
     }
 }

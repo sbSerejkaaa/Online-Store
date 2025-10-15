@@ -2,10 +2,12 @@ package com.example.product.mapper;
 
 import com.example.core.event.ProductRegisteredEvent;
 import com.example.core.model.Product;
+import com.example.core.status.ProductStatus;
 import com.example.product.dto.ProductRegistrationRequest;
 import com.example.product.dto.ProductResponse;
 import com.example.product.entity.EntityProduct;
 import java.time.Instant;
+import java.util.UUID;
 
 public class ProductMapper {
 
@@ -57,6 +59,7 @@ public class ProductMapper {
         ProductRegisteredEvent productRegisteredEvent = new ProductRegisteredEvent();
 
         productRegisteredEvent.setInventoryId(entityProduct.getId());
+        productRegisteredEvent.setOrderId(entityProduct.getId());
         productRegisteredEvent.setProductName(entityProduct.getProductName());
         productRegisteredEvent.setQuantity(entityProduct.getQuantity());
         productRegisteredEvent.setPrice(entityProduct.getPrice());
@@ -66,5 +69,6 @@ public class ProductMapper {
         return productRegisteredEvent;
 
     }
+
 
 }

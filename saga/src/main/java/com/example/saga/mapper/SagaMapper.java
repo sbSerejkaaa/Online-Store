@@ -7,11 +7,12 @@ public class SagaMapper {
 
     public static ReserveProductCommand toReserveCommand(OrderRegisteredEvent event) {
         return new ReserveProductCommand(
-                event.getOrderId(),
                 event.getInventoryId(),
-                event.getProductQuantity()
+                event.getProductQuantity(),
+                event.getOrderId()
         );
     }
+
 
 
 

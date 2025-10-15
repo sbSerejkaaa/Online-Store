@@ -33,17 +33,8 @@ public class ProductKafkaConfig {
     private String bootstrapServers;
 
     @Bean
-    public NewTopic sagaCommandsTopic() {
-        return TopicBuilder.name("saga-commands-topic")
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas", "2"))
-                .build();
-    }
-
-    @Bean
     public NewTopic inventoryReservedTopic() {
-        return TopicBuilder.name("inventory-reserved-topic")
+        return TopicBuilder.name("product-reserved-events-topic")
                 .partitions(3)
                 .replicas(3)
                 .configs(Map.of("min.insync.replicas", "2"))
@@ -52,7 +43,7 @@ public class ProductKafkaConfig {
 
     @Bean
     public NewTopic inventoryFailedTopic() {
-        return TopicBuilder.name("inventory-failed-topic")
+        return TopicBuilder.name("product-failed-topic")
                 .partitions(3)
                 .replicas(3)
                 .configs(Map.of("min.insync.replicas", "2"))
