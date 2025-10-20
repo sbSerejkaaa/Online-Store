@@ -9,12 +9,10 @@ public class SagaMapper {
         return new ReserveProductCommand(
                 event.getInventoryId(),
                 event.getProductQuantity(),
-                event.getOrderId()
+                event.getOrderId(),
+                event.getProductName(),
+                event.getStatus(),
+                event.getCreatedAt()
         );
     }
-
-
-
-
-
 }

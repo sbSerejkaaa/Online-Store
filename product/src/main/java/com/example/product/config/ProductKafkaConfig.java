@@ -32,35 +32,6 @@ public class ProductKafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Bean
-    public NewTopic inventoryReservedTopic() {
-        return TopicBuilder.name("product-reserved-events-topic")
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas", "2"))
-                .build();
-    }
-
-    @Bean
-    public NewTopic inventoryFailedTopic() {
-        return TopicBuilder.name("product-failed-topic")
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas", "2"))
-                .build();
-    }
-
-    @Bean
-    public NewTopic inventoryReservedDltTopic() {
-        return TopicBuilder.name("inventory-reserved-topic.DLT")
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of(
-                        "retention.ms", "1209600000",
-                        "min.insync.replicas", "2"
-                ))
-                .build();
-    }
 
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
@@ -101,7 +72,7 @@ public class ProductKafkaConfig {
         config.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
 
         config.put(JsonDeserializer.TRUSTED_PACKAGES, "com.example.core.*");
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, "inventory-service-group");
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, "product-service-group");
 
         return new DefaultKafkaConsumerFactory<>(config);
 
@@ -113,7 +84,7 @@ public class ProductKafkaConfig {
                 kafkaTemplate,
                 (record, exception) -> {
                     // Явно указываем правильное имя DLT топика
-                    return new TopicPartition("inventory-reserved-topic.DLT", record.partition());
+                    return new TopicPartition("product.request.topic.DLT", record.partition());
                 }
         );
     }

@@ -17,15 +17,15 @@ import java.time.Instant;
 
 @Slf4j
 @Component
-@KafkaListener(topics = "saga-product-commands-topic") // слушаю САГУ
+@KafkaListener(topics = "saga.products.commands") // слушаю САГУ
 @RequiredArgsConstructor
 
 public class ProductCommandHandler {
 
     private final ProductService productService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    private static final String INVENTORY_RESERVED_EVENTS_TOPIC = "product-reserved-events-topic";
-    private static final String INVENTORY_FAILED_TOPIC = "product-failed-topic";
+    private static final String PRODUCT_RESERVED_EVENTS_TOPIC = "product.request.topic";
+    private static final String PRODUCT_FAILED_TOPIC = "product.failed.topic";
 
     @KafkaHandler
     public void handleCommand(@Payload ReserveProductCommand command){
@@ -42,13 +42,13 @@ public class ProductCommandHandler {
                     .createdAt(Instant.now())
                     .build();
 
-            kafkaTemplate.send(INVENTORY_RESERVED_EVENTS_TOPIC, event);
+            kafkaTemplate.send(PRODUCT_RESERVED_EVENTS_TOPIC, event);
 
         } catch ( Exception e){
             log.error(e.getLocalizedMessage(), e);
             ProductReservationFailedEvent productReservationFailedEvent = new ProductReservationFailedEvent(command.getProductId(),
                     command.getOrderId(), command.getProductQuantity());
-            kafkaTemplate.send(INVENTORY_FAILED_TOPIC, productReservationFailedEvent);
+            kafkaTemplate.send(PRODUCT_FAILED_TOPIC, productReservationFailedEvent);
 
         }
 

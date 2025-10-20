@@ -1,11 +1,9 @@
-package com.example.order.config;
+package com.example.payment.config;
 
 import com.example.core.exception.NonRetryableException;
 import com.example.core.exception.RetryableException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -14,23 +12,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.kafka.listener.RetryListener;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.util.backoff.FixedBackOff;
+
 import java.util.HashMap;
 import java.util.Map;
+
 @Slf4j
 @Configuration
-public class OrderKafkaConfig {
+public class KafkaConfig {
+
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
-
 
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
@@ -71,7 +69,7 @@ public class OrderKafkaConfig {
         config.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
 
         config.put(JsonDeserializer.TRUSTED_PACKAGES, "com.example.core.*");
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, "order-service-group");
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-service-group");
 
         return new DefaultKafkaConsumerFactory<>(config);
 
@@ -83,7 +81,7 @@ public class OrderKafkaConfig {
                 kafkaTemplate,
                 (record, exception) -> {
                     // Явно указываем правильное имя DLT топика
-                    return new TopicPartition("order.request.topic.DLT", record.partition());
+                    return new TopicPartition("payment-reserved-topic.DLT", record.partition());
                 }
         );
     }
@@ -100,13 +98,10 @@ public class OrderKafkaConfig {
         errorHandler.addNotRetryableExceptions(NonRetryableException.class);
         errorHandler.addRetryableExceptions(RetryableException.class);
 
-        errorHandler.setRetryListeners(new RetryListener() {
-            @Override
-            public void failedDelivery(ConsumerRecord<?, ?> record, Exception ex, int deliveryAttempt) {
-                log.info("РЕТРАЙ {} для сообщения: {}, ошибка: {}",
-                        deliveryAttempt, record.key(), ex.getMessage());
-            }
-        });
+        errorHandler.setRetryListeners(
+                (record, ex, deliveryAttempt)
+                        -> log.info("РЕТРАЙ {} для сообщения: {}, ошибка: {}",
+                deliveryAttempt, record.key(), ex.getMessage()));
 
 
         ConcurrentKafkaListenerContainerFactory<String, Object> factory =
@@ -117,5 +112,4 @@ public class OrderKafkaConfig {
         return factory;
 
     }
-
 }

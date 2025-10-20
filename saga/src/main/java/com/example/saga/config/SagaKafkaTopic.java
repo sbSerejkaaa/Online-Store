@@ -9,43 +9,52 @@ import java.util.Map;
 
 @Configuration
 public class SagaKafkaTopic {
+// Вопрос: Нужны ли топики Events или в Саге достаточно только COMMANDS топиков?
 
     @Bean
-    public NewTopic sagaCommandsTopic() {
-        return TopicBuilder.name("saga-product-commands-topic")
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas", "2"))
-                .build();
+    public NewTopic sagaOrderCommandsTopic() {
+        return buildCommandTopic("saga.orders.commands");
     }
 
     @Bean
-    public NewTopic sagaEventsTopic() {
-        return TopicBuilder.name("saga-events-topic")
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas", "2"))
-                .build();
+    public NewTopic sagaProductCommandsTopic() {
+        return buildCommandTopic("saga.products.commands");  // ← исправил product → products
     }
 
     @Bean
-    public NewTopic sagaCommandsDltTopic() {
-        return TopicBuilder.name("saga-product-commands-topic.DLT")
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of(
-                        "retention.ms", "1209600000",
-                        "min.insync.replicas", "2"
-                ))
-                .build();
+    public NewTopic sagaPaymentCommandsTopic() {
+        return buildCommandTopic("saga.payments.commands");
+    }
+
+    // === DLT TOPICS ===
+    @Bean
+    public NewTopic sagaOrderCommandsDltTopic() {
+        return buildDltTopic("saga.orders.commands.DLT");
     }
 
     @Bean
-    public NewTopic sagaEventsDltTopic() {  // ← ДОБАВЬ ДЛЯ СОБЫТИЙ
-        return TopicBuilder.name("saga-events-topic.DLT")
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of("retention.ms", "1209600000"))
+    public NewTopic sagaPaymentCommandsDltTopic() {
+        return buildDltTopic("saga.payments.commands.DLT");
+    }
+
+    @Bean
+    public NewTopic sagaProductCommandsDltTopic() {
+        return buildDltTopic("saga.products.commands.DLT");
+    }
+
+    private NewTopic buildCommandTopic(String name) {
+        return TopicBuilder.name(name)
+                .partitions(3).replicas(3)
+                .configs(Map.of("min.insync.replicas", "2", "retention.ms", "604800000")) // 7 дней
                 .build();
     }
+
+    private NewTopic buildDltTopic(String name) {
+        return TopicBuilder.name(name)
+                .partitions(3).replicas(3)
+                .configs(Map.of("retention.ms", "1209600000")) // 14 дней для DLT
+                .build();
+    }
+
 }
+

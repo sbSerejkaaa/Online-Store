@@ -2,6 +2,7 @@ package com.example.saga.handlers;
 
 import com.example.core.command.ReserveProductCommand;
 import com.example.core.event.OrderRegisteredEvent;
+import com.example.core.event.ProductReservationFailedEvent;
 import com.example.saga.mapper.SagaMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -11,13 +12,14 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 @Component
-@KafkaListener(topics ={ "${order-request-topic}",
-        "${product-reserved-events-topic}"})
+@KafkaListener(topics ={
+        "${order.request.topic}",
+        "${product.request.topic}"})
 @RequiredArgsConstructor
 public class SagaHandler {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    private static final String SAGA_COMMAND_TOPIC = "saga-commands-topic";
+    private static final String SAGA_COMMAND_TOPIC = "saga.products.commands";
 
     @KafkaHandler
     public void handleEvent(@Payload OrderRegisteredEvent event){
@@ -25,5 +27,9 @@ public class SagaHandler {
 
         kafkaTemplate.send(SAGA_COMMAND_TOPIC, command);
         // RepositoryHistory add
+    }
+    @KafkaHandler
+    public void handleEvent(ProductReservationFailedEvent event){
+
     }
 }
