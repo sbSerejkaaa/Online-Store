@@ -9,7 +9,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CancelPaymentTransactionHandler implements PaymentTransactionCommandHandler {
+public class CancelPaymentTransactionHandlerImpl implements PaymentTransactionCommandHandler {
 
     @Override
     public void process(UUID requestId, String massage) {

@@ -1,6 +1,6 @@
 package com.example.payment.contorller.kafka.consumer;
 
-import com.example.payment.model.enums.PaymentTransactionCommand;
+import com.example.payment.model.dto.enums.PaymentTransactionCommand;
 import com.example.payment.service.handler.PaymentTransactionCommandHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
