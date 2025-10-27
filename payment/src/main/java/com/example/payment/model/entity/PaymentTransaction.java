@@ -40,4 +40,5 @@ public class PaymentTransaction extends BaseEntity {
     @OneToMany(mappedBy = "paymentTransaction", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Refund> refunds;
 
+    private String status;
 }

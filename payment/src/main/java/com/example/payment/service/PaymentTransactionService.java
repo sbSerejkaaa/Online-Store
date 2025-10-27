@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -18,5 +21,9 @@ public class PaymentTransactionService {
 
     public PaymentTransaction save(PaymentTransaction paymentTransaction){
        return paymentTransactionRepository.save(paymentTransaction);
+    }
+
+    public Optional<PaymentTransaction> findById(UUID id){
+        return paymentTransactionRepository.findById(id);
     }
 }

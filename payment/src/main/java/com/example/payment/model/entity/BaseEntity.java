@@ -1,5 +1,6 @@
 package com.example.payment.model.entity;
 
+import com.example.payment.model.enums.PaymentTransactionStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,4 +29,6 @@ public class BaseEntity {
 
     @Version
     private Long version;
+
+
 }
