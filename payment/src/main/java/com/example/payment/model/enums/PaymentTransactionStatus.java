@@ -8,12 +8,13 @@ public enum PaymentTransactionStatus {
     SUCCESS,
     FAILED;
 
-    public static PaymentTransactionStatus  fromString(String status){
-        for (PaymentTransactionStatus paymentTransactionStatus : PaymentTransactionStatus.values()){
-            if(paymentTransactionStatus.toString().equalsIgnoreCase(status)){
-                return paymentTransactionStatus;
+    public static PaymentTransactionStatus fromString(String value) {
+        for (PaymentTransactionStatus status : PaymentTransactionStatus.values()) {
+            if (status.name().equalsIgnoreCase(value)) {
+                return status;
             }
         }
-        throw new IllegalArgumentException("Invalid PaymentTransactionStatus: " + status);
+        throw new IllegalArgumentException("Unknown value: " + value);
     }
+
 }

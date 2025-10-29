@@ -1,4 +1,4 @@
-package com.example.payment.model.dto;
+package com.example.payment.contorller.dto.kafka;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -14,12 +14,12 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CancelPaymentTransactionRequest {
-    @NotNull(message = "Transaction ID не может быть null")
-    private UUID transactionId;
-    @NotNull
-    @Min(value = 1, message = "Возвращаемая сумма не должна быть null")
+public class CancelPaymentRequest {
+    @NotNull(message = "Transaction ID must not be null")
+    private Long transactionId;
+    @NotNull(message = "Cancel amount must not be null")
+    @Min(value = 1, message = "Cancel amount must be greater than zero")
     private BigDecimal refundedAmount;
-    private String reasons;
+    private String reason;
 
 }

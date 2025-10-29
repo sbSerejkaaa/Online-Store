@@ -4,5 +4,5 @@ import java.util.UUID;
 
 public interface PaymentTransactionCommandHandler {
 
-    void process(UUID requestId, String massage);
+    void processCommand(Long requestId, String massage);
 }

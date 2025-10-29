@@ -1,6 +1,6 @@
 package com.example.payment.contorller.kafka.producer;
 
-import com.example.payment.model.dto.enums.PaymentTransactionCommand;
+import com.example.payment.model.enums.PaymentTransactionCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,26 +16,23 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class PaymentTransactionProducer {
-    // PUBLIC
-    public final static String RESULT_SAGA_PAYMENT_TOPIC = "saga.payments.commands";
-    private final static String PAYMENT_TRANSACTION_COMMAND_TYPE_HEADER = "command";
+    private final static String RESULT_SAGA_PAYMENT_TOPIC = "saga.payments.commands";
     private final KafkaTemplate<String, String> kafkaTemplate;
 
 
-    public void sendCommandResult(String topic, UUID requestId, String message,
-                                  PaymentTransactionCommand command) {
+    public <T> void sendCommandResult(Long requestId, PaymentTransactionCommand commandType, String message) {
+        var kafkaMessage = buildMessage(commandType, requestId, message);
 
-        var kafkaMessage = buildMessage(topic, requestId, message, command);
         kafkaTemplate.send(kafkaMessage);
-
-        log.info("Successfully sent command result {}", kafkaMessage);
+        log.info("Sent command result: {}", message);
     }
 
-    private Message<String> buildMessage(String topic, UUID requestId, String message, PaymentTransactionCommand command) {
-        return MessageBuilder.withPayload(message)
-                .setHeader(KafkaHeaders.TOPIC, topic)
+    private Message<String> buildMessage(PaymentTransactionCommand commandType, Long requestId, String payload) {
+        return MessageBuilder
+                .withPayload(payload)
+                .setHeader(KafkaHeaders.TOPIC, RESULT_SAGA_PAYMENT_TOPIC)
                 .setHeader(KafkaHeaders.KEY, requestId)
-                .setHeader(PAYMENT_TRANSACTION_COMMAND_TYPE_HEADER, command.toString())
+                .setHeader("commandType", commandType)
                 .build();
     }
 

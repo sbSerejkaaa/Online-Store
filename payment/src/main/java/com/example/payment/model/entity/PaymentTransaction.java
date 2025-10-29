@@ -1,44 +1,44 @@
 package com.example.payment.model.entity;
 
-
+import com.example.payment.model.entity.account.CurrencyAccount;
 import com.example.payment.model.enums.PaymentTransactionStatus;
-import com.example.payment.model.enums.converter.PaymentTransactionConverter;
+import com.example.payment.model.enums.converter.PaymentTransactionStatusConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
+@Table(name = "payment_transaction")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentTransaction extends BaseEntity {
 
-    private BigDecimal amount;
+    private BigDecimal amountDebited;
 
-    private String currency;
+    private BigDecimal amountCredited;
 
-    @Convert(converter = PaymentTransactionConverter.class)
-    private PaymentTransactionStatus paymentTransactionStatus;
+    private BigDecimal exchangeRate;
 
-    @Column(name = "error_message")
+    @Convert(converter = PaymentTransactionStatusConverter.class)
+    private PaymentTransactionStatus status;
+
     private String errorMessage;
 
     @ManyToOne
-    @JoinColumn(name = "source_bank_account_id")
-    private BankAccount sourceBankAccount;
+    @JoinColumn(name = "sourceCurrencyAccountId", nullable = false)
+    private CurrencyAccount source;
 
     @ManyToOne
-    @JoinColumn(name = "destination_bank_account_id")
-    private BankAccount destinationBankAccount;
+    @JoinColumn(name = "destinationCurrencyAccountId")
+    private CurrencyAccount destination;
 
     @OneToMany(mappedBy = "paymentTransaction", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Refund> refunds;
 
-    private String status;
 }

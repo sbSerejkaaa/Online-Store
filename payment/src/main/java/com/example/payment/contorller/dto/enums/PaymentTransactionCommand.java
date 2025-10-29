@@ -1,4 +1,4 @@
-package com.example.payment.model.dto.enums;
+package com.example.payment.contorller.dto.enums;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
