@@ -1,6 +1,5 @@
 package com.example.payment.errors.handler;
 
-import com.example.payment.errors.exception.InsufficientFundsException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -11,7 +10,7 @@ import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
 import org.springframework.stereotype.Component;
 import org.xml.sax.helpers.DefaultHandler;
-
+/*
 import java.util.List;
 @Slf4j
 @Component
@@ -43,3 +42,5 @@ public class KafkaErrorHandler extends DefaultHandler {
     }
 
 }
+
+ */

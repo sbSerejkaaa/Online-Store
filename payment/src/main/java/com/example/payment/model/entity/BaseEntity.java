@@ -3,7 +3,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import java.time.LocalDateTime;
+import org.hibernate.annotations.UpdateTimestamp;
+import java.time.Instant;
+import java.util.UUID;
 
 @MappedSuperclass
 @Getter
@@ -11,30 +13,22 @@ import java.time.LocalDateTime;
 public class BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-    /**
-     * Поле, используемое JPA для оптимистической блокировки
-     * (чтобы избежать конфликтов параллельного обновления).
-     * Необязательно, но часто полезно в enterprise-приложениях.
-     */
+    // Версия для оптимистичной блокировки
+    // Увеличивается при каждом обновлении
+    // Защищает от одновременного изменения
     @Version
     private Long version;
 
-    /**
-     * Дата и время создания записи.
-     * Можно заполнять автоматически с помощью персист-колбэков или слушателей (e.g. @PrePersist).
-     */
+    // Когда запись создана (автоматически при INSERT)
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Column(updatable = false)
+    private Instant createdAt;
 
-    /**
-     * Дата и время последнего обновления записи.
-     * Можно обновлять автоматически в @PreUpdate.
-     */
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    // Когда запись последний раз обновлена (автоматически при UPDATE)
+    @UpdateTimestamp
+    private Instant updatedAt;
 
 }

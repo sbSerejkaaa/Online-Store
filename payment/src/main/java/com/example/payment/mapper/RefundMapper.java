@@ -1,32 +1,37 @@
 package com.example.payment.mapper;
 
-import com.example.payment.contorller.dto.enums.CommandResultStatus;
-import com.example.payment.contorller.dto.kafka.CancelPaymentRequest;
-import com.example.payment.contorller.dto.kafka.CancelPaymentResponse;
+import com.example.payment.contorller.dto.enums.ApiPaymentStatus;
+import com.example.payment.contorller.dto.request.RefundPaymentRequest;
+import com.example.payment.contorller.dto.response.RefundPaymentResponse;
+import com.example.payment.model.entity.Payment;
 import com.example.payment.model.entity.Refund;
 import com.example.payment.model.enums.RefundStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface RefundMapper {
-    Refund toEntity(CancelPaymentRequest cancelPaymentRequest,
-                    RefundStatus status);
 
-    @Mapping(source = "status", target = "status", qualifiedByName = "mapRefundStatusToCommandStatus")
-    CancelPaymentResponse toResponse(Refund refund);
+    // Entity → Response
+    @Mapping(source = "status", target = "status", qualifiedByName = "mapRefundStatusToApiStatus")
+    @Mapping(source = "payment.orderId", target = "orderId")
+    @Mapping(source = "amount", target = "amount")
+    @Mapping(source = "createdAt", target = "processedAt")
+    @Mapping(source = "id", target = "refundId")
+    @Mapping(target = "message", expression = "java(\"Возврат средств выполнен\")") // ← ФИКСИРОВАННОЕ СООБЩЕНИЕ
+    RefundPaymentResponse toResponse(Refund refund);
 
-    @Named("mapRefundStatusToCommandStatus")
-    default CommandResultStatus mapRefundStatusToCommandStatus(RefundStatus refundStatus) {
+    @Named("mapRefundStatusToApiStatus")
+    default ApiPaymentStatus mapRefundStatusToApiStatus(RefundStatus refundStatus) {
         if (refundStatus == null) {
-            return CommandResultStatus.FAILED;
+            return ApiPaymentStatus.ERROR;
         }
+
         return switch (refundStatus) {
-            case COMPLETED -> CommandResultStatus.SUCCESS;
-            case FAILED -> CommandResultStatus.FAILED;
+            case REQUESTED, PROCESSING -> ApiPaymentStatus.PROCESSING;
+            case COMPLETED -> ApiPaymentStatus.SUCCESS;
+            case FAILED -> ApiPaymentStatus.ERROR;
         };
     }
-
-
 }

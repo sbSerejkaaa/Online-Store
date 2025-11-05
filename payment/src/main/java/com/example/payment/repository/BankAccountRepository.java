@@ -1,16 +1,15 @@
 package com.example.payment.repository;
 
-import com.example.payment.model.entity.account.BankAccount;
+import com.example.payment.model.entity.BankAccount;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface BankAccountRepository extends JpaRepository<BankAccount, Long> {
-    BankAccount findByNumber(String accountNumber);
+public interface BankAccountRepository extends JpaRepository<BankAccount, UUID> {
 
-    @EntityGraph(attributePaths = "currencyAccounts")
-    Optional<BankAccount> findByCustomerId(Long customerId);
+    Optional<BankAccount> findByCustomerId(UUID customerId);
 
 }
