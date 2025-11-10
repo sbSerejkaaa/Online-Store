@@ -1,6 +1,7 @@
 package com.example.payment.service.handler;
 
 import com.example.payment.contorller.dto.response.RefundPaymentResponse;
+import com.example.payment.kafka.producer.PaymentTransactionProducer;
 import com.example.payment.mapper.RefundMapper;
 import com.example.payment.model.entity.Payment;
 import com.example.payment.model.entity.Refund;
@@ -19,11 +20,13 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class RefundPaymentHandlerImpl implements PaymentCommandHandler<RefundPaymentCommand, RefundPaymentResponse>{
-    // ИЗМЕНЕНИЕ: добавляем FundTransferService
+
     private final PaymentValidator validator;
     private final RefundService refundService;
-    private final FundTransferService fundTransferService; // ← НОВАЯ ЗАВИСИМОСТЬ!
+    private final FundTransferService fundTransferService;
     private final RefundMapper refundMapper;
+    private final PaymentTransactionProducer paymentTransactionProducer;
+
 
     @Override
     public RefundPaymentResponse handle(RefundPaymentCommand command) {
@@ -42,7 +45,10 @@ public class RefundPaymentHandlerImpl implements PaymentCommandHandler<RefundPay
             // 4. ОБНОВИТЬ СТАТУС REFUND
             refundService.updateRefundStatus(refund, RefundStatus.COMPLETED);
 
-            // 5. МАППИНГ
+            // 5. СОБЫТИЕ В KAFKA
+            paymentTransactionProducer.publishPaymentRefunded(refund);
+
+            // 6. МАППИНГ
             RefundPaymentResponse response = refundMapper.toResponse(refund);
 
             log.info("✅ [REFUND HANDLER] Refund processed successfully. Refund ID: {}", refund.getId());

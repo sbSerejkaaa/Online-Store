@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-/*
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -43,4 +43,3 @@ public class PaymentTransactionCommandListener {
 
 }
 
- */
