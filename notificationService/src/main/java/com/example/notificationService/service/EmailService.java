@@ -1,6 +1,6 @@
 package com.example.notificationService.service;
 
-import com.example.core.event.UserRegisteredEvent;
+import com.example.core.event.users.UserRegisteredEvent;
 import com.example.core.exception.NonRetryableException;
 import com.example.core.exception.RetryableException;
 import com.example.notificationService.model.NotificationLog;

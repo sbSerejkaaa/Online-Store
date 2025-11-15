@@ -4,7 +4,7 @@ import com.example.payment.contorller.dto.request.RefundPaymentRequest;
 import com.example.payment.contorller.dto.response.RefundPaymentResponse;
 import com.example.payment.service.command.RefundPaymentCommand;
 import com.example.payment.service.processor.PaymentProcessor;
-import com.example.payment.service.transformer.PaymentCommandTransformer;
+import com.example.payment.service.converter.PaymentCommandTransformer;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

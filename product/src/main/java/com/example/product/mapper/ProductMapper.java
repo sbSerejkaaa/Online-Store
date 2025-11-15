@@ -1,20 +1,18 @@
 package com.example.product.mapper;
 
-import com.example.core.event.ProductRegisteredEvent;
+import com.example.core.event.product.ProductReservedEvent;
 import com.example.core.model.Product;
-import com.example.core.status.ProductStatus;
-import com.example.product.dto.ProductRegistrationRequest;
-import com.example.product.dto.ProductResponse;
+import com.example.product.controller.dto.admin.ProductRegistrationRequest;
+import com.example.product.controller.dto.admin.ProductResponse;
 import com.example.product.entity.EntityProduct;
 import java.time.Instant;
-import java.util.UUID;
 
 public class ProductMapper {
 
     public Product toCoreModel(ProductRegistrationRequest request){
         Product productModel = new Product();
         // В будущем нужен будет айди из Order
-        productModel.setProductName(request.getNameInventory());
+        productModel.setProductName(request.getNameProduct());
         productModel.setQuantity(request.getQuantity());
         productModel.setPrice(request.getPrice());
         return productModel;
@@ -55,18 +53,18 @@ public class ProductMapper {
 
     }
 
-    public ProductRegisteredEvent toEvent(EntityProduct entityProduct){
-        ProductRegisteredEvent productRegisteredEvent = new ProductRegisteredEvent();
+    public ProductReservedEvent toEvent(EntityProduct entityProduct){
+        ProductReservedEvent productReservedEvent = new ProductReservedEvent();
 
-        productRegisteredEvent.setInventoryId(entityProduct.getId());
-        productRegisteredEvent.setOrderId(entityProduct.getId());
-        productRegisteredEvent.setProductName(entityProduct.getProductName());
-        productRegisteredEvent.setQuantity(entityProduct.getQuantity());
-        productRegisteredEvent.setPrice(entityProduct.getPrice());
+        productReservedEvent.setInventoryId(entityProduct.getId());
+        productReservedEvent.setOrderId(entityProduct.getId());
+        productReservedEvent.setProductName(entityProduct.getProductName());
+        productReservedEvent.setQuantity(entityProduct.getQuantity());
+        productReservedEvent.setPrice(entityProduct.getPrice());
         //status
-        productRegisteredEvent.setCreatedAt(entityProduct.getCreatedAt());
+        productReservedEvent.setCreatedAt(entityProduct.getCreatedAt());
 
-        return productRegisteredEvent;
+        return productReservedEvent;
 
     }
 

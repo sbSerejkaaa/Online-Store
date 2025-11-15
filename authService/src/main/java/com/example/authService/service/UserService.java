@@ -3,7 +3,7 @@ import com.example.authService.dto.UserRegistrationRequest;
 import com.example.authService.dto.UserResponse;
 import com.example.authService.entity.EntityUsers;
 import com.example.authService.repository.UserRepository;
-import com.example.core.event.UserRegisteredEvent;
+import com.example.core.event.users.UserRegisteredEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.errors.AuthenticationException;
 import org.apache.kafka.common.errors.TimeoutException;

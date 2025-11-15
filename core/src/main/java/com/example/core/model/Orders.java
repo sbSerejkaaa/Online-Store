@@ -15,6 +15,7 @@ import java.util.UUID;
 public class Orders {
     private UUID id;
     private UUID userId;
+    private UUID productId;
     private String productName;
     private Integer totalAmount;
     private OrderStatus status;

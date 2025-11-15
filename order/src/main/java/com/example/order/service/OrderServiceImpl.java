@@ -1,20 +1,17 @@
 package com.example.order.service;
 
-import com.example.core.event.OrderRegisteredEvent;
 import com.example.core.model.Orders;
+import com.example.core.status.OrderStatus;
+import com.example.order.mapper.OrderEntityMapper;
 import com.example.order.entity.OrderEntity;
-import com.example.order.mapper.OrderMapper;
 import com.example.order.repository.OrderRepository;
+import com.example.order.service.command.CancelOrderCommand;
+import com.example.order.service.command.ConfirmOrderCommand;
+import com.example.order.service.command.CreateOrderCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.errors.AuthenticationException;
-import org.apache.kafka.common.errors.TimeoutException;
-import org.apache.kafka.common.errors.TopicAuthorizationException;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.CompletableFuture;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -22,49 +19,36 @@ import java.util.concurrent.CompletableFuture;
 public class OrderServiceImpl implements OrderService{
 
     private final OrderRepository orderRepository;
-    private final OrderMapper orderMapper;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
-    private static final String ORDER_REGISTERED_TOPIC = "order-request-topic";
+    private final OrderEntityMapper entityMapper;
 
     @Override
-    public Orders createOrder(Orders order) {
-
-        OrderEntity entity = orderMapper.toEntity(order);           // Core → Entity
-
-        OrderEntity savedEntity = orderRepository.save(entity);     // Сохраняем в БД
-
-        // Отправляем событие в Kafka
-        OrderRegisteredEvent event = orderMapper.toEvent(savedEntity);
-
-        try {
-            CompletableFuture<SendResult<String, Object>> future =
-                    kafkaTemplate.send(ORDER_REGISTERED_TOPIC, savedEntity.getId().toString(), event);
-            future.whenComplete((result, ex) -> {
-                if (ex != null) {
-                    if (ex instanceof TimeoutException) {
-                        log.error("Таймаут соединения с Kafka");
-                    } else if (ex instanceof AuthenticationException) {
-                        log.error("Ошибка аутентификации в Kafka");
-                    } else if (ex instanceof TopicAuthorizationException) {
-                        log.error("Нет прав на запись в топик");
-                    } else {
-                        log.error("Другая ошибка: {}", ex.getMessage());
-                    }
-                } else {
-                    log.info("Событие отправлено в топик: {}", ORDER_REGISTERED_TOPIC);
-                    log.info("Inventory ID {}", savedEntity.getId());
-                }
-            });
-
-        } catch (Exception e) {
-            log.error("Ошибка при отправке события для продукта {}: {}",
-                    order.getProductName(), e.getMessage());
-        }
-        log.info("Событие отправлено в кафку");
-
-        // Возвращаем результат
-        return orderMapper.toCoreModel(savedEntity);               // Entity → Core
+    @Transactional
+    public Orders createOrder(CreateOrderCommand command) {
+        // Теперь это делает CreateOrderHandler!
+        throw new UnsupportedOperationException("Use CreateOrderHandler instead");
     }
 
+    @Override
+    @Transactional
+    public void confirmOrder(ConfirmOrderCommand command) {
+        OrderEntity order = orderRepository.findById(command.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found: " + command.getOrderId()));
 
+        order.setStatus(OrderStatus.CONFIRMED);
+        orderRepository.save(order);
+
+        log.info("✅ Заказ подтвержден: {}", command.getOrderId());
+    }
+
+    @Override
+    @Transactional
+    public void cancelOrder(CancelOrderCommand command) {
+        OrderEntity order = orderRepository.findById(command.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found: " + command.getOrderId()));
+
+        order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+
+        log.info("❌ Заказ отменен: {}, причина: {}", command.getOrderId(), command.getReason());
+    }
 }

@@ -1,6 +1,6 @@
 package com.example.authService.config;
 
-import com.example.core.event.UserRegisteredEvent;
+import com.example.core.event.users.UserRegisteredEvent;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;

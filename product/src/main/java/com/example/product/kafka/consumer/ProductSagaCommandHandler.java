@@ -1,0 +1,63 @@
+package com.example.product.kafka.consumer;
+
+import com.example.core.commandSaga.ReserveProductCommand;
+import com.example.product.kafka.producer.EventPublisherProduct;
+import com.example.product.service.ProductService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaHandler;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Component;
+
+import java.util.Map;
+
+@Slf4j
+@Component
+@KafkaListener(
+        topics = "saga.product.commands",
+        groupId = "product-service-group"
+)
+@RequiredArgsConstructor
+public class ProductSagaCommandHandler {
+    private final ProductService productService;
+    private final EventPublisherProduct eventPublisherProduct;
+
+    @KafkaHandler
+    public void handleReserveCommand(
+            @Payload ReserveProductCommand command,
+            @Headers Map<String, Object> headers) {
+
+        // 1. ИЗВЛЕКАЕМ МЕТАДАННЫЕ
+        String correlationId = (String) headers.get("correlationId");
+        String commandType = (String) headers.get("commandType");
+        String sagaId = (String) headers.get("sagaId");
+
+        log.info("📦 [PRODUCT] Received {} command. Order: {}, Product: {}, Correlation: {}",
+                commandType, command.getOrderId(), command.getProductName(), correlationId);
+
+        // 2. ПРОВЕРЯЕМ ТИП КОМАНДЫ
+        if (!"RESERVE_PRODUCT".equals(commandType)) {
+            log.warn("🟡 [PRODUCT] Ignoring non-reservation command. Type: {}", commandType);
+            return;
+        }
+
+        log.info("📦 [PRODUCT] Processing reserve command. Order: {}, Product: {}",
+                command.getOrderId(), command.getProductName());
+
+        // 3. ВЫПОЛНЯЕМ БИЗНЕС-ЛОГИКУ
+        try {
+            productService.reserveProduct(command.getProductName(), command.getQuantity());
+            eventPublisherProduct.publishProductReserved(command, headers, correlationId);
+            log.info("✅ [PRODUCT] Product reserved successfully. Order: {}", command.getOrderId());
+        } catch (Exception e) {
+            eventPublisherProduct.publishReservationFailed(command, headers, correlationId, e.getMessage());
+            log.error("❌ [PRODUCT] Reservation failed. Order: {}, Error: {}",
+                    command.getOrderId(), e.getMessage());
+        }
+
+    }
+
+}

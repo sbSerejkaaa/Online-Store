@@ -1,9 +1,6 @@
 package com.example.core.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -18,8 +15,5 @@ public class Product {
     private Integer quantity;
     private BigDecimal price;
 
-    public Product(UUID productId, Integer quantity) {
-        this.productId = productId;
-        this.quantity = quantity;
-    }
+
 }
