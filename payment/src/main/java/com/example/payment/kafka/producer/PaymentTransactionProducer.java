@@ -1,9 +1,11 @@
 package com.example.payment.kafka.producer;
 
-import com.example.payment.kafka.events.PaymentCreatedEvent;
-import com.example.payment.kafka.events.PaymentFailedEvent;
-import com.example.payment.kafka.events.PaymentRefundedEvent;
-import com.example.payment.kafka.events.factory.PaymentEventFactory;
+
+import com.example.core.event.payment.PaymentCreatedEvent;
+import com.example.core.event.payment.PaymentFailedEvent;
+import com.example.core.event.payment.PaymentRefundedEvent;
+
+import com.example.payment.kafka.factory.PaymentEventFactory;
 import com.example.payment.model.entity.Payment;
 import com.example.payment.model.entity.Refund;
 import lombok.RequiredArgsConstructor;

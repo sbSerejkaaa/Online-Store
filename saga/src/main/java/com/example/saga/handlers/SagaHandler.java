@@ -1,21 +1,21 @@
 package com.example.saga.handlers;
 
+import com.example.core.commandSaga.ConfirmOrderCommand;
+import com.example.core.commandSaga.ProcessPaymentCommand;
 import com.example.core.commandSaga.ReserveProductCommand;
 import com.example.core.event.order.OrderCreatedEvent;
-import com.example.saga.mapper.SagaMapper;
+import com.example.core.event.payment.PaymentCreatedEvent;
+import com.example.core.event.product.ProductReservationFailedEvent;
+import com.example.core.event.product.ProductReservedEvent;
+import com.example.saga.SagaCommandPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.Map;
 
 @Slf4j
@@ -26,38 +26,65 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SagaHandler {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
-    private static final String SAGA_COMMAND_PRODUCT_TOPIC = "saga.product.commands";
-    private static final String SAGA_COMMAND_PAYMENT_TOPIC = "saga.payment.commands";
+    private final SagaCommandPublisher commandPublisher;
 
     @KafkaHandler
-    public void handleOrderCreated(
-            @Payload OrderCreatedEvent event,
-            @Headers Map<String, Object> headers) {
+    public void handleOrderCreated(@Payload OrderCreatedEvent event,
+                                   @Headers Map<String, Object> headers) {
 
-        // 1. БЕРЕМ CORRELATION_ID ИЗ HEADERS ВХОДЯЩЕГО СООБЩЕНИЯ
         String correlationId = (String) headers.get("correlationId");
-        String originalEventId = (String) headers.get("eventId");
+        log.info("🎯 [SAGA] Starting saga for order: {}", event.getOrderId());
 
-        log.info("🎯 [SAGA] Processing order {}. Correlation: {}",
-                event.getOrderId(), correlationId);
-
-        // 2. СОЗДАЕМ КОМАНДУ
-        ReserveProductCommand payload = SagaMapper.toReserveCommand(event);
-
-        // 3. ОТПРАВЛЯЕМ С ТЕМ ЖЕ CORRELATION_ID
-        Message<ReserveProductCommand> message = MessageBuilder
-                .withPayload(payload)
-                .setHeader(KafkaHeaders.TOPIC, SAGA_COMMAND_PRODUCT_TOPIC)
-                .setHeader(KafkaHeaders.KEY, event.getOrderId().toString())
-                .setHeader("commandType", "RESERVE_PRODUCT")
-                .setHeader("correlationId", correlationId) // ← ТОТ ЖЕ САМЫЙ!
-                .setHeader("sourceService", "saga-service")
-                .setHeader("timestamp", Instant.now().toString())
-                .setHeader("originalEventId", originalEventId) // ← связываем события
+        ReserveProductCommand command = ReserveProductCommand.builder()
+                .orderId(event.getOrderId())
+                .userId(event.getUserId())
+                .productName(event.getProductName())
+                .quantity(event.getQuantity())
                 .build();
 
-        kafkaTemplate.send(message);
-        log.info("🔄 [SAGA] Sent ReserveProductCommand. Correlation: {}", correlationId);
+        commandPublisher.sendReserveProduct(command, headers);
+    }
+
+    @KafkaHandler
+    public void handleProductReserved(@Payload ProductReservedEvent event,
+                                      @Headers Map<String, Object> headers) {
+
+        log.info("💰 [SAGA] Product reserved for order: {}", event.getOrderId());
+
+        ProcessPaymentCommand command = ProcessPaymentCommand.builder()
+                .orderId(event.getOrderId())
+                .customerId(event.getUserId())
+                .amount(event.getTotalAmount())
+                .description("Оплата за " + event.getProductName())
+                .build();
+
+        commandPublisher.sendProcessPayment(command, headers);
+    }
+
+    @KafkaHandler
+    public void handlePaymentProcessed(@Payload PaymentCreatedEvent event,
+                                       @Headers Map<String, Object> headers) {
+
+        log.info("✅ [SAGA] Payment processed for order: {}", event.getOrderId());
+
+        ConfirmOrderCommand command = ConfirmOrderCommand.builder()
+                .orderId(event.getOrderId())
+                .build();
+
+        commandPublisher.sendConfirmOrder(command, headers);
+    }
+
+    @KafkaHandler
+    public void handleProductReservationFailed(@Payload ProductReservationFailedEvent event,
+                                               @Headers Map<String, Object> headers) {
+
+        log.error("❌ [SAGA] Product reservation failed for order: {}", event.getOrderId());
+
+        CancelOrderCommand command = CancelOrderCommand.builder()
+                .orderId(event.getOrderId())
+                .reason("Product reservation failed: " + event.getReason())
+                .build();
+
+        commandPublisher.sendCancelOrder(command, headers);
     }
 }

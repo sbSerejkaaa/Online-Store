@@ -14,10 +14,11 @@ import java.util.UUID;
 @Builder
 public class ProductReservedEvent {
     private UUID orderId;
+    private UUID userId;           // ← ДОБАВИТЬ! (для Payment Service)
     private String productName;
-    private Integer quantity;
-    private BigDecimal price;
-    private ProductStatus status;
+    private Integer quantity;      // ← зарезервированное количество
+    private BigDecimal unitPrice;  // ← цена за штуку (переименовать!)
+    private BigDecimal totalAmount; // ← ОБЩАЯ сумма (ДОБАВИТЬ!)
     private Instant createdAt;
 
 }

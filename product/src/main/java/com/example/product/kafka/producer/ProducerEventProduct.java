@@ -3,7 +3,6 @@ package com.example.product.kafka.producer;
 import com.example.core.commandSaga.ReserveProductCommand;
 import com.example.core.event.product.ProductReservationFailedEvent;
 import com.example.core.event.product.ProductReservedEvent;
-import com.example.core.status.ProductStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -12,21 +11,22 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Map;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class EventPublisherProduct {
+public class ProducerEventProduct {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void publishProductReserved(ReserveProductCommand command, Map<String, Object> headers, String correlationId) {
+    public void publishProductReserved(ReserveProductCommand command, BigDecimal totalAmount, Map<String, Object> headers, String correlationId) {
         ProductReservedEvent event = ProductReservedEvent.builder()
                 .orderId(command.getOrderId())
                 .productName(command.getProductName())
+                .totalAmount(totalAmount)
                 .quantity(command.getQuantity())
-                .status(ProductStatus.RESERVED)
                 .createdAt(Instant.now())
                 .build();
 
@@ -51,7 +51,6 @@ public class EventPublisherProduct {
                 .orderId(command.getOrderId())
                 .productName(command.getProductName())
                 .productQuantity(command.getQuantity())
-                .status(ProductStatus.RESERVATION_FAILED)  // ← ДОБАВИЛИ СТАТУС!
                 .createdAt(Instant.now())
                 .build();
 

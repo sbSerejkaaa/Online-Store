@@ -2,14 +2,13 @@ package com.example.product.service;
 
 import com.example.core.exception.ProductInsufficientQuantityException;
 import com.example.core.model.Product;
-
-import com.example.product.controller.dto.user.ProductCatalogDTO;
 import com.example.product.entity.EntityProduct;
 import com.example.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -51,38 +50,19 @@ public class ProductServiceImpl implements ProductService{
                 .collect(Collectors.toList());
     }
 
-
-    // User method
-
     @Override
-    public List<ProductCatalogDTO> getAllAvailableProducts() {
-        log.info("Получение всех доступных товаров для каталога");
-
-        return productRepository.findAll().stream()
-                .filter(entity -> entity.getQuantity() > 0) // только товары в наличии
-                .map(entity -> ProductCatalogDTO.builder()
-                        .productName(entity.getProductName())
-                        .price(entity.getPrice())
-                        .availableQuantity(entity.getQuantity())
-                        .description("") // можно добавить поле в EntityProduct позже
-                        .build())
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public ProductCatalogDTO getProductDTOByName(String productName) {
-        log.info(" Получение DTO продукта по названию:: {}", productName);
-
-        EntityProduct entity = productRepository.findByProductName(productName)
+    public BigDecimal calculateTotalAmount(String productName, Integer quantity) {
+        EntityProduct productEntity = productRepository.findByProductName(productName)
                 .orElseThrow(() -> new RuntimeException("Товар не найден: " + productName));
 
-        return ProductCatalogDTO.builder()
-                .productName(entity.getProductName())
-                .price(entity.getPrice())
-                .availableQuantity(entity.getQuantity())
-                .description("")
-                .build();
-    }
+        // ПРОВЕРКА + РАСЧЕТ
+        if (quantity > productEntity.getQuantity()) {
+            throw new ProductInsufficientQuantityException(productEntity.getId(), null);
+        }
 
+        // 🔥 РАССЧИТЫВАЕМ СУММУ
+        return productEntity.getPrice().multiply(new BigDecimal(quantity));
+
+    }
 }
 

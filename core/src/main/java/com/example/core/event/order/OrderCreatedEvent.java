@@ -16,7 +16,7 @@ public class OrderCreatedEvent {
     private UUID orderId;
     private UUID userId;
     private String productName;
-    private Integer productQuantity;
+    private Integer quantity;
     private BigDecimal totalAmount;
     private OrderStatus status;
     private Instant createdAt;

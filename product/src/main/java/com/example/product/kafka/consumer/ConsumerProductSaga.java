@@ -1,17 +1,17 @@
 package com.example.product.kafka.consumer;
 
 import com.example.core.commandSaga.ReserveProductCommand;
-import com.example.product.kafka.producer.EventPublisherProduct;
+import com.example.product.kafka.producer.ProducerEventProduct;
 import com.example.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 @Slf4j
@@ -21,9 +21,9 @@ import java.util.Map;
         groupId = "product-service-group"
 )
 @RequiredArgsConstructor
-public class ProductSagaCommandHandler {
+public class ConsumerProductSaga {
     private final ProductService productService;
-    private final EventPublisherProduct eventPublisherProduct;
+    private final ProducerEventProduct producerEventProduct;
 
     @KafkaHandler
     public void handleReserveCommand(
@@ -49,11 +49,22 @@ public class ProductSagaCommandHandler {
 
         // 3. ВЫПОЛНЯЕМ БИЗНЕС-ЛОГИКУ
         try {
+
+// 1. РАССЧИТЫВАЕМ СУММУ (проверка + расчет)
+            BigDecimal totalAmount = productService.calculateTotalAmount(
+                    command.getProductName(),
+                    command.getQuantity()
+            );
+
+            // 2. РЕЗЕРВИРУЕМ ТОВАР (проверка + резервация)
             productService.reserveProduct(command.getProductName(), command.getQuantity());
-            eventPublisherProduct.publishProductReserved(command, headers, correlationId);
+
+            // 3. ОТПРАВЛЯЕМ СОБЫТИЕ С СУММОЙ
+            producerEventProduct.publishProductReserved(command, totalAmount, headers, correlationId);
+
             log.info("✅ [PRODUCT] Product reserved successfully. Order: {}", command.getOrderId());
         } catch (Exception e) {
-            eventPublisherProduct.publishReservationFailed(command, headers, correlationId, e.getMessage());
+            producerEventProduct.publishReservationFailed(command, headers, correlationId, e.getMessage());
             log.error("❌ [PRODUCT] Reservation failed. Order: {}, Error: {}",
                     command.getOrderId(), e.getMessage());
         }

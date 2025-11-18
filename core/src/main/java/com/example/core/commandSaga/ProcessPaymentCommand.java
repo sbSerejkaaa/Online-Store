@@ -1,11 +1,9 @@
 package com.example.core.commandSaga;
 
 import com.example.core.status.OrderStatus;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -13,11 +11,10 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ProcessPaymentCommand {
     private UUID orderId;
-    private UUID userId;
-    private Integer productQuantity;
-    private String productName;
-    private OrderStatus status;
-    private Instant createdAt;
+    private UUID customerId;       // ← переименовали!
+    private BigDecimal amount;     // ← ДОБАВИЛИ!
+    private String description;    // ← ДОБАВИЛИ!
 }
