@@ -1,11 +1,10 @@
 package com.example.saga.handlers;
 
 import com.example.core.commandSaga.ConfirmOrderCommand;
-import com.example.core.commandSaga.ProcessPaymentCommand;
+import com.example.core.commandSaga.CreatePaymentCommand;
 import com.example.core.commandSaga.ReserveProductCommand;
 import com.example.core.event.order.OrderCreatedEvent;
 import com.example.core.event.payment.PaymentCreatedEvent;
-import com.example.core.event.product.ProductReservationFailedEvent;
 import com.example.core.event.product.ProductReservedEvent;
 import com.example.saga.SagaCommandPublisher;
 import lombok.RequiredArgsConstructor;
@@ -51,11 +50,10 @@ public class SagaHandler {
 
         log.info("💰 [SAGA] Product reserved for order: {}", event.getOrderId());
 
-        ProcessPaymentCommand command = ProcessPaymentCommand.builder()
+        CreatePaymentCommand command = CreatePaymentCommand.builder()
                 .orderId(event.getOrderId())
                 .customerId(event.getUserId())
                 .amount(event.getTotalAmount())
-                .description("Оплата за " + event.getProductName())
                 .build();
 
         commandPublisher.sendProcessPayment(command, headers);
@@ -74,7 +72,7 @@ public class SagaHandler {
         commandPublisher.sendConfirmOrder(command, headers);
     }
 
-    @KafkaHandler
+   /* @KafkaHandler
     public void handleProductReservationFailed(@Payload ProductReservationFailedEvent event,
                                                @Headers Map<String, Object> headers) {
 
@@ -87,4 +85,6 @@ public class SagaHandler {
 
         commandPublisher.sendCancelOrder(command, headers);
     }
+
+    */
 }

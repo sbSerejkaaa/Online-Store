@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 @Setter
@@ -17,7 +19,9 @@ public class Orders {
     private UUID userId;
     private UUID productId;
     private String productName;
-    private Integer totalAmount;
+    private Integer quantity;
+    private BigDecimal totalAmount;
     private OrderStatus status;
+    private Instant createdAt;
 
 }

@@ -6,7 +6,6 @@ import com.example.payment.model.entity.Refund;
 import com.example.payment.model.enums.PaymentStatus;
 import com.example.payment.model.enums.RefundStatus;
 import com.example.payment.repository.RefundRepository;
-import com.example.payment.service.command.CreatePaymentCommand;
 import com.example.payment.service.command.RefundPaymentCommand;
 import com.example.payment.service.domain.BankAccountService;
 import com.example.payment.service.domain.PaymentService;

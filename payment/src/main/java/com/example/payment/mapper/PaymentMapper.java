@@ -1,8 +1,6 @@
 package com.example.payment.mapper;
 
 import com.example.payment.contorller.dto.enums.ApiPaymentStatus;
-import com.example.payment.contorller.dto.request.CreatePaymentRequest;
-import com.example.payment.contorller.dto.response.CreatePaymentResponse;
 import com.example.payment.model.entity.Payment;
 import com.example.payment.model.enums.PaymentStatus;
 import org.mapstruct.Mapper;

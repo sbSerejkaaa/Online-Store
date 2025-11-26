@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -22,7 +23,7 @@ public class ProducerEventProduct {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void publishProductReserved(ReserveProductCommand command, BigDecimal totalAmount, Map<String, Object> headers, String correlationId) {
-        ProductReservedEvent event = ProductReservedEvent.builder()
+        ProductReservedEvent payload = ProductReservedEvent.builder()
                 .orderId(command.getOrderId())
                 .productName(command.getProductName())
                 .totalAmount(totalAmount)
@@ -31,14 +32,15 @@ public class ProducerEventProduct {
                 .build();
 
         Message<ProductReservedEvent> message = MessageBuilder
-                .withPayload(event)
+                .withPayload(payload)
                 .setHeader(KafkaHeaders.TOPIC, "product.event.topic")
                 .setHeader(KafkaHeaders.KEY, command.getOrderId().toString())
+                .setHeader("eventId", UUID.randomUUID().toString())
                 .setHeader("eventType", "PRODUCT_RESERVED")
                 .setHeader("correlationId", correlationId)
                 .setHeader("sourceService", "product-service")
                 .setHeader("timestamp", Instant.now().toString())
-                .setHeader("originalEventId", headers.get("eventId")) // ← наследуем
+
                 .build();
 
         kafkaTemplate.send(message);
@@ -47,7 +49,7 @@ public class ProducerEventProduct {
 
     public void publishReservationFailed(ReserveProductCommand command, Map<String, Object> headers, String correlationId, String reason) {
         // ИСПРАВЛЯЕМ БИЛДЕР:
-        ProductReservationFailedEvent event = ProductReservationFailedEvent.builder()  // ← ProductReservationFailedEvent!
+        ProductReservationFailedEvent payload = ProductReservationFailedEvent.builder()  // ← ProductReservationFailedEvent!
                 .orderId(command.getOrderId())
                 .productName(command.getProductName())
                 .productQuantity(command.getQuantity())
@@ -55,14 +57,13 @@ public class ProducerEventProduct {
                 .build();
 
         Message<ProductReservationFailedEvent> message = MessageBuilder
-                .withPayload(event)
+                .withPayload(payload)
                 .setHeader(KafkaHeaders.TOPIC, "saga.events.product")
                 .setHeader(KafkaHeaders.KEY, command.getOrderId().toString())
                 .setHeader("eventType", "PRODUCT_RESERVATION_FAILED")
                 .setHeader("correlationId", correlationId)
                 .setHeader("sourceService", "product-service")
                 .setHeader("timestamp", Instant.now().toString())
-                .setHeader("originalEventId", headers.get("eventId")) // ← наследуем
                 .build();
 
         kafkaTemplate.send(message);

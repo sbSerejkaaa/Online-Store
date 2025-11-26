@@ -2,7 +2,8 @@ package com.example.order.service.handler;
 
 import com.example.core.event.order.OrderCreatedEvent;
 import com.example.core.model.Orders;
-import com.example.order.kafka.producer.OrderEventPublisher;
+import com.example.core.status.OrderStatus;
+import com.example.order.kafka.producer.ProducerOrder;
 import com.example.order.mapper.OrderEntityMapper;
 import com.example.order.entity.OrderEntity;
 import com.example.order.mapper.OrderEventMapper;
@@ -13,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -22,39 +21,42 @@ public class CreateOrderHandler {
     private final OrderRepository orderRepository;
     private final OrderEntityMapper entityMapper;
     private final OrderEventMapper orderEventMapper;
-    private final OrderEventPublisher eventPublisher;
+    private final ProducerOrder eventPublisher;
 
     @Transactional
     public Orders handle(CreateOrderCommand command) {
         log.info("🏭 Создание заказа для продукта: {}", command.getProductName());
 
-        // 1. ЗАПРАШИВАЕМ ЦЕНУ У PRODUCT SERVICE
-        BigDecimal productPrice = productPriceClient.getPrice(command.getProductName());
-        BigDecimal totalAmount = productPrice.multiply(new BigDecimal(command.getQuantity()));
+        // command УЖЕ содержит:
+        // - productName (валидированный)
+        // - quantity (валидированный)
+        // - commandId (сгенерированный)
+        // - timestamp (добавленный)
 
-         // 1. СОЗДАЕМ Entity
-         // 2. command.getProductName(), command.getQuantity() - из команды(сырые данные от пользователя)
-         // 3. Время создания заказа и статус из конструктора сущности
-         // 4. ID будет создано на стороне JPA в методе save()
-         // 5. Нужно в будущем подтянуть ID зарегистрированного пользователя !!!
+        // 1. СОЗДАЕМ OrderEntity БЕЗ СУММЫ
+        OrderEntity entity = OrderEntity.builder()
+                .productName(command.getProductName())
+                .quantity(command.getQuantity())
+                .status(OrderStatus.IN_PROCESS)
+                .build();
 
-        OrderEntity entity = new OrderEntity(
-                command.getProductName(),
-                command.getQuantity());
+
+
+        // totalAmount = null (сумму рассчитает ProductService)
 
         // 2. СОХРАНЯЕМ в БД
         OrderEntity savedEntity = orderRepository.save(entity);
 
-        // 3. Маппим в Доменную модель из данныx БД
-        Orders order = entityMapper.toDomain(savedEntity);     // Entity → Domain
+        // 3. Маппим в Доменную модель
+        Orders order = entityMapper.toDomain(savedEntity);
 
-        // 4. Создаем ивент на основе модели
-        OrderCreatedEvent event = orderEventMapper.toEvent(order); // Domain → Event
+        // 4. Создаем ивент БЕЗ СУММЫ
+        OrderCreatedEvent event = orderEventMapper.toEvent(order);
 
-        // 5. Отправляем данные в ПРОДЮСЕР
+        // 5. Отправляем в Kafka для Саги
         eventPublisher.publishOrderCreated(event);
-        log.info("📢 Событие OrderCreated опубликовано для заказа: {}", order.getId());
 
+        log.info("📢 OrderCreatedEvent отправлен в сагу: {}", order.getId());
         return order;
     }
 }

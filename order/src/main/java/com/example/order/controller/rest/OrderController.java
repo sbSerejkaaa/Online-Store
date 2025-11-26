@@ -1,6 +1,6 @@
 package com.example.order.controller.rest;
 
-import com.example.order.controller.dto.OrderRegistrationRequest;
+import com.example.order.controller.dto.OrderRequest;
 import com.example.order.controller.dto.OrderResponse;
 
 import com.example.order.service.processor.OrderProcessor;
@@ -24,7 +24,7 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<OrderResponse> createOrder(
-            @RequestBody @Valid OrderRegistrationRequest request) {
+            @RequestBody @Valid OrderRequest request) {
 
         log.info("📦 Создание заказа для продукта: {}", request.getProductName());
 

@@ -4,15 +4,14 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.UUID;
-@Setter
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 
-public class ReserveProductCommand {
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class CreatePaymentCommand {
     private UUID orderId;
-    private UUID userId;
-    private String productName;
-    private Integer quantity;
+    private UUID customerId;
+    private BigDecimal amount;
 }

@@ -14,7 +14,7 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic orderRequestTopic() {
-        return buildTopic("order.request.topic");
+        return buildTopic("order.event.topic");
     }
 
     @Bean
@@ -24,7 +24,7 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic orderRequestDltTopic() {
-        return buildDltTopic("order.request.topic.DLT");
+        return buildDltTopic("order.event.topic.DLT");
     }
 
     private NewTopic buildTopic(String name) {

@@ -8,7 +8,6 @@ import com.example.order.repository.OrderRepository;
 import com.example.order.service.command.CancelOrderCommand;
 import com.example.order.service.command.ConfirmOrderCommand;
 import com.example.order.service.command.CreateOrderCommand;
-import jakarta.persistence.criteria.Order;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

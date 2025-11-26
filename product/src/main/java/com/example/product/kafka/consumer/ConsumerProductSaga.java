@@ -35,22 +35,17 @@ public class ConsumerProductSaga {
         String commandType = (String) headers.get("commandType");
         String sagaId = (String) headers.get("sagaId");
 
-        log.info("📦 [PRODUCT] Received {} command. Order: {}, Product: {}, Correlation: {}",
-                commandType, command.getOrderId(), command.getProductName(), correlationId);
-
         // 2. ПРОВЕРЯЕМ ТИП КОМАНДЫ
         if (!"RESERVE_PRODUCT".equals(commandType)) {
             log.warn("🟡 [PRODUCT] Ignoring non-reservation command. Type: {}", commandType);
             return;
         }
 
-        log.info("📦 [PRODUCT] Processing reserve command. Order: {}, Product: {}",
-                command.getOrderId(), command.getProductName());
-
         // 3. ВЫПОЛНЯЕМ БИЗНЕС-ЛОГИКУ
         try {
 
-// 1. РАССЧИТЫВАЕМ СУММУ (проверка + расчет)
+
+            // 1. РАССЧИТЫВАЕМ СУММУ (проверка + расчет)
             BigDecimal totalAmount = productService.calculateTotalAmount(
                     command.getProductName(),
                     command.getQuantity()
@@ -62,10 +57,11 @@ public class ConsumerProductSaga {
             // 3. ОТПРАВЛЯЕМ СОБЫТИЕ С СУММОЙ
             producerEventProduct.publishProductReserved(command, totalAmount, headers, correlationId);
 
-            log.info("✅ [PRODUCT] Product reserved successfully. Order: {}", command.getOrderId());
+            log.info(" Product reserved successfully. Order: {}", command.getOrderId());
+
         } catch (Exception e) {
             producerEventProduct.publishReservationFailed(command, headers, correlationId, e.getMessage());
-            log.error("❌ [PRODUCT] Reservation failed. Order: {}, Error: {}",
+            log.error(" Reservation failed. Order: {}, Error: {}",
                     command.getOrderId(), e.getMessage());
         }
 

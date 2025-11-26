@@ -14,7 +14,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OrderEventPublisher {
+public class ProducerOrder {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     private static final String SAGA_ORDER_EVENTS_TOPIC = "order.event.topic";

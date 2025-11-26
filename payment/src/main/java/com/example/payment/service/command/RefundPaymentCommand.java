@@ -9,16 +9,11 @@ import java.util.UUID;
 @Builder
 public class RefundPaymentCommand {
     // ТЕХНИЧЕСКИЕ ПОЛЯ
-    UUID commandId;
+    UUID refundTracedId;
     Instant timestamp;
 
     // БИЗНЕС-ПОЛЯ (уже провалидированы)
     UUID orderId;           // ID заказа для возврата
 
 
-    @Override
-    public String toString() {
-        return String.format("RefundPaymentCommand[commandId=%s, orderId=%s]",
-                commandId, orderId);
-    }
 }

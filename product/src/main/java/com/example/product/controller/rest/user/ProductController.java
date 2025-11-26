@@ -1,6 +1,6 @@
 package com.example.product.controller.rest.user;
 
-import com.example.product.controller.dto.user.ProductCatalogDTO;
+
 import com.example.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,15 +19,5 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @GetMapping
-    public List<ProductCatalogDTO> getAllProducts() {
-        log.info("📦 [PRODUCT API] Getting all products for catalog");
-        return productService.getAllAvailableProducts();
-    }
 
-    @GetMapping("/{productName}")
-    public ProductCatalogDTO getProductByName(@PathVariable String productName) {
-        log.info("🔍 [PRODUCT API] Getting product by name: {}", productName);
-        return productService.getProductDTOByName(productName);
-    }
 }

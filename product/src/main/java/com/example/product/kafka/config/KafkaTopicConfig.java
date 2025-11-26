@@ -13,7 +13,7 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic productRequestTopic() {
-        return buildTopic("product.request.topic");
+        return buildTopic("product.event.topic");
     }
 
     @Bean
@@ -23,7 +23,7 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic productRequestDltTopic() {
-        return buildDltTopic("product.request.topic.DLT");
+        return buildDltTopic("product.event.topic.DLT");
     }
 
     private NewTopic buildTopic(String name) {

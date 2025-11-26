@@ -1,10 +1,6 @@
 package com.example.core.event.order;
 
-import com.example.core.status.OrderStatus;
 import lombok.*;
-
-import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.UUID;
 
 @Setter
@@ -17,9 +13,4 @@ public class OrderCreatedEvent {
     private UUID userId;
     private String productName;
     private Integer quantity;
-    private BigDecimal totalAmount;
-    private OrderStatus status;
-    private Instant createdAt;
-
-
 }

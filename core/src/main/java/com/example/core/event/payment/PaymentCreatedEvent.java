@@ -13,5 +13,5 @@ public class PaymentCreatedEvent {
     UUID orderId;        // Связь с заказом (ключевое поле)
     UUID customerId;     // Кто платил
     BigDecimal amount;   // Сумма платежа
-    String description;  // "Оплата за iPhone 15"
+
 }

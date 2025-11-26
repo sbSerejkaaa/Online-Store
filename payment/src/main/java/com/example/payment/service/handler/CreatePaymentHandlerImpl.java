@@ -1,12 +1,11 @@
 package com.example.payment.service.handler;
 
-import com.example.payment.contorller.dto.response.CreatePaymentResponse;
+import com.example.core.event.payment.PaymentCreatedEvent;
 import com.example.payment.kafka.producer.PaymentTransactionProducer;
 import com.example.payment.mapper.PaymentMapper;
 import com.example.payment.model.entity.BankAccount;
 import com.example.payment.model.entity.Payment;
 import com.example.payment.model.enums.PaymentStatus;
-import com.example.payment.service.command.CreatePaymentCommand;
 import com.example.payment.service.domain.FundTransferService;
 import com.example.payment.service.domain.PaymentService;
 import com.example.payment.service.handler.exception.PaymentProcessingException;
@@ -31,7 +30,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CreatePaymentHandlerImpl implements PaymentCommandHandler<CreatePaymentCommand, CreatePaymentResponse> {
+public class CreatePaymentHandlerImpl implements PaymentCommandHandler<CreatePaymentCommand, PaymentCreatedEvent> {
 
     private final PaymentValidator validator;
     private final PaymentService paymentService;

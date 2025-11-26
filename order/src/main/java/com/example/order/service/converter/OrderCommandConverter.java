@@ -1,7 +1,7 @@
 package com.example.order.service.converter;
 
 import com.example.core.status.OrderStatus;
-import com.example.order.controller.dto.OrderRegistrationRequest;
+import com.example.order.controller.dto.OrderRequest;
 import com.example.order.service.command.CancelOrderCommand;
 import com.example.order.service.command.ConfirmOrderCommand;
 import com.example.order.service.command.CreateOrderCommand;
@@ -16,7 +16,7 @@ public class OrderCommandConverter {
      * Конвертация: OrderRegistrationRequest → CreateOrderCommand
      * Для создания заказа от пользователя
      */
-    public CreateOrderCommand toCreateOrderCommand(OrderRegistrationRequest request) {
+    public CreateOrderCommand toCreateOrderCommand(OrderRequest request) {
         return CreateOrderCommand.builder()
                 .productName(request.getProductName())
                 .quantity(request.getQuantity())

@@ -8,8 +8,10 @@ public class ReserveProductMapper {
     public static ReserveProductCommand toReserveCommand(OrderCreatedEvent event) {
         return new ReserveProductCommand(
                 event.getOrderId(),
+                event.getUserId(),
                 event.getProductName(),
-                event.getProductQuantity()
+                event.getQuantity(),
+                event.getTotalAmount()
         );
     }
 }

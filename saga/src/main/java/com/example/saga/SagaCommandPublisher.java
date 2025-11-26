@@ -1,7 +1,7 @@
 package com.example.saga;
 
 import com.example.core.commandSaga.ConfirmOrderCommand;
-import com.example.core.commandSaga.ProcessPaymentCommand;
+import com.example.core.commandSaga.CreatePaymentCommand;
 import com.example.core.commandSaga.ReserveProductCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -28,11 +29,11 @@ public class SagaCommandPublisher {
                 .withPayload(command)
                 .setHeader(KafkaHeaders.TOPIC, "saga.product.commands")
                 .setHeader(KafkaHeaders.KEY, command.getOrderId().toString())
+                .setHeader("eventId", UUID.randomUUID())
                 .setHeader("commandType", "RESERVE_PRODUCT")
                 .setHeader("correlationId", correlationId)
                 .setHeader("sourceService", "saga-service")
                 .setHeader("timestamp", Instant.now().toString())
-                .setHeader("originalEventId", originalHeaders.get("eventId"))
                 .build();
 
         kafkaTemplate.send(message);
@@ -40,18 +41,18 @@ public class SagaCommandPublisher {
                 command.getOrderId(), correlationId);
     }
 
-    public void sendProcessPayment(ProcessPaymentCommand command, Map<String, Object> originalHeaders) {
+    public void sendProcessPayment(CreatePaymentCommand command, Map<String, Object> originalHeaders) {
         String correlationId = (String) originalHeaders.get("correlationId");
 
-        Message<ProcessPaymentCommand> message = MessageBuilder
+        Message<CreatePaymentCommand> message = MessageBuilder
                 .withPayload(command)
                 .setHeader(KafkaHeaders.TOPIC, "saga.payment.commands")
                 .setHeader(KafkaHeaders.KEY, command.getOrderId().toString())
+                .setHeader("eventId", UUID.randomUUID())
                 .setHeader("commandType", "PROCESS_PAYMENT")
                 .setHeader("correlationId", correlationId)
                 .setHeader("sourceService", "saga-service")
                 .setHeader("timestamp", Instant.now().toString())
-                .setHeader("originalEventId", originalHeaders.get("eventId"))
                 .build();
 
         kafkaTemplate.send(message);
@@ -66,11 +67,11 @@ public class SagaCommandPublisher {
                 .withPayload(command)
                 .setHeader(KafkaHeaders.TOPIC, "saga.order.commands")
                 .setHeader(KafkaHeaders.KEY, command.getOrderId().toString())
+                .setHeader("eventId", UUID.randomUUID())
                 .setHeader("commandType", "CONFIRM_ORDER")
                 .setHeader("correlationId", correlationId)
                 .setHeader("sourceService", "saga-service")
                 .setHeader("timestamp", Instant.now().toString())
-                .setHeader("originalEventId", originalHeaders.get("eventId"))
                 .build();
 
         kafkaTemplate.send(message);

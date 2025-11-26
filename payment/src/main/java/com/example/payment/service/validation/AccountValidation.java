@@ -16,31 +16,26 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class AccountValidation {
     public void validateForWithdrawal(BankAccount account, BigDecimal amount) {
-        log.debug("🔍 [VALIDATION] Validating withdrawal: account {}, amount {}", account.getId(), amount);
 
         if (account.getStatus() != BankAccountStatus.ACTIVE) {
-            throw new AccountBlockedException("Account is not active");
+            throw new AccountBlockedException("Аккаунта пользователя не активен");
         }
         if (account.getBalance().compareTo(amount) < 0) {
-            throw new InsufficientFundsException("Insufficient funds");
-        }
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidAmountException("Amount must be positive");
+            throw new InsufficientFundsException("Недостаточно средств на аккаунте у пользователя: ID = " + account.getId());
         }
 
-        log.debug("✅ [VALIDATION] Withdrawal validation passed");
+        log.debug("Подтверждение вывода средств пройдено");
     }
 
     public void validateForDeposit(BankAccount account, BigDecimal amount) {
-        log.debug("🔍 [VALIDATION] Validating deposit: account {}, amount {}", account.getId(), amount);
 
         if (account.getStatus() == BankAccountStatus.CLOSED) {
-            throw new AccountBlockedException("Cannot deposit to closed account");
+            throw new AccountBlockedException("Невозможно внести депозит на закрытый счет");
         }
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidAmountException("Amount must be positive");
+            throw new InvalidAmountException("Сумма должна быть положительной");
         }
 
-        log.debug("✅ [VALIDATION] Deposit validation passed");
+        log.debug("Подтверждение депозита пройдено");
     }
 }

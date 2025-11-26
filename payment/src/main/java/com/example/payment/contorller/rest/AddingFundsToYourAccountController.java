@@ -1,8 +1,8 @@
 package com.example.payment.contorller.rest;
 
-import com.example.payment.contorller.dto.request.CreatePaymentRequest;
-import com.example.payment.contorller.dto.response.CreatePaymentResponse;
-import com.example.payment.service.command.CreatePaymentCommand;
+import com.example.payment.contorller.dto.request.AddFundsOnBankAccountRequest;
+import com.example.payment.contorller.dto.response.AddFundsBankAccountResponse;
+import com.example.payment.service.command.AddingFundsToYourAccountCommand;
 import com.example.payment.service.processor.PaymentProcessor;
 import com.example.payment.service.converter.PaymentCommandTransformer;
 import jakarta.validation.Valid;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/payments")
 @RequiredArgsConstructor
-public class CreatePaymentController {
+public class AddingFundsToYourAccountController {
 
     private final PaymentProcessor paymentProcessor;
     private final PaymentCommandTransformer transformer;
@@ -29,20 +29,17 @@ public class CreatePaymentController {
      * POST /api/v1/payments
      */
     @PostMapping
-    public ResponseEntity<CreatePaymentResponse> createPayment(
-            @RequestBody @Valid CreatePaymentRequest request) {
+    public ResponseEntity<AddFundsBankAccountResponse> createPayment(
+            @RequestBody @Valid AddFundsOnBankAccountRequest request) {
 
-        log.info(" Создание платежа для заказа: {}", request.getOrderId());
 
         // Преобразуем API DTO в бизнес-команду
-        CreatePaymentCommand command = transformer.toCreatePaymentCommand(request);
+        AddingFundsToYourAccountCommand command = transformer.toAddAccountCommand(request);
         // Command - иммутабельный объект с дополнительными техническими полями (commandId, timestamp)
 
         // Передаем команду в процессор для выполнения бизнес-логики
-        CreatePaymentResponse response = paymentProcessor.handleCommand(command);
+        AddFundsBankAccountResponse response = paymentProcessor.handleCommand(command);
         // PaymentProcessor находит нужный handler и выполняет команду
-
-        log.info("Платеж, созданный для заказа: {}", request.getOrderId());
 
 
         return ResponseEntity.ok(response);

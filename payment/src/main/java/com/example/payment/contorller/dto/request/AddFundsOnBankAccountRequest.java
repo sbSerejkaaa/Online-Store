@@ -14,18 +14,14 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreatePaymentRequest {
+public class AddFundsOnBankAccountRequest {
     @NotNull(message = "ID пользователя не может быть null")
-    private UUID customerId;
+    private UUID bankAccountId;;
 
-    @NotNull(message = "ID заказа не может быть равно null")
-    private UUID orderId;
+    @NotNull(message = "Сумма пополнения не может равняться 0")
+    BigDecimal amount;
 
-    @NotNull
-    @DecimalMin("0.01")
-    private BigDecimal amount;
 
-    private String description;
 
 
 

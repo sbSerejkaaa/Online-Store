@@ -26,6 +26,9 @@ public class OrderEntity {
     @Column(name = "product_name")
     private String productName;
 
+    @Column(name = "quantity")
+    private Integer quantity;
+
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
 
@@ -34,14 +37,6 @@ public class OrderEntity {
 
     @Column(name = "created_at")
     private Instant createdAt;
-
-    public OrderEntity(String productName, BigDecimal totalAmount) {
-        this.productName = productName;
-        this.totalAmount = totalAmount;
-        this.status = OrderStatus.IN_PROCESS;
-        this.createdAt = Instant.now();
-    }
-
 
     @PrePersist
     protected void onCreate() {

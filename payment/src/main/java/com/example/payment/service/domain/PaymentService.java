@@ -4,7 +4,6 @@ import com.example.payment.model.entity.BankAccount;
 import com.example.payment.model.entity.Payment;
 import com.example.payment.model.enums.PaymentStatus;
 import com.example.payment.repository.PaymentRepository;
-import com.example.payment.service.command.CreatePaymentCommand;
 import com.example.payment.service.domain.exception.PaymentNotFoundException;
 import com.example.payment.service.domain.factory.PaymentFactory;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,7 @@ public class PaymentService {
      * СОЗДАТЬ И СОХРАНИТЬ PAYMENT
      */
     public Payment createPayment(CreatePaymentCommand command, BankAccount bankAccount) {
-        log.info("💳 [PAYMENT SERVICE] Creating payment for order: {}", command.getOrderId());
+        log.info("Создание платежа по заказу: {}", command.getOrderId());
 
         // Используем Factory для создания Payment
         Payment payment = paymentFactory.createFromCommand(command, bankAccount);

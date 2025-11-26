@@ -24,21 +24,17 @@ public class PaymentProcessor {
     @SuppressWarnings("unchecked")
     public <T, R> R handleCommand(T command) {
         String commandType = command.getClass().getSimpleName();
-        log.info("⚙️ [PROCESSOR] Processing command: {}", commandType);
 
         try {
             // 1. НАЙТИ ПОДХОДЯЩИЙ HANDLER
             PaymentCommandHandler<T, R> handler = findHandler(command);
 
             // 2. ВЫПОЛНИТЬ КОМАНДУ
-            log.debug("🎯 [PROCESSOR] Found handler: {}", handler.getClass().getSimpleName());
             R result = handler.handle(command);
 
-            log.info("✅ [PROCESSOR] Command processed successfully: {}", commandType);
             return result;
 
         } catch (Exception e) {
-            log.error("❌ [PROCESSOR] Command processing failed: {}", commandType, e);
             throw new PaymentProcessingException(
                     "Failed to process command: " + commandType, e
             );
@@ -53,8 +49,7 @@ public class PaymentProcessor {
         return (PaymentCommandHandler<T, R>) handlers.stream()
                 .filter(handler -> {
                     boolean canHandle = handler.canHandle(command);
-                    log.debug("🔍 [PROCESSOR] Handler {} can handle: {}",
-                            handler.getClass().getSimpleName(), canHandle);
+
                     return canHandle;
                 })
                 .findFirst()
@@ -65,13 +60,4 @@ public class PaymentProcessor {
                 });
     }
 
-    /**
-     * ПОЛУЧИТЬ ВСЕ ЗАРЕГИСТРИРОВАННЫЕ HANDLERS (для дебага)
-     */
-    public void printRegisteredHandlers() {
-        log.info("📋 [PROCESSOR] Registered handlers:");
-        handlers.forEach(handler ->
-                log.info("   - {}", handler.getClass().getSimpleName())
-        );
-    }
 }

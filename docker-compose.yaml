@@ -1,4 +1,18 @@
+version: '3.8'
+
 services:
+  # 🗄️ База данных PostgreSQL
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 🔄 Apache Kafka
   kafka-1:
     image: apache/kafka:latest
     ports:
@@ -9,8 +23,75 @@ services:
       - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
       - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka-1:9092
       - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093
       - CLUSTER_ID=testSerejka11
     volumes:
-      - ./volumes/kafka/data/:/tmp/kafka-logs
+      - kafka_data:/tmp/kafka-log
+
+  # 📦 ТВОИ МИКРОСЕРВИСЫ
+  authservice:
+    build: ./authService
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth_db
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092
+    depends_on:
+      - postgres
+      - kafka-1
+
+  notificationservice:
+    build: ./notificationService
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092
+    depends_on:
+      - kafka-1
+
+  order:
+    build: ./order
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_db
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092
+    depends_on:
+      - postgres
+      - kafka-1
+
+  payment:
+    build: ./payment
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/payment_db
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092
+    depends_on:
+      - postgres
+      - kafka-1
+
+  product:
+    build: ./product
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/product_db
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092
+    depends_on:
+      - postgres
+      - kafka-1
+
+  saga:
+    build: ./saga
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092
+    depends_on:
+      - kafka-1
+
+volumes:
+  postgres_data:
+  kafka_data:
