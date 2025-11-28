@@ -5,8 +5,11 @@ import com.example.core.model.Product;
 import com.example.product.controller.dto.admin.ProductRegistrationRequest;
 import com.example.product.controller.dto.admin.ProductResponse;
 import com.example.product.entity.EntityProduct;
+import org.springframework.stereotype.Component;
+
 import java.time.Instant;
 
+@Component
 public class ProductMapper {
 
     public Product toCoreModel(ProductRegistrationRequest request){
@@ -56,11 +59,10 @@ public class ProductMapper {
     public ProductReservedEvent toEvent(EntityProduct entityProduct){
         ProductReservedEvent productReservedEvent = new ProductReservedEvent();
 
-        productReservedEvent.setInventoryId(entityProduct.getId());
+
         productReservedEvent.setOrderId(entityProduct.getId());
         productReservedEvent.setProductName(entityProduct.getProductName());
         productReservedEvent.setQuantity(entityProduct.getQuantity());
-        productReservedEvent.setPrice(entityProduct.getPrice());
         //status
         productReservedEvent.setCreatedAt(entityProduct.getCreatedAt());
 

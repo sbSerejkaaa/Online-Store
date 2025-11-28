@@ -33,7 +33,7 @@ public class SagaCommandPublisher {
                 .setHeader("commandType", "RESERVE_PRODUCT")
                 .setHeader("correlationId", correlationId)
                 .setHeader("sourceService", "saga-service")
-                .setHeader("timestamp", Instant.now().toString())
+                .setHeader("createdAt", Instant.now().toString())
                 .build();
 
         kafkaTemplate.send(message);

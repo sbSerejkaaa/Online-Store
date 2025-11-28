@@ -3,6 +3,7 @@ package com.example.order.kafka.producer;
 import com.example.core.event.order.OrderCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.errors.TimeoutException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
@@ -11,6 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -34,15 +38,27 @@ public class ProducerOrder {
                     .setHeader("eventId", eventId)
                     .setHeader("correlationId", correlationId)
                     .setHeader("sourceService", "order-service")
-                    .setHeader("timestamp", Instant.now().toString())
                     .build();
 
             // 3. ОТПРАВЛЯЕМ В KAFKA
-            kafkaTemplate.send(message);
+            log.info("📤 [KAFKA PRODUCER] Sending message. OrderId: {}, Key: {}",
+                    event.getOrderId(), event.getOrderId().toString());
 
-            log.info(" [ORDER KAFKA] Event sent to Saga. Order: {}, Correlation: {}",
-                    event.getOrderId(), correlationId);
+            // ПРОСТОЙ СИНХРОННЫЙ ВАРИАНТ
+            try {
+                var result = kafkaTemplate.send(message).get(5, TimeUnit.SECONDS);
+                log.info("✅ [KAFKA SUCCESS] Event successfully sent! " +
+                                "Topic: {}, Partition: {}, Offset: {}, Key: {}",
+                        result.getRecordMetadata().topic(),
+                        result.getRecordMetadata().partition(),
+                        result.getRecordMetadata().offset(),
+                        event.getOrderId().toString());
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                log.error("❌ [KAFKA ERROR] Failed to send event: {}", e.getMessage());
+                throw new RuntimeException("Kafka publish failed", e);
+            }
 
+            log.info("🚀 [KAFKA PRODUCER] Send operation completed for order: {}", event.getOrderId());
         } catch (Exception e) {
             log.error(" [ORDER KAFKA] Failed to send event for order {}: {}",
                     event.getOrderId(), e.getMessage());

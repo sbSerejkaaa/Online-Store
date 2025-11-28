@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -18,6 +19,7 @@ public class OrderResponse {
     private UUID orderId;
     private String productName;
     private Integer quantity;
-    private OrderStatus status;
+    private BigDecimal totalAmount;
+    private String status;
 
 }

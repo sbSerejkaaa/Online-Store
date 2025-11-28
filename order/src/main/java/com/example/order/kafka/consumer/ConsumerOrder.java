@@ -15,8 +15,8 @@ import java.util.Map;
 @Slf4j
 @Component
 @KafkaListener(
-        topics = "saga.order.commands",
-        groupId = "order-service-group"
+        topics = "saga.payment.commands",
+        groupId = "payment-service-group"
 )
 @RequiredArgsConstructor
 public class ConsumerOrder {

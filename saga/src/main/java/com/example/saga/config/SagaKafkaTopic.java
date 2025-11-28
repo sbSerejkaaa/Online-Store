@@ -44,14 +44,14 @@ public class SagaKafkaTopic {
 
     private NewTopic buildCommandTopic(String name) {
         return TopicBuilder.name(name)
-                .partitions(3).replicas(3)
-                .configs(Map.of("min.insync.replicas", "2", "retention.ms", "604800000")) // 7 дней
+                .partitions(3).replicas(1)
+                .configs(Map.of("min.insync.replicas", "1", "retention.ms", "604800000")) // 7 дней
                 .build();
     }
 
     private NewTopic buildDltTopic(String name) {
         return TopicBuilder.name(name)
-                .partitions(3).replicas(3)
+                .partitions(3).replicas(1)
                 .configs(Map.of("retention.ms", "1209600000")) // 14 дней для DLT
                 .build();
     }

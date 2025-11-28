@@ -2,7 +2,8 @@ package com.example.payment.kafka.consumer;
 
 
 import com.example.core.commandSaga.CreatePaymentCommand;
-import com.example.payment.service.processor.PaymentProcessor;
+import com.example.payment.infrastructure.service.payment.ProcessPaymentService;
+import com.example.payment.kafka.producer.PaymentTransactionProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -22,37 +23,45 @@ import java.util.Map;
 )
 @RequiredArgsConstructor
 public class ConsumerPayment {
-
-    private final PaymentProcessor paymentProcessor;
+    private final ProcessPaymentService paymentService;
+    private final PaymentTransactionProducer producerEventPayment;
 
     @KafkaHandler
     public void handleProcessPaymentCommand(
             @Payload CreatePaymentCommand command,
             @Headers Map<String, Object> headers) {
 
+        // 1. ИЗВЛЕКАЕМ МЕТАДАННЫЕ
         String correlationId = (String) headers.get("correlationId");
         String commandType = (String) headers.get("commandType");
+        String sagaId = (String) headers.get("sagaId");
 
+        // 2. ПРОВЕРЯЕМ ТИП КОМАНДЫ
         if (!"PROCESS_PAYMENT".equals(commandType)) {
-
+            log.warn("Игнорируем команду не-оплаты. Тип: {}", commandType);
             return;
         }
 
+        // 3. ВЫПОЛНЯЕМ БИЗНЕС-ЛОГИКУ ОПЛАТЫ
         try {
-            CreatePaymentCommand internalCommand = CreatePaymentCommand.builder()
-                    .orderId(command.getOrderId())
-                    .customerId(command.getCustomerId())
-                    .amount(command.getAmount())
-                    .build();
+            log.info("Обрабатываем оплату заказа: {}", command.getOrderId());
 
-            paymentProcessor.handleCommand(internalCommand);
+            // 1. ВЫПОЛНЯЕМ СПИСАНИЕ СРЕДСТВ
+            paymentService.withdrawForOrder(command);
 
-            log.info("✅ [PAYMENT] Payment processed. Order: {}", command.getOrderId());
+            // 2. ОТПРАВЛЯЕМ СОБЫТИЕ УСПЕШНОЙ ОПЛАТЫ
+            producerEventPayment.publishPaymentCompleted(command, headers, correlationId);
+
+            log.info("✅ [PAYMENT] Оплата успешно обработана. Заказ: {}", command.getOrderId());
 
         } catch (Exception e) {
-            log.error("❌ [PAYMENT] Payment failed. Order: {}, Error: {}",
-                    command.getOrderId(), e.getMessage());
+            // 3. ОТПРАВЛЯЕМ СОБЫТИЕ ОШИБКИ ОПЛАТЫ
+            producerEventPayment.publishPaymentFailed(command, headers, correlationId, e.getMessage());
+            log.error("Ошибка оплаты. Заказ: {}, Ошибка: {}",
+                    command.getOrderId(), e.getMessage(), e);
         }
     }
 }
+
+
 

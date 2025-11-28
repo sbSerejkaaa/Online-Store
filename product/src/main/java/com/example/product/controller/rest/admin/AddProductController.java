@@ -4,6 +4,7 @@ import com.example.product.controller.dto.admin.ProductRegistrationRequest;
 import com.example.product.controller.dto.admin.ProductResponse;
 import com.example.product.service.command.AddProductOnWarehouseCommand;
 import com.example.product.service.converter.ProductCommandConverter;
+import com.example.product.service.processor.ProductProcessor;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/inv")
 @RequiredArgsConstructor
 public class AddProductController {
-    private final OrderProcessor orderProcessor;
+    private final ProductProcessor productProcessor;
     private final ProductCommandConverter converter;
 
     @PostMapping
@@ -30,7 +31,7 @@ public class AddProductController {
         AddProductOnWarehouseCommand command = converter.toAddProductCommand(request);
 
         // Передаем команду в процессор
-        ProductResponse response = orderProcessor.handleCommand(command);
+        ProductResponse response = productProcessor.handleCommand(command);
 
         log.info("✅ Заказ создан: {}", response.getNameInventory());
         return ResponseEntity.accepted().body(response);

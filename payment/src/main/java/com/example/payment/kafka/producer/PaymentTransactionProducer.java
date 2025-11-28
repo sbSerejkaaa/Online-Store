@@ -1,13 +1,10 @@
 package com.example.payment.kafka.producer;
 
 
-import com.example.core.event.payment.PaymentCreatedEvent;
+import com.example.core.commandSaga.CreatePaymentCommand;
+import com.example.core.event.payment.PaymentCompletedEvent;
 import com.example.core.event.payment.PaymentFailedEvent;
-import com.example.core.event.payment.PaymentRefundedEvent;
 
-import com.example.payment.kafka.factory.PaymentEventFactory;
-import com.example.payment.model.entity.Payment;
-import com.example.payment.model.entity.Refund;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -17,6 +14,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -24,55 +22,59 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PaymentTransactionProducer {
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    private final PaymentEventFactory eventFactory;
 
-    private static final String PAYMENT_EVENTS_TOPIC = "payment.events";
+    public void publishPaymentCompleted(CreatePaymentCommand command,
+                                        Map<String, Object> originalHeaders,
+                                        String correlationId) {
+        PaymentCompletedEvent event = PaymentCompletedEvent.builder()
+                .orderId(command.getOrderId())
+                .customerId(command.getCustomerId())
+                .amount(command.getAmount())
+                .completedAt(Instant.now())
+                .build();
 
-    /**
-     * 🎯 ОСНОВНЫЕ МЕТОДЫ (только 3 - по одному на каждый тип события)
-     */
-    public void publishPaymentCreated(Payment payment) {
-        PaymentCreatedEvent event = eventFactory.createPaymentCreatedEvent(payment);
-        sendEvent(event, "PAYMENT_CREATED", event.getOrderId().toString());
-        log.info("✅ [KAFKA] PaymentCreatedEvent sent for order: {}", payment.getOrderId());
+        Message<PaymentCompletedEvent> message = MessageBuilder
+                .withPayload(event)
+                .setHeader(KafkaHeaders.TOPIC, "payment.event.topic")
+                .setHeader(KafkaHeaders.KEY, command.getOrderId().toString())
+                .setHeader("eventId", UUID.randomUUID())
+                .setHeader("eventType", "PAYMENT_COMPLETED")
+                .setHeader("correlationId", correlationId)
+                .setHeader("sourceService", "payment-service")
+                .setHeader("timestamp", Instant.now().toString())
+                .build();
+
+        kafkaTemplate.send(message);
+        log.info("📤 [PAYMENT] Отправлено событие PaymentCompleted. Заказ: {}, Сумма: {}",
+                command.getOrderId(), command.getAmount());
     }
 
-    public void publishPaymentRefunded(Refund refund) {
-        PaymentRefundedEvent event = eventFactory.createPaymentRefundedEvent(refund);
-        sendEvent(event, "PAYMENT_REFUNDED", event.getOrderId().toString());
-        log.info("✅ [KAFKA] PaymentRefundedEvent sent for refund: {}", refund.getId());
+    public void publishPaymentFailed(CreatePaymentCommand command,
+                                     Map<String, Object> originalHeaders,
+                                     String correlationId,
+                                     String errorMessage) {
+        PaymentFailedEvent event = PaymentFailedEvent.builder()
+                .orderId(command.getOrderId())
+                .customerId(command.getCustomerId())
+                .amount(command.getAmount())
+                .failedAt(Instant.now())
+                .build();
+
+        Message<PaymentFailedEvent> message = MessageBuilder
+                .withPayload(event)
+                .setHeader(KafkaHeaders.TOPIC, "saga.payment.events")
+                .setHeader(KafkaHeaders.KEY, command.getOrderId().toString())
+                .setHeader("eventId", UUID.randomUUID())
+                .setHeader("eventType", "PAYMENT_FAILED")
+                .setHeader("correlationId", correlationId)
+                .setHeader("sourceService", "payment-service")
+                .setHeader("timestamp", Instant.now().toString())
+                .build();
+
+        kafkaTemplate.send(message);
+        log.error("📤 [PAYMENT] Отправлено событие PaymentFailed. Заказ: {}, Ошибка: {}",
+                command.getOrderId(), errorMessage);
     }
-
-    public void publishPaymentFailed(UUID orderId, String operation, String errorCode,
-                                     String errorMessage, UUID customerId) {
-        PaymentFailedEvent event = eventFactory.createPaymentFailedEvent(
-                orderId, operation, errorCode, errorMessage, customerId
-        );
-        sendEvent(event, "PAYMENT_FAILED", orderId.toString());
-        log.info("✅ [KAFKA] PaymentFailedEvent sent for order: {}", orderId);
-    }
-
-    /**
-     * 🎯 PRIVATE METHOD - единая точка отправки (Single Responsibility)
-     */
-    private <T> void sendEvent(T event, String eventType, String key) {
-        try {
-            Message<T> message = MessageBuilder
-                    .withPayload(event)
-                    .setHeader(KafkaHeaders.TOPIC, PAYMENT_EVENTS_TOPIC)
-                    .setHeader(KafkaHeaders.KEY, key)
-                    .setHeader("eventType", eventType)
-                    .setHeader("eventId", UUID.randomUUID().toString())
-                    .setHeader("timestamp", Instant.now().toString())
-                    .build();
-
-            kafkaTemplate.send(message);
-
-        } catch (Exception e) {
-            log.error("❌ [KAFKA] Failed to send {} event for key: {}", eventType, key, e);
-        }
-    }
-
 }
 
 

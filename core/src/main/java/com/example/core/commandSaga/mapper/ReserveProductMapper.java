@@ -10,8 +10,7 @@ public class ReserveProductMapper {
                 event.getOrderId(),
                 event.getUserId(),
                 event.getProductName(),
-                event.getQuantity(),
-                event.getTotalAmount()
+                event.getQuantity()
         );
     }
 }

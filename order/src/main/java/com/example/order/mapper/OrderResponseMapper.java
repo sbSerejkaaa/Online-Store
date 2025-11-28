@@ -8,6 +8,5 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface OrderResponseMapper {
     @Mapping(source = "id", target = "orderId")
-    @Mapping(source = "totalAmount", target = "quantity")
     OrderResponse toResponse(Orders order);
 }

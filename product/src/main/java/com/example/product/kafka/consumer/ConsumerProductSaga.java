@@ -44,20 +44,25 @@ public class ConsumerProductSaga {
         // 3. ВЫПОЛНЯЕМ БИЗНЕС-ЛОГИКУ
         try {
 
+            log.info("🔍 [PRODUCT] Starting reservation for order: {}", command.getOrderId());
 
-            // 1. РАССЧИТЫВАЕМ СУММУ (проверка + расчет)
+            // 1. РАССЧИТЫВАЕМ СУММУ
+            log.info("🔍 [PRODUCT] Calculating total amount...");
             BigDecimal totalAmount = productService.calculateTotalAmount(
                     command.getProductName(),
                     command.getQuantity()
             );
+            log.info("🔍 [PRODUCT] Total amount calculated: {}", totalAmount);
 
-            // 2. РЕЗЕРВИРУЕМ ТОВАР (проверка + резервация)
+            // 2. РЕЗЕРВИРУЕМ ТОВАР
+            log.info("🔍 [PRODUCT] Reserving product...");
             productService.reserveProduct(command.getProductName(), command.getQuantity());
+            log.info("🔍 [PRODUCT] Product reserved successfully");
 
-            // 3. ОТПРАВЛЯЕМ СОБЫТИЕ С СУММОЙ
+            // 3. ОТПРАВЛЯЕМ СОБЫТИЕ
+            log.info("🔍 [PRODUCT] Publishing ProductReservedEvent...");
             producerEventProduct.publishProductReserved(command, totalAmount, headers, correlationId);
-
-            log.info(" Product reserved successfully. Order: {}", command.getOrderId());
+            log.info("✅ [PRODUCT] Product reserved successfully. Order: {}", command.getOrderId());
 
         } catch (Exception e) {
             producerEventProduct.publishReservationFailed(command, headers, correlationId, e.getMessage());
@@ -68,3 +73,5 @@ public class ConsumerProductSaga {
     }
 
 }
+
+

@@ -10,11 +10,11 @@ import java.util.Map;
 @Configuration
 public class KafkaTopicConfig {
     private static final int PARTITIONS = 3;
-    private static final int REPLICAS = 3;
+    private static final int REPLICAS = 1;
 
     @Bean
     public NewTopic paymentRequestTopic() {
-        return buildTopic("payment.request.topic");
+        return buildTopic("payment.event.topic");
     }
 
     @Bean
@@ -31,7 +31,7 @@ public class KafkaTopicConfig {
         return TopicBuilder.name(name)
                 .partitions(PARTITIONS)
                 .replicas(REPLICAS)
-                .configs(Map.of("min.insync.replicas", "2"))
+                .configs(Map.of("min.insync.replicas", "1"))
                 .build();
     }
 
@@ -41,7 +41,7 @@ public class KafkaTopicConfig {
                 .replicas(REPLICAS)
                 .configs(Map.of(
                         "retention.ms", "1209600000",
-                        "min.insync.replicas", "2"
+                        "min.insync.replicas", "1"
                 ))
                 .build();
     }

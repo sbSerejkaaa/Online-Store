@@ -70,3 +70,4 @@ public class ProducerEventProduct {
         log.info(" [PRODUCT PRODUCER] Reservation failed event sent. Order: {}", command.getOrderId());
     }
 }
+

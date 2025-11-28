@@ -20,8 +20,9 @@ import java.util.Map;
 @Slf4j
 @Component
 @KafkaListener(topics ={
-        "${order.event.topic}",
-        "${product.event.topic}"})
+        "order.event.topic",
+        "product.event.topic",
+        "payment.event.topic"})
 @RequiredArgsConstructor
 public class SagaHandler {
 
@@ -31,17 +32,24 @@ public class SagaHandler {
     public void handleOrderCreated(@Payload OrderCreatedEvent event,
                                    @Headers Map<String, Object> headers) {
 
-        String correlationId = (String) headers.get("correlationId");
-        log.info("🎯 [SAGA] Starting saga for order: {}", event.getOrderId());
+        try {
+            log.info("🎯 [SAGA] Starting saga for order: {}", event.getOrderId());
+            String correlationId = (String) headers.get("correlationId");
+            log.info("🎯 [SAGA] Starting saga for order: {}", event.getOrderId());
 
-        ReserveProductCommand command = ReserveProductCommand.builder()
-                .orderId(event.getOrderId())
-                .userId(event.getUserId())
-                .productName(event.getProductName())
-                .quantity(event.getQuantity())
-                .build();
+            ReserveProductCommand command = ReserveProductCommand.builder()
+                    .orderId(event.getOrderId())
+                    .userId(event.getUserId())
+                    .productName(event.getProductName())
+                    .quantity(event.getQuantity())
+                    .build();
 
-        commandPublisher.sendReserveProduct(command, headers);
+            commandPublisher.sendReserveProduct(command, headers);
+        } catch (Exception e) {
+            log.error("❌ Ошибка в handleOrderCreated для order: {}", event.getOrderId(), e);
+            throw e;
+        }
+
     }
 
     @KafkaHandler
@@ -58,6 +66,8 @@ public class SagaHandler {
 
         commandPublisher.sendProcessPayment(command, headers);
     }
+
+
 
     @KafkaHandler
     public void handlePaymentProcessed(@Payload PaymentCreatedEvent event,

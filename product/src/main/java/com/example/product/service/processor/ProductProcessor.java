@@ -3,6 +3,7 @@ package com.example.product.service.processor;
 
 import com.example.core.model.Product;
 import com.example.product.controller.dto.admin.ProductResponse;
+import com.example.product.mapper.ProductMapper;
 import com.example.product.service.command.AddProductOnWarehouseCommand;
 import com.example.product.service.handler.CreateProductHandler;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProductProcessor {
 
+
+    private final ProductMapper responseMapper;
     private final CreateProductHandler createProductHandler;
 
     public ProductResponse handleCommand(AddProductOnWarehouseCommand command) {

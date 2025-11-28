@@ -3,8 +3,9 @@ package com.example.payment.kafka.factory;
 import com.example.core.event.payment.PaymentCreatedEvent;
 import com.example.core.event.payment.PaymentFailedEvent;
 import com.example.core.event.payment.PaymentRefundedEvent;
-import com.example.payment.model.entity.Payment;
-import com.example.payment.model.entity.Refund;
+
+import com.example.payment.infrastructure.persistence.entity.Payment;
+import com.example.payment.infrastructure.persistence.entity.Refund;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -18,7 +19,6 @@ public class PaymentEventFactory {
                 .orderId(payment.getOrderId())
                 .customerId(payment.getBankAccount().getCustomerId())
                 .amount(payment.getAmount())
-                .description(payment.getDescription())
                 .build();
     }
 
@@ -36,12 +36,10 @@ public class PaymentEventFactory {
     public PaymentFailedEvent createPaymentFailedEvent(UUID orderId, String operation,
                                                        String errorCode, String errorMessage, UUID customerId) {
         return PaymentFailedEvent.builder()
-                .eventId(UUID.randomUUID())
-                .createdAt(Instant.now())
+
+
                 .orderId(orderId)
-                .operation(operation)
-                .errorCode(errorCode)
-                .errorMessage(errorMessage)
+
                 .customerId(customerId)
                 .build();
     }
