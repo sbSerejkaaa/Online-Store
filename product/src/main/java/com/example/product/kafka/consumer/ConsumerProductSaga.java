@@ -17,7 +17,7 @@ import java.util.Map;
 @Slf4j
 @Component
 @KafkaListener(
-        topics = "saga.product.commands",
+        topics = "saga.products.commands",
         groupId = "product-service-group"
 )
 @RequiredArgsConstructor
@@ -37,41 +37,59 @@ public class ConsumerProductSaga {
 
         // 2. ПРОВЕРЯЕМ ТИП КОМАНДЫ
         if (!"RESERVE_PRODUCT".equals(commandType)) {
-            log.warn("🟡 [PRODUCT] Ignoring non-reservation command. Type: {}", commandType);
+            log.warn("Тип команды не соответствует методу резервации : {}", commandType);
             return;
         }
 
         // 3. ВЫПОЛНЯЕМ БИЗНЕС-ЛОГИКУ
         try {
 
-            log.info("🔍 [PRODUCT] Starting reservation for order: {}", command.getOrderId());
+            log.info("Начало резервации товара по заказу: {}", command.getOrderId());
 
             // 1. РАССЧИТЫВАЕМ СУММУ
-            log.info("🔍 [PRODUCT] Calculating total amount...");
+            log.info("Расчет суммы для оплаты");
             BigDecimal totalAmount = productService.calculateTotalAmount(
                     command.getProductName(),
                     command.getQuantity()
             );
-            log.info("🔍 [PRODUCT] Total amount calculated: {}", totalAmount);
+            log.info("Сумма для оплаты: {}", totalAmount);
 
             // 2. РЕЗЕРВИРУЕМ ТОВАР
-            log.info("🔍 [PRODUCT] Reserving product...");
             productService.reserveProduct(command.getProductName(), command.getQuantity());
-            log.info("🔍 [PRODUCT] Product reserved successfully");
+            log.info("Продукт зарезервирован");
 
-            // 3. ОТПРАВЛЯЕМ СОБЫТИЕ
-            log.info("🔍 [PRODUCT] Publishing ProductReservedEvent...");
+            // 3. ОТЛАДОЧНАЯ ИНФОРМАЦИЯ ПЕРЕД ОТПРАВКОЙ
+            log.info("Headers перед отправкой: {}", headers);
+            log.info("CorrelationId: {}", correlationId);
+            log.info("Command: orderId={}, product={}, quantity={}",
+                    command.getOrderId(), command.getProductName(), command.getQuantity());
+            log.info("TotalAmount: {}", totalAmount);
+
+            // 4. ПРОВЕРКА correlationId
+            if (correlationId == null) {
+                log.error("correlationId is NULL! Использую orderId как correlationId");
+                correlationId = command.getOrderId().toString();
+            }
+
+            // 5. ОТПРАВЛЯЕМ СОБЫТИЕ
             producerEventProduct.publishProductReserved(command, totalAmount, headers, correlationId);
-            log.info("✅ [PRODUCT] Product reserved successfully. Order: {}", command.getOrderId());
+            log.info("✅ Отправка данныx в Producer. Order: {}", command.getOrderId());
 
         } catch (Exception e) {
-            producerEventProduct.publishReservationFailed(command, headers, correlationId, e.getMessage());
-            log.error(" Reservation failed. Order: {}, Error: {}",
-                    command.getOrderId(), e.getMessage());
+            log.error("❌ Ошибка в КОНЦЕ обработки команды. Order: {}", command.getOrderId(), e);
+
+            // Пробуем отправить событие об ошибке
+            try {
+                producerEventProduct.publishReservationFailed(command, headers, correlationId, e.getMessage());
+            } catch (Exception ex) {
+                log.error("❌ Не удалось отправить событие об ошибке", ex);
+            }
+
+            // Бросаем исключение чтобы Kafka сделал ретрай
+            throw e;
         }
 
     }
-
 }
 
 

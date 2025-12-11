@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Setter
 @Getter
 @NoArgsConstructor
@@ -18,6 +20,8 @@ public class OrderRequest {
     @NotNull(message = "Количество не может быть пустым")
     @Positive(message = "Количество должно быть положительным числом")
     private Integer quantity;
+
+    private UUID accountId;
 
 
     // TODO: Добавить когда будет авторизация

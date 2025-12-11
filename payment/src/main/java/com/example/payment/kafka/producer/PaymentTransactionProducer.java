@@ -3,7 +3,7 @@ package com.example.payment.kafka.producer;
 
 import com.example.core.commandSaga.CreatePaymentCommand;
 import com.example.core.event.payment.PaymentCompletedEvent;
-import com.example.core.event.payment.PaymentFailedEvent;
+import com.example.core.failedCommand.payment.PaymentFailedEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +28,9 @@ public class PaymentTransactionProducer {
                                         String correlationId) {
         PaymentCompletedEvent event = PaymentCompletedEvent.builder()
                 .orderId(command.getOrderId())
-                .customerId(command.getCustomerId())
                 .amount(command.getAmount())
                 .completedAt(Instant.now())
+                .accountId(command.getAccountId())
                 .build();
 
         Message<PaymentCompletedEvent> message = MessageBuilder
@@ -41,7 +41,7 @@ public class PaymentTransactionProducer {
                 .setHeader("eventType", "PAYMENT_COMPLETED")
                 .setHeader("correlationId", correlationId)
                 .setHeader("sourceService", "payment-service")
-                .setHeader("timestamp", Instant.now().toString())
+                .setHeader("EventTimestamp", Instant.now().toString())
                 .build();
 
         kafkaTemplate.send(message);
@@ -68,7 +68,7 @@ public class PaymentTransactionProducer {
                 .setHeader("eventType", "PAYMENT_FAILED")
                 .setHeader("correlationId", correlationId)
                 .setHeader("sourceService", "payment-service")
-                .setHeader("timestamp", Instant.now().toString())
+                .setHeader("eventTimestamp", Instant.now().toString())
                 .build();
 
         kafkaTemplate.send(message);

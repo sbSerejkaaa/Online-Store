@@ -1,7 +1,8 @@
 package com.example.order.kafka.consumer;
 
+import com.example.core.commandSaga.ConfirmOrderCommand;
 import com.example.order.service.OrderServiceImpl;
-import com.example.order.service.command.ConfirmOrderCommand;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -15,8 +16,8 @@ import java.util.Map;
 @Slf4j
 @Component
 @KafkaListener(
-        topics = "saga.payment.commands",
-        groupId = "payment-service-group"
+        topics = "saga.orders.commands",
+        groupId = "order-service-group"
 )
 @RequiredArgsConstructor
 public class ConsumerOrder {
@@ -39,7 +40,7 @@ public class ConsumerOrder {
 
         try {
             // Меняем статус заказа на "Оформлен"
-            orderServiceImpl.confirmOrder(command);
+            orderServiceImpl.confirmOrder(command.getOrderId());
             log.info("✅ [ORDER] Order confirmed: {}", command.getOrderId());
 
         } catch (Exception e) {

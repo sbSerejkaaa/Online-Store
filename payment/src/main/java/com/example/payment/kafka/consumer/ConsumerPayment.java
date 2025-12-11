@@ -18,7 +18,7 @@ import java.util.Map;
 @Slf4j
 @Component
 @KafkaListener(
-        topics = "saga.payment.commands",
+        topics = "saga.payments.commands",
         groupId = "payment-service-group"
 )
 @RequiredArgsConstructor
@@ -30,6 +30,10 @@ public class ConsumerPayment {
     public void handleProcessPaymentCommand(
             @Payload CreatePaymentCommand command,
             @Headers Map<String, Object> headers) {
+
+
+        log.info("📥 [PAYMENT] Получена команда. Order: {}, Amount: {}, Headers: {}",
+                command.getOrderId(), command.getAmount(), headers);
 
         // 1. ИЗВЛЕКАЕМ МЕТАДАННЫЕ
         String correlationId = (String) headers.get("correlationId");

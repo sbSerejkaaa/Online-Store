@@ -1,7 +1,7 @@
 package com.example.payment.kafka.factory;
 
 import com.example.core.event.payment.PaymentCreatedEvent;
-import com.example.core.event.payment.PaymentFailedEvent;
+import com.example.core.failedCommand.payment.PaymentFailedEvent;
 import com.example.core.event.payment.PaymentRefundedEvent;
 
 import com.example.payment.infrastructure.persistence.entity.Payment;

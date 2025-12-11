@@ -29,6 +29,7 @@ public class ProducerEventProduct {
                 .totalAmount(totalAmount)
                 .quantity(command.getQuantity())
                 .createdAt(Instant.now())
+                .accountId(command.getAccountId())
                 .build();
 
         Message<ProductReservedEvent> message = MessageBuilder
@@ -39,7 +40,7 @@ public class ProducerEventProduct {
                 .setHeader("eventType", "PRODUCT_RESERVED")
                 .setHeader("correlationId", correlationId)
                 .setHeader("sourceService", "product-service")
-                .setHeader("timestamp", Instant.now().toString())
+                .setHeader("eventTimestamp", Instant.now().toString())
 
                 .build();
 
@@ -63,7 +64,7 @@ public class ProducerEventProduct {
                 .setHeader("eventType", "PRODUCT_RESERVATION_FAILED")
                 .setHeader("correlationId", correlationId)
                 .setHeader("sourceService", "product-service")
-                .setHeader("timestamp", Instant.now().toString())
+                .setHeader("eventTimestamp", Instant.now().toString())
                 .build();
 
         kafkaTemplate.send(message);

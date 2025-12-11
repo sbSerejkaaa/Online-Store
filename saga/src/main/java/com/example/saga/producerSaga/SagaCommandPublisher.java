@@ -1,4 +1,4 @@
-package com.example.saga;
+package com.example.saga.producerSaga;
 
 import com.example.core.commandSaga.ConfirmOrderCommand;
 import com.example.core.commandSaga.CreatePaymentCommand;
@@ -27,7 +27,7 @@ public class SagaCommandPublisher {
 
         Message<ReserveProductCommand> message = MessageBuilder
                 .withPayload(command)
-                .setHeader(KafkaHeaders.TOPIC, "saga.product.commands")
+                .setHeader(KafkaHeaders.TOPIC, "saga.products.commands")
                 .setHeader(KafkaHeaders.KEY, command.getOrderId().toString())
                 .setHeader("eventId", UUID.randomUUID())
                 .setHeader("commandType", "RESERVE_PRODUCT")
@@ -46,13 +46,13 @@ public class SagaCommandPublisher {
 
         Message<CreatePaymentCommand> message = MessageBuilder
                 .withPayload(command)
-                .setHeader(KafkaHeaders.TOPIC, "saga.payment.commands")
+                .setHeader(KafkaHeaders.TOPIC, "saga.payments.commands")
                 .setHeader(KafkaHeaders.KEY, command.getOrderId().toString())
                 .setHeader("eventId", UUID.randomUUID())
                 .setHeader("commandType", "PROCESS_PAYMENT")
                 .setHeader("correlationId", correlationId)
                 .setHeader("sourceService", "saga-service")
-                .setHeader("timestamp", Instant.now().toString())
+                .setHeader("eventTimestamp", Instant.now().toString())
                 .build();
 
         kafkaTemplate.send(message);
@@ -65,13 +65,13 @@ public class SagaCommandPublisher {
 
         Message<ConfirmOrderCommand> message = MessageBuilder
                 .withPayload(command)
-                .setHeader(KafkaHeaders.TOPIC, "saga.order.commands")
+                .setHeader(KafkaHeaders.TOPIC, "saga.orders.commands")
                 .setHeader(KafkaHeaders.KEY, command.getOrderId().toString())
                 .setHeader("eventId", UUID.randomUUID())
                 .setHeader("commandType", "CONFIRM_ORDER")
                 .setHeader("correlationId", correlationId)
                 .setHeader("sourceService", "saga-service")
-                .setHeader("timestamp", Instant.now().toString())
+                .setHeader("eventTimestamp", Instant.now().toString())
                 .build();
 
         kafkaTemplate.send(message);

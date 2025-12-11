@@ -24,7 +24,7 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic paymentRequestDltTopic() {
-        return buildDltTopic("payment.request.topic.DLT");
+        return buildDltTopic("payment.event.topic.DLT");
     }
 
     private NewTopic buildTopic(String name) {

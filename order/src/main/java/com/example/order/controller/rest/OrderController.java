@@ -38,15 +38,4 @@ public class OrderController {
         return ResponseEntity.accepted().body(response);
     }
 
-
-  /*  @GetMapping("/{orderId}/history")
-    @ResponseStatus(HttpStatus.OK)
-    public List<OrderHistoryResponse> getOrderHistory(@PathVariable UUID orderId){
-        return orderHistoryService.findByOrderId(orderId).stream().map(orderHistory -> {
-            OrderHistoryResponse orderHistoryResponse = new OrderHistoryResponse();
-            BeanUtils.copyProperties(orderHistory, orderHistoryResponse);
-            return orderHistoryResponse;
-        }).toList();
-
-   */
 }

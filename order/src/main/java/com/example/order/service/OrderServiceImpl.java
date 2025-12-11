@@ -13,6 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.util.UUID;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,11 +33,11 @@ public class OrderServiceImpl implements OrderService{
 
     @Override
     @Transactional
-    public void confirmOrder(ConfirmOrderCommand command) {
+    public void confirmOrder(UUID orderId) {
         OrderEntity order = null;
         try {
-            order = orderRepository.findById(command.getOrderId())
-                    .orElseThrow(() -> new Exception("Order not found: " + command.getOrderId()));
+            order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new Exception("Order not found: " + orderId));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -42,18 +45,23 @@ public class OrderServiceImpl implements OrderService{
         order.setStatus(OrderStatus.CONFIRMED);
         orderRepository.save(order);
 
-        log.info("✅ Order {} confirmed successfully", command.getOrderId());
+        log.info("✅ Order {} confirmed successfully", orderId);
     }
 
     @Override
     @Transactional
-    public void cancelOrder(CancelOrderCommand command) {
-        OrderEntity order = orderRepository.findById(command.getOrderId())
-                .orElseThrow(() -> new RuntimeException("Order not found: " + command.getOrderId()));
+    public void cancelOrder(UUID orderId) {  // ← UUID + причина
+        OrderEntity order = null;
+        try {
+            order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new Exception("Отмена заказа Id: " + orderId));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         order.setStatus(OrderStatus.CANCELLED);
         orderRepository.save(order);
 
-        log.info("❌ Заказ отменен: {}, причина: {}", command.getOrderId(), command.getReason());
+        log.info(" Заказ отменен: {}", orderId);
     }
 }

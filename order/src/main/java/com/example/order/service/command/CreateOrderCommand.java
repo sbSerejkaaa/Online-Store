@@ -14,4 +14,6 @@ public class CreateOrderCommand {
     String productName;
     Integer quantity;
 
+    UUID accountId;
+
 }

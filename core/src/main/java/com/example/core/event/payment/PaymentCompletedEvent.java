@@ -1,19 +1,20 @@
 package com.example.core.event.payment;
 
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-@Value
+@Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PaymentCompletedEvent {
 
     UUID orderId;
-    UUID customerId;
     BigDecimal amount;
     Instant completedAt;
+    UUID accountId;
 
 }

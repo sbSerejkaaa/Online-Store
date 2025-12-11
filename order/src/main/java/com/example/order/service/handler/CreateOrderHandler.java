@@ -52,6 +52,7 @@ public class CreateOrderHandler {
 
         // 4. Создаем ивент БЕЗ СУММЫ
         OrderCreatedEvent event = orderEventMapper.toEvent(order);
+        event.setAccountId(command.getAccountId());
 
         // 5. Отправляем в Kafka для Саги
         eventPublisher.publishOrderCreated(event);

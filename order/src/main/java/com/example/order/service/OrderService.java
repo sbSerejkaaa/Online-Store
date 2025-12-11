@@ -5,9 +5,11 @@ import com.example.order.service.command.CancelOrderCommand;
 import com.example.order.service.command.ConfirmOrderCommand;
 import com.example.order.service.command.CreateOrderCommand;
 
+import java.util.UUID;
+
 public interface OrderService {
 
     Orders createOrder(CreateOrderCommand command);
-    void confirmOrder(ConfirmOrderCommand command);
-    void cancelOrder(CancelOrderCommand command);
+    void confirmOrder(UUID orderId);
+    void cancelOrder(UUID orderId);
 }

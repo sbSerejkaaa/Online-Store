@@ -20,5 +20,6 @@ public class ProductReservedEvent {
     private BigDecimal unitPrice;  // ← цена за штуку (переименовать!)
     private BigDecimal totalAmount; // ← ОБЩАЯ сумма (ДОБАВИТЬ!)
     private Instant createdAt;
+    private UUID accountId;
 
 }

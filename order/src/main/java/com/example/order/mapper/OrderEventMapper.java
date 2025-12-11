@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 public interface OrderEventMapper {
     @Mapping(source = "id", target = "orderId")
     @Mapping(source = "productName", target = "productName")
-    @Mapping(source = "quantity", target = "quantity")        // ✅ ИСПРАВЛЕНО!
+    @Mapping(source = "quantity", target = "quantity")// ✅ ИСПРАВЛЕНО!
+
     OrderCreatedEvent toEvent(Orders order);
 }

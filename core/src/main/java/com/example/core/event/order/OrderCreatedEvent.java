@@ -13,4 +13,5 @@ public class OrderCreatedEvent {
     private UUID userId;
     private String productName;
     private Integer quantity;
+    private UUID accountId;
 }

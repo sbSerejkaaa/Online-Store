@@ -1,4 +1,4 @@
-package com.example.core.event.payment;
+package com.example.core.failedCommand.payment;
 
 import lombok.Builder;
 import lombok.Value;
@@ -10,10 +10,8 @@ import java.util.UUID;
 @Value
 @Builder
 public class PaymentFailedEvent {
-
     UUID orderId;
     UUID customerId;
     BigDecimal amount;
     Instant failedAt;
-
 }

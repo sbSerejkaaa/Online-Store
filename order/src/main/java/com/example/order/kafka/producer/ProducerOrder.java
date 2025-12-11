@@ -41,26 +41,26 @@ public class ProducerOrder {
                     .build();
 
             // 3. ОТПРАВЛЯЕМ В KAFKA
-            log.info("📤 [KAFKA PRODUCER] Sending message. OrderId: {}, Key: {}",
+            log.info("Отправка события в кафку OrderId: {}, Key: {}",
                     event.getOrderId(), event.getOrderId().toString());
 
-            // ПРОСТОЙ СИНХРОННЫЙ ВАРИАНТ
+            // СИНХРОННЫЙ ВАРИАНТ
             try {
                 var result = kafkaTemplate.send(message).get(5, TimeUnit.SECONDS);
-                log.info("✅ [KAFKA SUCCESS] Event successfully sent! " +
+                log.info("Событие успешно отправлено " +
                                 "Topic: {}, Partition: {}, Offset: {}, Key: {}",
                         result.getRecordMetadata().topic(),
                         result.getRecordMetadata().partition(),
                         result.getRecordMetadata().offset(),
                         event.getOrderId().toString());
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                log.error("❌ [KAFKA ERROR] Failed to send event: {}", e.getMessage());
+                log.error("Ошибка отправки ивента: {}", e.getMessage());
                 throw new RuntimeException("Kafka publish failed", e);
             }
 
-            log.info("🚀 [KAFKA PRODUCER] Send operation completed for order: {}", event.getOrderId());
+            log.info("Операция отправки заказа завершена: {}", event.getOrderId());
         } catch (Exception e) {
-            log.error(" [ORDER KAFKA] Failed to send event for order {}: {}",
+            log.error("Не удалось отправить событие для заказа {}: {}",
                     event.getOrderId(), e.getMessage());
             throw new RuntimeException("Kafka publish failed", e);
         }

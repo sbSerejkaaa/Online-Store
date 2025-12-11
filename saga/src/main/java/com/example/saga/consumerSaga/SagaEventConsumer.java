@@ -1,12 +1,13 @@
-package com.example.saga.handlers;
+package com.example.saga.consumerSaga;
 
 import com.example.core.commandSaga.ConfirmOrderCommand;
 import com.example.core.commandSaga.CreatePaymentCommand;
 import com.example.core.commandSaga.ReserveProductCommand;
 import com.example.core.event.order.OrderCreatedEvent;
-import com.example.core.event.payment.PaymentCreatedEvent;
+import com.example.core.event.payment.PaymentCompletedEvent;
+
 import com.example.core.event.product.ProductReservedEvent;
-import com.example.saga.SagaCommandPublisher;
+import com.example.saga.producerSaga.SagaCommandPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -24,7 +25,7 @@ import java.util.Map;
         "product.event.topic",
         "payment.event.topic"})
 @RequiredArgsConstructor
-public class SagaHandler {
+public class SagaEventConsumer {
 
     private final SagaCommandPublisher commandPublisher;
 
@@ -33,68 +34,68 @@ public class SagaHandler {
                                    @Headers Map<String, Object> headers) {
 
         try {
-            log.info("🎯 [SAGA] Starting saga for order: {}", event.getOrderId());
+
             String correlationId = (String) headers.get("correlationId");
-            log.info("🎯 [SAGA] Starting saga for order: {}", event.getOrderId());
+            log.info("Создание команды для резервации: {}", event.getOrderId());
 
             ReserveProductCommand command = ReserveProductCommand.builder()
                     .orderId(event.getOrderId())
                     .userId(event.getUserId())
                     .productName(event.getProductName())
                     .quantity(event.getQuantity())
+                    .accountId(event.getAccountId())
                     .build();
 
             commandPublisher.sendReserveProduct(command, headers);
+            log.info("Команда отправлена в кафку: {}", command);
         } catch (Exception e) {
-            log.error("❌ Ошибка в handleOrderCreated для order: {}", event.getOrderId(), e);
+            log.error("Ошибка в handleOrderCreated: {}", event.getOrderId(), e);
             throw e;
         }
-
     }
 
     @KafkaHandler
     public void handleProductReserved(@Payload ProductReservedEvent event,
                                       @Headers Map<String, Object> headers) {
 
-        log.info("💰 [SAGA] Product reserved for order: {}", event.getOrderId());
+        log.info("Создание команды на оплату: {}", event.getOrderId());
 
-        CreatePaymentCommand command = CreatePaymentCommand.builder()
-                .orderId(event.getOrderId())
-                .customerId(event.getUserId())
-                .amount(event.getTotalAmount())
-                .build();
+        try {
+            CreatePaymentCommand command = CreatePaymentCommand.builder()
+                    .orderId(event.getOrderId())
+                    .customerId(event.getUserId())
+                    .amount(event.getTotalAmount())
+                    .accountId(event.getAccountId())
+                    .build();
 
-        commandPublisher.sendProcessPayment(command, headers);
+            commandPublisher.sendProcessPayment(command, headers);
+
+        } catch (Exception e){
+            log.error("Ошибка в handleProductReserved: {}", event.getOrderId(), e);
+            throw e;
+        }
     }
-
-
 
     @KafkaHandler
-    public void handlePaymentProcessed(@Payload PaymentCreatedEvent event,
+    public void handlePaymentProcessed(@Payload PaymentCompletedEvent event,
                                        @Headers Map<String, Object> headers) {
 
-        log.info("✅ [SAGA] Payment processed for order: {}", event.getOrderId());
+        log.info("Создание команды для подтверждения заказа для Order: {}", event.getOrderId());
 
-        ConfirmOrderCommand command = ConfirmOrderCommand.builder()
-                .orderId(event.getOrderId())
-                .build();
+        try {
+            ConfirmOrderCommand command = ConfirmOrderCommand.builder()
+                    .orderId(event.getOrderId())
+                    .totalAmount(event.getAmount())
+                    .build();
 
-        commandPublisher.sendConfirmOrder(command, headers);
+            commandPublisher.sendConfirmOrder(command, headers);
+        } catch (Exception e){
+            log.error("Ошибка в handlePaymentProcessed: {}", event.getOrderId(), e);
+            throw e;
+        }
+
     }
 
-   /* @KafkaHandler
-    public void handleProductReservationFailed(@Payload ProductReservationFailedEvent event,
-                                               @Headers Map<String, Object> headers) {
 
-        log.error("❌ [SAGA] Product reservation failed for order: {}", event.getOrderId());
 
-        CancelOrderCommand command = CancelOrderCommand.builder()
-                .orderId(event.getOrderId())
-                .reason("Product reservation failed: " + event.getReason())
-                .build();
-
-        commandPublisher.sendCancelOrder(command, headers);
-    }
-
-    */
 }

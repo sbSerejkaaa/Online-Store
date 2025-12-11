@@ -20,6 +20,7 @@ public class OrderCommandConverter {
         return CreateOrderCommand.builder()
                 .productName(request.getProductName())
                 .quantity(request.getQuantity())
+                .accountId(request.getAccountId())
                 .commandId(UUID.randomUUID())
                 .timestamp(Instant.now())
                 .build();

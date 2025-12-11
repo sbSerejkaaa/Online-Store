@@ -36,7 +36,7 @@ public class ProcessPaymentService {
                 command.getOrderId(), command.getCustomerId(), command.getAmount());
 
         // 1. Находим счет по customerId
-        BankAccount account = bankAccountQueryService.findByCustomerId(command.getCustomerId());
+        BankAccount account = bankAccountQueryService.findById(command.getAccountId());
 
         // 2. Валидация счета и суммы
         accountValidation.validateForWithdrawal(account, command.getAmount());

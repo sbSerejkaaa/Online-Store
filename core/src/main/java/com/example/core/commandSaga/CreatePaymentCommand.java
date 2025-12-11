@@ -14,4 +14,5 @@ public class CreatePaymentCommand {
     private UUID orderId;
     private UUID customerId;
     private BigDecimal amount;
+    private UUID accountId;
 }
