@@ -1,5 +1,6 @@
 package com.example.saga.consumerSaga;
 
+import com.example.core.commandCancelSaga.CompensateOrderCommand;
 import com.example.core.commandSaga.ConfirmOrderCommand;
 import com.example.core.commandSaga.CreatePaymentCommand;
 import com.example.core.commandSaga.ReserveProductCommand;
@@ -7,6 +8,7 @@ import com.example.core.event.order.OrderCreatedEvent;
 import com.example.core.event.payment.PaymentCompletedEvent;
 
 import com.example.core.event.product.ProductReservedEvent;
+import com.example.core.failedEvent.payment.PaymentFailedEvent;
 import com.example.saga.producerSaga.SagaCommandPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +25,8 @@ import java.util.Map;
 @KafkaListener(topics ={
         "order.event.topic",
         "product.event.topic",
-        "payment.event.topic"})
+        "payment.event.topic",
+        "payment.failed.topic"})
 @RequiredArgsConstructor
 public class SagaEventConsumer {
 
@@ -76,6 +79,8 @@ public class SagaEventConsumer {
         }
     }
 
+
+
     @KafkaHandler
     public void handlePaymentProcessed(@Payload PaymentCompletedEvent event,
                                        @Headers Map<String, Object> headers) {
@@ -94,6 +99,24 @@ public class SagaEventConsumer {
             throw e;
         }
 
+    }
+
+    @KafkaHandler
+    public void handlePaymentFailed(@Payload PaymentFailedEvent event,
+                                    @Headers Map<String, Object> headers) {
+
+        log.error("Не удалось произвести оплату заказа: {}. Error: {}",
+                event.getOrderId(), event.getErrorMessage());
+
+        // Просто отменяем заказ (самая простая компенсация)
+        CompensateOrderCommand command = CompensateOrderCommand.builder()
+                .orderId(event.getOrderId())
+                .reason("Payment failed: " + event.getErrorMessage())
+                .build();
+
+        commandPublisher.sendCancelOrder(command, headers);
+
+        log.info("Начатая компенсация: отмена заказа {}", event.getOrderId());
     }
 
 

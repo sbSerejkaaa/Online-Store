@@ -1,4 +1,4 @@
-package com.example.core.failedCommand.payment;
+package com.example.core.failedEvent.payment;
 
 import lombok.Builder;
 import lombok.Value;
@@ -14,4 +14,5 @@ public class PaymentFailedEvent {
     UUID customerId;
     BigDecimal amount;
     Instant failedAt;
+    String errorMessage;
 }

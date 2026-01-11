@@ -1,5 +1,6 @@
 package com.example.product.service;
 
+import com.example.core.commandSaga.ReserveProductCommand;
 import com.example.core.exception.ProductInsufficientQuantityException;
 import com.example.core.model.Product;
 import com.example.product.entity.EntityProduct;
@@ -19,20 +20,27 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService{
 
     private final ProductRepository productRepository;
+    private final ProductOutboxService outboxService;
 
     @Override
-    public void reserveProduct(String productName, Integer quantity) {
-        EntityProduct productEntity = productRepository.findByProductName(productName)
-                .orElseThrow(() -> new RuntimeException("Товар не найден: " + productName));
+    public void reserveProduct(ReserveProductCommand command, BigDecimal totalAmount) {
+        // 1. ЛОГИКА РЕЗЕРВАЦИИ
+        EntityProduct productEntity = productRepository.findByProductName(command.getProductName())
+                .orElseThrow(() -> new RuntimeException("Товар не найден"));
 
-        if (quantity > productEntity.getQuantity()) {
+        if (command.getQuantity() > productEntity.getQuantity()) {
             throw new ProductInsufficientQuantityException(productEntity.getId(), null);
         }
 
-        productEntity.setQuantity(productEntity.getQuantity() - quantity);
+        productEntity.setQuantity(productEntity.getQuantity() - command.getQuantity());
         productRepository.save(productEntity);
 
-        log.info("✅ [PRODUCT] Зарезервировано {} шт товара '{}'", quantity, productName);
+        log.info("Зарезервировано {} шт товара '{}'", command.getQuantity(), command.getProductName());
+
+        // 2. СОХРАНЕНИЕ В OUTBOX (В ТОЙ ЖЕ ТРАНЗАКЦИИ)
+        outboxService.saveProductReserved(command, productEntity.getId(), totalAmount);
+
+        log.info("Outbox сохранен для order: {}", command.getOrderId());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.example.saga.producerSaga;
 
+import com.example.core.commandCancelSaga.CompensateOrderCommand;
 import com.example.core.commandSaga.ConfirmOrderCommand;
 import com.example.core.commandSaga.CreatePaymentCommand;
 import com.example.core.commandSaga.ReserveProductCommand;
@@ -60,6 +61,24 @@ public class SagaCommandPublisher {
                 command.getOrderId(), command.getAmount(), correlationId);
     }
 
+    public void sendCancelOrder(CompensateOrderCommand command, Map<String, Object> originalHeaders) {
+        String correlationId = (String) originalHeaders.get("correlationId");
+
+        Message<CompensateOrderCommand> message = MessageBuilder
+                .withPayload(command)
+                .setHeader(KafkaHeaders.TOPIC, "saga.orders.commands")  // тот же топик что для confirm
+                .setHeader(KafkaHeaders.KEY, command.getOrderId().toString())
+                .setHeader("commandType", "CANCEL_ORDER")  // ← ВАЖНО: другой тип!
+                .setHeader("correlationId", correlationId)
+                .setHeader("sourceService", "saga-service")
+                .setHeader("eventTimestamp", Instant.now().toString())
+                .build();
+
+        kafkaTemplate.send(message);
+        log.info("🔄 [SAGA] Sent CancelOrderCommand. Order: {}, Reason: {}, Correlation: {}",
+                command.getOrderId(), command.getReason(), correlationId);
+    }
+
     public void sendConfirmOrder(ConfirmOrderCommand command, Map<String, Object> originalHeaders) {
         String correlationId = (String) originalHeaders.get("correlationId");
 
@@ -79,24 +98,5 @@ public class SagaCommandPublisher {
                 command.getOrderId(), correlationId);
     }
 
-    /*  public void sendCancelOrder(CancelOrderCommand command, Map<String, Object> originalHeaders) {
-        String correlationId = (String) originalHeaders.get("correlationId");
 
-        Message<CancelOrderCommand> message = MessageBuilder
-                .withPayload(command)
-                .setHeader(KafkaHeaders.TOPIC, "saga.order.commands")
-                .setHeader(KafkaHeaders.KEY, command.getOrderId().toString())
-                .setHeader("commandType", "CANCEL_ORDER")
-                .setHeader("correlationId", correlationId)
-                .setHeader("sourceService", "saga-service")
-                .setHeader("timestamp", Instant.now().toString())
-                .setHeader("originalEventId", originalHeaders.get("eventId"))
-                .build();
-
-        kafkaTemplate.send(message);
-        log.info("[SAGA] Sent CancelOrderCommand. Order: {}, Correlation: {}",
-                command.getOrderId(), correlationId);
-    }
-
-     */
 }

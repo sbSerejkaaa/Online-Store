@@ -1,5 +1,6 @@
 package com.example.product.service;
 
+import com.example.core.commandSaga.ReserveProductCommand;
 import com.example.core.model.Product;
 
 import java.math.BigDecimal;
@@ -9,7 +10,7 @@ import java.util.UUID;
 public interface ProductService {
 
     // Admin
-    void reserveProduct(String productName, Integer quantity);
+    void reserveProduct(ReserveProductCommand command, BigDecimal totalAmount);
 
     void cancelReservation(Product productToCancel, UUID orderId);
 

@@ -2,6 +2,7 @@ package com.example.product.kafka.consumer;
 
 import com.example.core.commandSaga.ReserveProductCommand;
 import com.example.product.kafka.producer.ProducerEventProduct;
+import com.example.product.service.ProductOutboxService;
 import com.example.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import java.util.Map;
 public class ConsumerProductSaga {
     private final ProductService productService;
     private final ProducerEventProduct producerEventProduct;
+    private final ProductOutboxService outboxService;
 
     @KafkaHandler
     public void handleReserveCommand(
@@ -55,35 +57,15 @@ public class ConsumerProductSaga {
             log.info("Сумма для оплаты: {}", totalAmount);
 
             // 2. РЕЗЕРВИРУЕМ ТОВАР
-            productService.reserveProduct(command.getProductName(), command.getQuantity());
-            log.info("Продукт зарезервирован");
+            productService.reserveProduct(command, totalAmount);
+            log.info("Продукт зарезервирован, соxранен в БД и Outbox");
 
-            // 3. ОТЛАДОЧНАЯ ИНФОРМАЦИЯ ПЕРЕД ОТПРАВКОЙ
-            log.info("Headers перед отправкой: {}", headers);
-            log.info("CorrelationId: {}", correlationId);
-            log.info("Command: orderId={}, product={}, quantity={}",
-                    command.getOrderId(), command.getProductName(), command.getQuantity());
-            log.info("TotalAmount: {}", totalAmount);
-
-            // 4. ПРОВЕРКА correlationId
-            if (correlationId == null) {
-                log.error("correlationId is NULL! Использую orderId как correlationId");
-                correlationId = command.getOrderId().toString();
-            }
-
-            // 5. ОТПРАВЛЯЕМ СОБЫТИЕ
-            producerEventProduct.publishProductReserved(command, totalAmount, headers, correlationId);
-            log.info("✅ Отправка данныx в Producer. Order: {}", command.getOrderId());
 
         } catch (Exception e) {
-            log.error("❌ Ошибка в КОНЦЕ обработки команды. Order: {}", command.getOrderId(), e);
+            log.error("Ошибка обработки команды. Order: {}", command.getOrderId(), e);
 
-            // Пробуем отправить событие об ошибке
-            try {
-                producerEventProduct.publishReservationFailed(command, headers, correlationId, e.getMessage());
-            } catch (Exception ex) {
-                log.error("❌ Не удалось отправить событие об ошибке", ex);
-            }
+            // Сохраняем событие об ошибке в OUTBOX
+            outboxService.saveReservationFailed(command, e.getMessage());
 
             // Бросаем исключение чтобы Kafka сделал ретрай
             throw e;

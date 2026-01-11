@@ -1,6 +1,7 @@
 package com.example.payment.infrastructure.service.payment;
 
 import com.example.core.commandSaga.CreatePaymentCommand;
+import com.example.payment.infrastructure.outbox.PaymentOutboxService;
 import com.example.payment.infrastructure.persistence.entity.BankAccount;
 import com.example.payment.infrastructure.persistence.entity.Payment;
 import com.example.payment.infrastructure.persistence.entity.factory.PaymentFactory;
@@ -27,6 +28,7 @@ public class ProcessPaymentService {
     private final BankAccountQueryService bankAccountQueryService;
     private final PaymentFactory paymentFactory;
     private final AccountValidation accountValidation;
+    private final PaymentOutboxService outboxService;
 
     /**
      * СПИСАНИЕ СРЕДСТВ ЗА ЗАКАЗ ИЗ KAFKA КОМАНДЫ
@@ -51,7 +53,18 @@ public class ProcessPaymentService {
         payment.setStatus(PaymentStatus.COMPLETED); // Сразу завершаем, т.к. списание прошло
         paymentRepository.save(payment);
 
-        log.info("✅ [PROCESS PAYMENT] Withdrawal successful. Order: {}, Account: {}, New balance: {}",
+        // 5. СОХРАНЯЕМ В OUTBOX через отдельный сервис
+        outboxService.saveSuccessfulPayment(command, payment);
+
+        log.info("Withdrawal successful. Order: {}, Account: {}, New balance: {}",
                 command.getOrderId(), account.getId(), newBalance);
+    }
+
+    public void handlePaymentFailed(CreatePaymentCommand command, String errorMessage) {
+        log.error("Payment failed. Order: {}, Error: {}",
+                command.getOrderId(), errorMessage);
+
+        // Сохраняем в outbox
+        outboxService.saveFailedPayment(command, errorMessage);
     }
 }
