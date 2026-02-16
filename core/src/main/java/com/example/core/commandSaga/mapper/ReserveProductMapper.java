@@ -9,7 +9,6 @@ public class ReserveProductMapper {
         return new ReserveProductCommand(
                 event.getOrderId(),
                 event.getAccountId(),
-                event.getUserId(),
                 event.getProductName(),
                 event.getQuantity()
 

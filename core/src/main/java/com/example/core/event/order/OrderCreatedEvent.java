@@ -10,7 +10,6 @@ import java.util.UUID;
 @Builder
 public class OrderCreatedEvent {
     private UUID orderId;
-    private UUID userId;
     private String productName;
     private Integer quantity;
     private UUID accountId;

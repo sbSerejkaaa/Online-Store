@@ -35,9 +35,6 @@ public class PaymentOutboxService {
             payload.put("paymentId", payment.getId().toString());
             payload.put("completedAt", java.time.Instant.now().toString());
 
-            if (command.getCustomerId() != null) {
-                payload.put("customerId", command.getCustomerId().toString());
-            }
 
             String jsonPayload = objectMapper.writeValueAsString(payload);
 
@@ -72,9 +69,7 @@ public class PaymentOutboxService {
             if (command.getAccountId() != null) {
                 payload.put("accountId", command.getAccountId().toString());
             }
-            if (command.getCustomerId() != null) {
-                payload.put("customerId", command.getCustomerId().toString());
-            }
+
 
             String jsonPayload = objectMapper.writeValueAsString(payload);
 

@@ -12,7 +12,7 @@ import java.util.UUID;
 public class PaymentFailedEvent {
     UUID orderId;
     UUID customerId;
-    BigDecimal amount;
-    Instant failedAt;
+    String productName;
+    Integer quantity;
     String errorMessage;
 }

@@ -1,7 +1,6 @@
 package com.example.product.kafka.consumer;
 
 import com.example.core.commandSaga.ReserveProductCommand;
-import com.example.product.kafka.producer.ProducerEventProduct;
 import com.example.product.service.ProductOutboxService;
 import com.example.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ConsumerProductSaga {
     private final ProductService productService;
-    private final ProducerEventProduct producerEventProduct;
     private final ProductOutboxService outboxService;
 
     @KafkaHandler

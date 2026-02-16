@@ -1,5 +1,4 @@
 package com.example.saga.producerSaga;
-
 import com.example.core.commandCancelSaga.CompensateOrderCommand;
 import com.example.core.commandSaga.ConfirmOrderCommand;
 import com.example.core.commandSaga.CreatePaymentCommand;
@@ -42,14 +41,13 @@ public class SagaCommandPublisher {
                 command.getOrderId(), correlationId);
     }
 
-    public void sendProcessPayment(CreatePaymentCommand command, Map<String, Object> originalHeaders) {
-        String correlationId = (String) originalHeaders.get("correlationId");
+    public void sendProcessPayment(CreatePaymentCommand command, String correlationId) {
 
         Message<CreatePaymentCommand> message = MessageBuilder
                 .withPayload(command)
                 .setHeader(KafkaHeaders.TOPIC, "saga.payments.commands")
                 .setHeader(KafkaHeaders.KEY, command.getOrderId().toString())
-                .setHeader("eventId", UUID.randomUUID())
+                .setHeader("eventId", UUID.randomUUID().toString())
                 .setHeader("commandType", "PROCESS_PAYMENT")
                 .setHeader("correlationId", correlationId)
                 .setHeader("sourceService", "saga-service")
@@ -66,9 +64,9 @@ public class SagaCommandPublisher {
 
         Message<CompensateOrderCommand> message = MessageBuilder
                 .withPayload(command)
-                .setHeader(KafkaHeaders.TOPIC, "saga.orders.commands")  // тот же топик что для confirm
+                .setHeader(KafkaHeaders.TOPIC, "saga.orders.commands")
                 .setHeader(KafkaHeaders.KEY, command.getOrderId().toString())
-                .setHeader("commandType", "CANCEL_ORDER")  // ← ВАЖНО: другой тип!
+                .setHeader("commandType", "CANCEL_ORDER")
                 .setHeader("correlationId", correlationId)
                 .setHeader("sourceService", "saga-service")
                 .setHeader("eventTimestamp", Instant.now().toString())
@@ -97,6 +95,4 @@ public class SagaCommandPublisher {
         log.info("[SAGA] Sent ConfirmOrderCommand. Order: {}, Correlation: {}",
                 command.getOrderId(), correlationId);
     }
-
-
 }

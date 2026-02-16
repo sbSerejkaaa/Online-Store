@@ -28,17 +28,24 @@ public class ProductOutboxService {
      * Сохраняет событие успешной резервации товара
      */
     public void saveProductReserved(ReserveProductCommand command, UUID productId, BigDecimal totalAmount) {
+
+
         try {
             Map<String, Object> payload = new HashMap<>();
             payload.put("orderId", command.getOrderId().toString());
-            payload.put("userId", command.getUserId().toString());
             payload.put("productName", command.getProductName());
             payload.put("quantity", command.getQuantity());
             payload.put("productId", productId.toString());
             payload.put("totalAmount", totalAmount);
             payload.put("reservedAt", Instant.now().toString());
+            payload.put("accountId", command.getAccountId().toString());
 
             String jsonPayload = objectMapper.writeValueAsString(payload);
+            // 🔥🔥🔥 ВОТ СЮДА ВСТАВЛЯЕМ ПРОВЕРКУ
+            if (jsonPayload == null || jsonPayload.trim().isEmpty() || jsonPayload.equals("null")) {
+                log.error("🔥🔥🔥 CRITICAL: payload is null for order {}", command.getOrderId());
+                throw new RuntimeException("Payload is null for order " + command.getOrderId());
+            }
 
             ProductOutbox outbox = ProductOutbox.builder()
                     .eventType("PRODUCT_RESERVED")

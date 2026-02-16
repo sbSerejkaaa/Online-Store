@@ -36,10 +36,7 @@ public class PaymentEventFactory {
     public PaymentFailedEvent createPaymentFailedEvent(UUID orderId, String operation,
                                                        String errorCode, String errorMessage, UUID customerId) {
         return PaymentFailedEvent.builder()
-
-
                 .orderId(orderId)
-
                 .customerId(customerId)
                 .build();
     }

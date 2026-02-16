@@ -13,7 +13,6 @@ import java.util.UUID;
 public class ReserveProductCommand {
     private UUID orderId;
     private UUID accountId;
-    private UUID userId;
     private String productName;
     private Integer quantity;
 }

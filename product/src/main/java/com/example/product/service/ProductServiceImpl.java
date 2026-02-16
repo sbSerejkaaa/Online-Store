@@ -8,6 +8,7 @@ import com.example.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -17,12 +18,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProductServiceImpl implements ProductService{
 
     private final ProductRepository productRepository;
     private final ProductOutboxService outboxService;
 
     @Override
+    @Transactional
     public void reserveProduct(ReserveProductCommand command, BigDecimal totalAmount) {
         // 1. ЛОГИКА РЕЗЕРВАЦИИ
         EntityProduct productEntity = productRepository.findByProductName(command.getProductName())
@@ -44,6 +47,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
+    @Transactional
     public void cancelReservation(Product productToCancel, UUID orderId) {
         EntityProduct productEntity = productRepository.findById(productToCancel.getProductId()).orElseThrow();
         productEntity.setQuantity(productEntity.getQuantity() + productToCancel.getQuantity());
@@ -52,6 +56,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
+    @Transactional
     public List<Product> findAll() {
          return productRepository.findAll().stream()
                 .map(entity -> new Product(entity.getId(), entity.getProductName(), entity.getQuantity(), entity.getPrice()))
@@ -59,6 +64,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
+    @Transactional
     public BigDecimal calculateTotalAmount(String productName, Integer quantity) {
         EntityProduct productEntity = productRepository.findByProductName(productName)
                 .orElseThrow(() -> new RuntimeException("Товар не найден: " + productName));
