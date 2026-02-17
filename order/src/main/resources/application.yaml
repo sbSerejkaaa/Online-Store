@@ -1,7 +1,10 @@
 server:
-  port: 0
+  port: 8081
 
 spring:
+  application:
+    name: order-service
+
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/orders_db}
     username: ${DB_USERNAME:postgres}
@@ -27,3 +30,15 @@ spring:
     listener:
       type: single
       ack-mode: manual
+
+management:
+  endpoints:
+     web:
+      exposure:
+         include: health, prometheus, metrics, info
+  metrics:
+    export:
+       prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name:unknown}

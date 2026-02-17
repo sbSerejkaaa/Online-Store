@@ -1,6 +1,9 @@
 server:
-  port: 0
+  port: 8083
+
 spring:
+  application:
+    name: payment-service
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/payment_db}
     username: ${DB_USERNAME:postgres}
@@ -29,9 +32,20 @@ spring:
       username: default
   cache:
     type: redis
-logging:
+
+  logging:
     level:
       org.hibernate.type.descriptor.sql: TRACE
 
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus, metrics, info
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name:unknown}
 

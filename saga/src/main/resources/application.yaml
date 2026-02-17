@@ -1,4 +1,10 @@
+server:
+  port: 8084
+
 spring:
+  application:
+    name: saga-service
+
   kafka:
     bootstrap-servers: localhost:29092
     consumer:
@@ -12,6 +18,19 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus, metrics, info
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name:unknown}
+
 logging:
   level:
     com.example.saga: DEBUG
