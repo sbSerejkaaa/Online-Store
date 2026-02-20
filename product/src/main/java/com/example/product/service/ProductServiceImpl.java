@@ -7,6 +7,8 @@ import com.example.product.entity.EntityProduct;
 import com.example.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,22 @@ public class ProductServiceImpl implements ProductService{
 
     private final ProductRepository productRepository;
     private final ProductOutboxService outboxService;
+
+    // МЕТОД ДЛЯ КЭШИРОВАНИЯ ТОВАРА
+    // Храним в Redis по ключу "products::имя_товара"
+    @Cacheable(value = "products", key = "#productName")
+    public EntityProduct getCachedProduct(String productName) {
+        log.info(" ЗАПРОС В БД для товара: {}", productName);
+        return productRepository.findByProductName(productName)
+                .orElseThrow(() -> new RuntimeException("Товар не найден: " + productName));
+    }
+
+    // ОЧИСТКА КЭША ПРИ ИЗМЕНЕНИИ ТОВАРА
+    @CacheEvict(value = "products", key = "#productName")
+    public void evictProductCache(String productName) {
+        log.info("Кэш для товара {} очищен", productName);
+    }
+
 
     @Override
     @Transactional
@@ -43,6 +61,9 @@ public class ProductServiceImpl implements ProductService{
         // 2. СОХРАНЕНИЕ В OUTBOX (В ТОЙ ЖЕ ТРАНЗАКЦИИ)
         outboxService.saveProductReserved(command, productEntity.getId(), totalAmount);
 
+        // 3. ОЧИЩАЕМ КЭШ, ТАК КАК КОЛИЧЕСТВО ИЗМЕНИЛОСЬ
+        evictProductCache(command.getProductName());
+
         log.info("Outbox сохранен для order: {}", command.getOrderId());
     }
 
@@ -53,29 +74,38 @@ public class ProductServiceImpl implements ProductService{
         productEntity.setQuantity(productEntity.getQuantity() + productToCancel.getQuantity());
         productRepository.save(productEntity);
 
+        // ОЧИЩАЕМ КЭШ, ТАК КАК КОЛИЧЕСТВО ИЗМЕНИЛОСЬ
+        evictProductCache(productEntity.getProductName());
+
     }
 
     @Override
     @Transactional
     public List<Product> findAll() {
          return productRepository.findAll().stream()
-                .map(entity -> new Product(entity.getId(), entity.getProductName(), entity.getQuantity(), entity.getPrice()))
+                .map(entity -> new Product(
+                        entity.getId(),
+                        entity.getProductName(),
+                        entity.getQuantity(),
+                        entity.getPrice()))
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
     public BigDecimal calculateTotalAmount(String productName, Integer quantity) {
-        EntityProduct productEntity = productRepository.findByProductName(productName)
-                .orElseThrow(() -> new RuntimeException("Товар не найден: " + productName));
+        // 1. Берём товар из Redis (или БД при первом запросе)
+        EntityProduct cachedProduct = getCachedProduct(productName);
 
+        // 2. Свежий остаток — отдельный быстрый запрос в БД
+        int actualQuantity = productRepository.getQuantityByName(productName);
         // ПРОВЕРКА + РАСЧЕТ
-        if (quantity > productEntity.getQuantity()) {
-            throw new ProductInsufficientQuantityException(productEntity.getId(), null);
+        if (quantity > actualQuantity) {
+            throw new ProductInsufficientQuantityException(cachedProduct.getId(), null);
         }
 
-        // 🔥 РАССЧИТЫВАЕМ СУММУ
-        return productEntity.getPrice().multiply(new BigDecimal(quantity));
+        //  РАССЧИТЫВАЕМ СУММУ
+        return cachedProduct.getPrice().multiply(new BigDecimal(quantity));
 
     }
 }
