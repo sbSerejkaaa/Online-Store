@@ -11,7 +11,7 @@ public interface ProductRepository extends JpaRepository<EntityProduct, UUID> {
 
     Optional<EntityProduct> findByProductName(String productName);
 
-    // 🔥 Новый метод — только количество (быстрый запрос)
+    // только количество (быстрый запрос)
     @Query("SELECT p.quantity FROM EntityProduct p WHERE p.productName = :productName")
     int getQuantityByName(String productName);
 }

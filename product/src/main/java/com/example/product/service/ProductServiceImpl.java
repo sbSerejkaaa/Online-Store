@@ -30,7 +30,7 @@ public class ProductServiceImpl implements ProductService{
     // Храним в Redis по ключу "products::имя_товара"
     @Cacheable(value = "products", key = "#productName")
     public EntityProduct getCachedProduct(String productName) {
-        log.info(" ЗАПРОС В БД для товара: {}", productName);
+        log.info("ЗАПРОС В БД для товара: {}", productName);
         return productRepository.findByProductName(productName)
                 .orElseThrow(() -> new RuntimeException("Товар не найден: " + productName));
     }

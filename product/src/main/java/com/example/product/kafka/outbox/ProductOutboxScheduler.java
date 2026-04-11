@@ -30,7 +30,7 @@ public class ProductOutboxScheduler {
     @Transactional
     public void sendPendingEvents() {
         try {
-            log.debug("🔍 OutboxScheduler: поиск pending событий...");
+            log.debug("OutboxScheduler: поиск pending событий...");
 
             Instant cutoffTime = Instant.now().minusSeconds(10);
 
@@ -41,18 +41,18 @@ public class ProductOutboxScheduler {
             );
 
             if (pendingEvents.isEmpty()) {
-                log.debug("✅ Нет pending событий");
+                log.debug("Нет pending событий");
                 return;
             }
 
-            log.info("📤 Найдено {} pending событий для отправки", pendingEvents.size());
+            log.info("Найдено {} pending событий для отправки", pendingEvents.size());
 
             for (ProductOutbox event : pendingEvents) {
                 sendEventToKafka(event);
             }
 
         } catch (Exception e) {
-            log.error("❌ Критическая ошибка в OutboxScheduler", e);
+            log.error("Критическая ошибка в OutboxScheduler", e);
         }
     }
 
@@ -62,23 +62,23 @@ public class ProductOutboxScheduler {
             String topic = getTopicForEventType(event.getEventType());
             String key = event.getAggregateId().toString();
 
-            log.info("📨 Отправка события {} для заказа {}",
+            log.info("Отправка события {} для заказа {}",
                     event.getEventType(), event.getAggregateId());
 
-            // 🔥 ИЗМЕНЕНИЕ ЗДЕСЬ: парсим не в Object, а в конкретный тип
+            // ИЗМЕНЕНИЕ ЗДЕСЬ: парсим не в Object, а в конкретный тип
             ProductReservedEvent payload = objectMapper.readValue(
                     event.getPayload(),
                     ProductReservedEvent.class
             );
 
             if (payload == null) {
-                log.error("❌ Payload is null for event: {}", event.getEventId());
+                log.error("Payload is null for event: {}", event.getEventId());
                 event.setStatus(ProductOutbox.OutboxStatus.FAILED);
                 outboxRepository.save(event);
                 return;
             }
 
-            // 🔥 СОЗДАЁМ СООБЩЕНИЕ С ЗАГОЛОВКАМИ
+            // СОЗДАЁМ СООБЩЕНИЕ С ЗАГОЛОВКАМИ
             Message<ProductReservedEvent> message = MessageBuilder
                     .withPayload(payload)
                     .setHeader(KafkaHeaders.TOPIC, topic)
@@ -89,7 +89,7 @@ public class ProductOutboxScheduler {
                     .setHeader("eventTimestamp", Instant.now().toString())
                     .build();
 
-            // 🔥 ОТПРАВЛЯЕМ
+            // ОТПРАВЛЯЕМ
             kafkaTemplate.send(message).get();
 
             // 2. ТОЛЬКО ПОСЛЕ УСПЕШНОЙ ОТПРАВКИ меняем статус
@@ -97,11 +97,11 @@ public class ProductOutboxScheduler {
             event.setSentAt(Instant.now());
             outboxRepository.save(event);
 
-            log.info("✅ Отправлено событие {} для order: {} с correlationId: {}",
+            log.info("Отправлено событие {} для order: {} с correlationId: {}",
                     event.getEventType(), event.getAggregateId(), message.getHeaders().get("correlationId"));
 
         } catch (Exception e) {
-            log.error("❌ Ошибка отправки события {}: {}",
+            log.error("Ошибка отправки события {}: {}",
                     event.getEventType(), e.getMessage());
             // Оставляем статус PENDING для повторной попытки
         }

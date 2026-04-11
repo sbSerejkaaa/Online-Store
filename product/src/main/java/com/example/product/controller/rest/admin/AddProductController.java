@@ -33,7 +33,7 @@ public class AddProductController {
         // Передаем команду в процессор
         ProductResponse response = productProcessor.handleCommand(command);
 
-        log.info("✅ Заказ создан: {}", response.getNameInventory());
+        log.info("Заказ создан: {}", response.getNameInventory());
         return ResponseEntity.accepted().body(response);
     }
 }

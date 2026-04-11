@@ -41,9 +41,9 @@ public class ProductOutboxService {
             payload.put("accountId", command.getAccountId().toString());
 
             String jsonPayload = objectMapper.writeValueAsString(payload);
-            // 🔥🔥🔥 ВОТ СЮДА ВСТАВЛЯЕМ ПРОВЕРКУ
+
             if (jsonPayload == null || jsonPayload.trim().isEmpty() || jsonPayload.equals("null")) {
-                log.error("🔥🔥🔥 CRITICAL: payload is null for order {}", command.getOrderId());
+                log.error("CRITICAL: payload is null for order {}", command.getOrderId());
                 throw new RuntimeException("Payload is null for order " + command.getOrderId());
             }
 
