@@ -37,7 +37,7 @@ public class SagaCommandPublisher {
                 .build();
 
         kafkaTemplate.send(message);
-        log.info("🔄 [SAGA] Sent ReserveProductCommand. Order: {}, Correlation: {}",
+        log.info("Sent ReserveProductCommand. Order: {}, Correlation: {}",
                 command.getOrderId(), correlationId);
     }
 
@@ -55,7 +55,7 @@ public class SagaCommandPublisher {
                 .build();
 
         kafkaTemplate.send(message);
-        log.info("[SAGA] Sent ProcessPaymentCommand. Order: {}, Amount: {}, Correlation: {}",
+        log.info("Sent ProcessPaymentCommand. Order: {}, Amount: {}, Correlation: {}",
                 command.getOrderId(), command.getAmount(), correlationId);
     }
 
@@ -73,7 +73,7 @@ public class SagaCommandPublisher {
                 .build();
 
         kafkaTemplate.send(message);
-        log.info("🔄 [SAGA] Sent CancelOrderCommand. Order: {}, Reason: {}, Correlation: {}",
+        log.info("Sent CancelOrderCommand. Order: {}, Reason: {}, Correlation: {}",
                 command.getOrderId(), command.getReason(), correlationId);
     }
 
@@ -92,7 +92,7 @@ public class SagaCommandPublisher {
                 .build();
 
         kafkaTemplate.send(message);
-        log.info("[SAGA] Sent ConfirmOrderCommand. Order: {}, Correlation: {}",
+        log.info("Sent ConfirmOrderCommand. Order: {}, Correlation: {}",
                 command.getOrderId(), correlationId);
     }
 }

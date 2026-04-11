@@ -22,7 +22,7 @@ public class PaymentValidator {
         // Вызываем сервис чтобы найти счет по ID пользователя из команды
         // Если счет не найден - метод выбросит BankAccountNotFoundException
         BankAccount bankAccount = createBankAccountService.findByCustomerId(command.getCustomerId());
-        log.debug("✅ [VALIDATOR] Bank account found: {}", bankAccount.getId());
+        log.debug("Bank account found: {}", bankAccount.getId());
 
         // 2. ВАЛИДАЦИЯ СЧЕТА И СУММЫ (ЧЕРЕЗ КОМПОНЕНТ!)
         // Передаем найденный счет и сумму платежа в компонент валидации
@@ -30,24 +30,24 @@ public class PaymentValidator {
         // Если валидация не пройдена - метод выбросит исключение
         accountValidationComponent.validateForWithdrawal(bankAccount, command.getAmount());
 
-        log.info("✅ [VALIDATOR] Payment command validation PASSED for order: {}", command.getOrderId());
+        log.info("Payment command validation PASSED for order: {}", command.getOrderId());
         return bankAccount;
     }
 
 
     public Payment validateRefundPayment(RefundPaymentCommand command) {
-        log.info("🔍 [VALIDATOR] Validating refund command: {}", command.getCommandId());
+        log.info("Validating refund command: {}", command.getCommandId());
 
         // 1. НАЙТИ ПЛАТЕЖ
         // Ищем оригинальный платеж по ID заказа из команды возврата
         // Если платеж не найден - метод выбросит исключение
         Payment payment = processPaymentService.findByOrderId(command.getOrderId());
-        log.debug("✅ [VALIDATOR] Payment found: {}", payment.getId());
+        log.debug("Payment found: {}", payment.getId());
 
         // 2. ПРОВЕРИТЬ СТАТУС ПЛАТЕЖА
         // Проверяем бизнес-правило: возвращать можно только завершенные платежи
         if (payment.getStatus() != PaymentStatus.COMPLETED) {
-            log.error("❌ [VALIDATOR] Payment not completed. Status: {}", payment.getStatus());
+            log.error("Payment not completed. Status: {}", payment.getStatus());
             throw new IllegalArgumentException(
                     "Cannot refund payment with status: " + payment.getStatus() + ". Payment must be COMPLETED."
             );
@@ -64,10 +64,10 @@ public class PaymentValidator {
                         refund.getStatus() == RefundStatus.PROCESSING);
 
         if (hasActiveRefund) {
-            log.error("❌ [VALIDATOR] Active refund already exists for payment: {}", payment.getId());
+            log.error("Active refund already exists for payment: {}", payment.getId());
             throw new IllegalArgumentException("Active refund already exists for this payment");
         }
-        // 🆕 4. ДОБАВЛЯЕМ ТОЛЬКО ЭТУ ПРОВЕРКУ:
+        //  4. ДОБАВЛЯЕМ ТОЛЬКО ЭТУ ПРОВЕРКУ:
         boolean hasCompletedRefund = existingRefunds.stream()
                 .anyMatch(refund -> refund.getStatus() == RefundStatus.COMPLETED);
 
@@ -75,7 +75,7 @@ public class PaymentValidator {
             throw new DuplicateRefundException("Refund already completed for this payment");
         }
 
-        log.info("✅ [VALIDATOR] Refund validation PASSED for order: {}", command.getOrderId());
+        log.info("Refund validation PASSED for order: {}", command.getOrderId());
         return payment;
     }
     /*

@@ -26,7 +26,7 @@ public class OrderController {
     public ResponseEntity<OrderResponse> createOrder(
             @RequestBody @Valid OrderRequest request) {
 
-        log.info("📦 Создание заказа для продукта: {}", request.getProductName());
+        log.info("Создание заказа для продукта: {}", request.getProductName());
 
         // Конвертируем DTO в команду
         CreateOrderCommand command = converter.toCreateOrderCommand(request);
@@ -34,7 +34,7 @@ public class OrderController {
         // Передаем команду в процессор
         OrderResponse response = orderProcessor.handleCommand(command);
 
-        log.info("✅ Заказ создан: {}", response.getOrderId());
+        log.info("Заказ создан: {}", response.getOrderId());
         return ResponseEntity.accepted().body(response);
     }
 

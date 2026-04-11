@@ -45,7 +45,7 @@ public class OrderServiceImpl implements OrderService{
         order.setStatus(OrderStatus.CONFIRMED);
         orderRepository.save(order);
 
-        log.info("✅ Order {} confirmed successfully", orderId);
+        log.info("Order {} confirmed successfully", orderId);
     }
 
     @Override
@@ -62,6 +62,6 @@ public class OrderServiceImpl implements OrderService{
         order.setStatus(OrderStatus.CANCELLED);
         orderRepository.save(order);
 
-        log.info(" Заказ отменен: {}", orderId);
+        log.info("Заказ отменен: {}", orderId);
     }
 }

@@ -98,7 +98,7 @@ services:
     networks:
       - app-network
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin  # логин admin / пароль admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
 
 volumes:
   postgres_order_data:

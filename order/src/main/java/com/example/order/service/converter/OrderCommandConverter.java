@@ -13,7 +13,7 @@ import java.util.UUID;
 @Component
 public class OrderCommandConverter {
     /**
-     * Конвертация: OrderRegistrationRequest → CreateOrderCommand
+     * Конвертация: OrderRegistrationRequest в CreateOrderCommand
      * Для создания заказа от пользователя
      */
     public CreateOrderCommand toCreateOrderCommand(OrderRequest request) {
@@ -27,7 +27,7 @@ public class OrderCommandConverter {
     }
 
     /**
-     * Конвертация: данные → ConfirmOrderCommand
+     * Конвертация: данные в ConfirmOrderCommand
      * Для подтверждения заказа от Saga
      */
     public ConfirmOrderCommand toConfirmOrderCommand(UUID orderId) {
@@ -40,7 +40,7 @@ public class OrderCommandConverter {
     }
 
     /**
-     * Конвертация: данные → CancelOrderCommand
+     * Конвертация: данные в CancelOrderCommand
      * Для отмены заказа от Saga
      */
     public CancelOrderCommand toCancelOrderCommand(UUID orderId, String reason) {

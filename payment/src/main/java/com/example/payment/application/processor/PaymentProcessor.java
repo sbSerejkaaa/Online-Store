@@ -55,7 +55,7 @@ public class PaymentProcessor {
                 .findFirst()
                 .orElseThrow(() -> {
                     String errorMsg = "No handler found for command: " + command.getClass().getSimpleName();
-                    log.error("❌ [PROCESSOR] {}", errorMsg);
+                    log.error("Processor {}", errorMsg);
                     return new IllegalArgumentException(errorMsg);
                 });
     }

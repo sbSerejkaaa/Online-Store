@@ -34,7 +34,7 @@ public class ProcessPaymentService {
      * СПИСАНИЕ СРЕДСТВ ЗА ЗАКАЗ ИЗ KAFKA КОМАНДЫ
      */
     public void withdrawForOrder(CreatePaymentCommand command) {
-        log.info("🛒 [PROCESS PAYMENT] Starting withdrawal from Kafka command. Order: {}, Customer: {}, Amount: {}",
+        log.info("Starting withdrawal from Kafka command. Order: {}, Customer: {}, Amount: {}",
                 command.getOrderId(), command.getAccountId(), command.getAmount());
 
         // 1. Находим счет по customerId

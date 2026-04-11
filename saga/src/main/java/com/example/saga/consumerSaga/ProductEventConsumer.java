@@ -21,13 +21,12 @@ import java.util.Map;
 public class ProductEventConsumer {
 
     private final SagaCommandPublisher commandPublisher;
-    private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = "product.event.topic", groupId = "saga-group")
     public void handleProductReserved(@Payload ProductReservedEvent event,
                                       @Headers Map<String, Object> headers) {
 
-        log.info("📥 [SAGA] Получен ответ от Product: {}", event.getOrderId());
+        log.info("Получен ответ от Product: {}", event.getOrderId());
 
         CreatePaymentCommand command = CreatePaymentCommand.builder()
                 .orderId(event.getOrderId())

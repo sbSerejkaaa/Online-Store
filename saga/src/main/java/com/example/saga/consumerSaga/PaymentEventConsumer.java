@@ -23,7 +23,7 @@ public class PaymentEventConsumer {
     public void handlePaymentProcessed(@Payload PaymentCompletedEvent event,
                                        @Headers Map<String, Object> headers) {
 
-        log.info("💰 [SAGA] Получен ответ от Payment для заказа: {}", event.getOrderId());
+        log.info("Получен ответ от Payment для заказа: {}", event.getOrderId());
 
         ConfirmOrderCommand command = ConfirmOrderCommand.builder()
                 .orderId(event.getOrderId())
@@ -31,6 +31,6 @@ public class PaymentEventConsumer {
                 .build();
 
         commandPublisher.sendConfirmOrder(command, headers);
-        log.info("✅ Команда ConfirmOrder отправлена для заказа: {}", event.getOrderId());
+        log.info("Команда ConfirmOrder отправлена для заказа: {}", event.getOrderId());
     }
 }

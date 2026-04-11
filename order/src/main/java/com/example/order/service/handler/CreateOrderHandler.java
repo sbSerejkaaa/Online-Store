@@ -25,7 +25,7 @@ public class CreateOrderHandler {
 
     @Transactional
     public Orders handle(CreateOrderCommand command) {
-        log.info("🏭 Создание заказа для продукта: {}", command.getProductName());
+        log.info("Создание заказа для продукта: {}", command.getProductName());
 
         // command УЖЕ содержит:
         // - productName (валидированный)
@@ -57,7 +57,7 @@ public class CreateOrderHandler {
         // 5. Отправляем в Kafka для Саги
         eventPublisher.publishOrderCreated(event);
 
-        log.info("📢 OrderCreatedEvent отправлен в сагу: {}", order.getId());
+        log.info("OrderCreatedEvent отправлен в сагу: {}", order.getId());
         return order;
     }
 }

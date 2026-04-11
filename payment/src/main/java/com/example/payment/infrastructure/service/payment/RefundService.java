@@ -22,7 +22,7 @@ public class RefundService {
 
 
     public BankAccount refundToWallet(UUID bankAccountId, BigDecimal amount) {
-        log.info("🔄 [REFUND] Starting refund to wallet. Account: {}, amount: {}",
+        log.info("Starting refund to wallet. Account: {}, amount: {}",
                 bankAccountId, amount);
 
         BankAccount account = bankAccountQueryService.findById(bankAccountId);
@@ -31,28 +31,27 @@ public class RefundService {
 
         BankAccount updatedAccount = bankAccountRepository.save(account);
 
-        log.info("✅ [REFUND] Refund successful. Account: {}, New balance: {}",
+        log.info("Refund successful. Account: {}, New balance: {}",
                 bankAccountId, newBalance);
         return updatedAccount;
     }
 
     public Refund updateRefundStatus(Refund refund, RefundStatus status) {
-        log.debug("🔄 [REFUND SERVICE] Updating refund status to: {}", status);
+        log.debug("Updating refund status to: {}", status);
 
         refund.setStatus(status);
         Refund updatedRefund = refundRepository.save(refund);
 
-        log.debug("✅ [REFUND SERVICE] Refund status updated for ID: {}", updatedRefund.getId());
+        log.debug("Refund status updated for ID: {}", updatedRefund.getId());
         return updatedRefund;
     }
 
 
     @Transactional(readOnly = true)
     public java.util.List<Refund> findByPaymentId(UUID paymentId) {
-        log.debug("🔍 [REFUND SERVICE] Finding refunds for payment: {}", paymentId);
+        log.debug("Finding refunds for payment: {}", paymentId);
         return refundRepository.findByPayment_Id(paymentId);
     }
-
 
      */
 

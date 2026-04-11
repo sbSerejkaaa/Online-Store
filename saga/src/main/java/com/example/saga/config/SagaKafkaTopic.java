@@ -9,7 +9,6 @@ import java.util.Map;
 
 @Configuration
 public class SagaKafkaTopic {
-// Вопрос: Нужны ли топики Events или в Саге достаточно только COMMANDS топиков?
 
     @Bean
     public NewTopic sagaOrderCommandsTopic() {
@@ -18,7 +17,7 @@ public class SagaKafkaTopic {
 
     @Bean
     public NewTopic sagaProductCommandsTopic() {
-        return buildCommandTopic("saga.products.commands");  // ← исправил product → products
+        return buildCommandTopic("saga.products.commands");
     }
 
     @Bean
@@ -26,7 +25,7 @@ public class SagaKafkaTopic {
         return buildCommandTopic("saga.payments.commands");
     }
 
-    // === DLT TOPICS ===
+
     @Bean
     public NewTopic sagaOrderCommandsDltTopic() {
         return buildDltTopic("saga.orders.commands.DLT");

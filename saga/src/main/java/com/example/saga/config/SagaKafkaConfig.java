@@ -82,7 +82,7 @@ public class SagaKafkaConfig {
                     // АВТОМАТИЧЕСКОЕ СОЗДАНИЕ DLT ИМЕНИ
                     String originalTopic = record.topic();
                     String dltTopic = originalTopic + ".DLT";
-                    log.warn("📨 Отправка в DLT: {} → {}, ошибка: {}",
+                    log.warn("Отправка в DLT: {} → {}, ошибка: {}",
                             originalTopic, dltTopic, exception.getMessage());
 
                     return new TopicPartition(dltTopic, record.partition());

@@ -30,12 +30,12 @@ public class RefundPaymentController {
     public ResponseEntity<RefundPaymentResponse> refundPayment(
             @RequestBody @Valid RefundPaymentRequest request) {
 
-        log.info("🔄 [REFUND CONTROLLER] Processing refund for order: {}", request.getOrderId());
+        log.info("Processing refund for order: {}", request.getOrderId());
 
         RefundPaymentCommand command = transformer.toRefundPaymentCommand(request);
         RefundPaymentResponse response = paymentProcessor.handleCommand(command);
 
-        log.info("✅ [REFUND CONTROLLER] Refund processed for order: {}", request.getOrderId());
+        log.info("Refund processed for order: {}", request.getOrderId());
         return ResponseEntity.ok(response);
     }
 }

@@ -15,11 +15,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Orders {
-    private UUID id;           // → orderId (маппится явно)
-    private String productName; // → productName (автоматически)
-    private Integer quantity;   // → quantity (автоматически)
-    private BigDecimal totalAmount; // → totalAmount (автоматически)
-    private OrderStatus status; // → status (автоматически)
-    private Instant createdAt;  // → createdAt (автоматически)
+    private UUID id;           //  orderId (маппится явно)
+    private String productName; // productName (автоматически)
+    private Integer quantity;   // quantity (автоматически)
+    private BigDecimal totalAmount; // totalAmount (автоматически)
+    private OrderStatus status; // status (автоматически)
+    private Instant createdAt;  // createdAt (автоматически)
 
 }

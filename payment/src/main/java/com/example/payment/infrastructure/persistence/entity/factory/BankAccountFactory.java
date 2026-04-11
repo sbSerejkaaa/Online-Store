@@ -15,7 +15,7 @@ public class BankAccountFactory {
      * СОЗДАТЬ НОВЫЙ БАНКОВСКИЙ СЧЕТ ДЛЯ ПОЛЬЗОВАТЕЛЯ
      */
     public BankAccount createFromCustomerId(UUID customerId) {
-        log.debug("🏭 [BANK ACCOUNT FACTORY] Creating bank account for customer: {}", customerId);
+        log.debug("Создание банковского счета на аккаунте {}", customerId);
 
         return BankAccount.builder()
                 .customerId(customerId)

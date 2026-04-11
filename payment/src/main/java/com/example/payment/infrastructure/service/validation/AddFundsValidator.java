@@ -24,7 +24,7 @@ public class AddFundsValidator {
      * ВАЛИДАЦИЯ КОМАНДЫ ПОПОЛНЕНИЯ СЧЕТА
      */
     public void validate(AddingFundsToYourAccountCommand command) {
-        log.info("🔍 [ВАЛИДАТОР ПОПОЛНЕНИЯ] Начинаем валидацию команды пополнения. Trace ID: {}", command.getTraceId());
+        log.info("Начинаем валидацию команды пополнения. Trace ID: {}", command.getTraceId());
 
         // 1. ВАЛИДАЦИЯ СУММЫ
         validateAmount(command.getAmount());
@@ -35,7 +35,7 @@ public class AddFundsValidator {
         // 3. ВАЛИДАЦИЯ СТАТУСА СЧЕТА
         validateAccountStatus(account);
 
-        log.info("✅ [ВАЛИДАТОР ПОПОЛНЕНИЯ] Валидация команды пополнения ПРОЙДЕНА. Trace ID: {}", command.getTraceId());
+        log.info("Валидация команды пополнения ПРОЙДЕНА. Trace ID: {}", command.getTraceId());
     }
 
     /**
@@ -49,7 +49,7 @@ public class AddFundsValidator {
             throw new InvalidAmountException("Сумма пополнения превышает максимальный лимит. Максимум: " + maxAmount);
         }
 
-        log.debug("✅ [ВАЛИДАТОР ПОПОЛНЕНИЯ] Проверка суммы пройдена: {}", amount);
+        log.debug("Проверка суммы пройдена: {}", amount);
     }
 
     /**

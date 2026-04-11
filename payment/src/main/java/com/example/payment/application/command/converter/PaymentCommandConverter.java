@@ -13,7 +13,7 @@ import java.util.UUID;
  * TRANSFORMER (ПРЕОБРАЗОВАТЕЛЬ)
  *
  * НАЗНАЧЕНИЕ: Преобразование между разными слоями приложения
- * - API DTO (для внешнего мира) → Business Command (для внутренней логики)
+ * - API DTO (для внешнего мира) в Business Command (для внутренней логики)
  * - Изолирует знание о структурах данных между слоями
  *
  * ПРИНЦИП: SINGLE RESPONSIBILITY - только преобразование данных
@@ -22,7 +22,7 @@ import java.util.UUID;
 public class PaymentCommandConverter {
     public AddingFundsToYourAccountCommand toAddAccountCommand(AddFundsOnBankAccountRequest request){
         return AddingFundsToYourAccountCommand.builder()
-                .traceId(UUID.randomUUID()) // - для трассировки внутренней команды внесения денежны средств
+                .traceId(UUID.randomUUID()) // для трассировки внутренней команды внесения денежны средств
                 .timestamp(Instant.now())
                 .bankAccountId(request.getBankAccountId())
                 .amount(request.getAmount())
@@ -31,11 +31,11 @@ public class PaymentCommandConverter {
 
 
     /**
-     * ПРЕОБРАЗОВАНИЕ: RefundPaymentRequest → RefundPaymentCommand
+     * ПРЕОБРАЗОВАНИЕ: RefundPaymentRequest в RefundPaymentCommand
      */
     public RefundPaymentCommand toRefundPaymentCommand(RefundPaymentRequest request) {
         return RefundPaymentCommand.builder()
-                .refundTracedId(UUID.randomUUID())      // - для трассировки внутренней команды возврата денежны средств
+                .refundTracedId(UUID.randomUUID())      // для трассировки внутренней команды возврата денежны средств
                 .orderId(request.getOrderId())     // ID заказа для возврата
                 .timestamp(Instant.now())          // Время создания
                 .build();

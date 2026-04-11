@@ -30,7 +30,7 @@ public class ConsumerPayment {
             @Payload CreatePaymentCommand command,
             @Headers Map<String, Object> headers) {
 
-        log.info("📥 [PAYMENT] Получена команда. Order: {}, Amount: {}",
+        log.info("Получена команда. Order: {}, Amount: {}",
                 command.getOrderId(), command.getAmount());
 
         String correlationId = (String) headers.get("correlationId");
@@ -48,15 +48,11 @@ public class ConsumerPayment {
             // Внутри withdrawForOrder() уже есть outboxService.saveSuccessfulPayment()
             paymentService.withdrawForOrder(command);
 
-            log.info("✅ [PAYMENT] Оплата успешно обработана и сохранена в OUTBOX. Заказ: {}",
+            log.info("Оплата успешно обработана и сохранена в OUTBOX. Заказ: {}",
                     command.getOrderId());
 
-            // 2. НЕ ОТПРАВЛЯЕМ В KAFKA ЗДЕСЬ!
-            // producerEventPayment.publishPaymentCompleted(...); ← УДАЛИТЬ!
-            // Отправкой займется OutboxScheduler
-
         } catch (Exception e) {
-            log.error("❌ Ошибка оплаты. Заказ: {}, Ошибка: {}",
+            log.error("Ошибка оплаты. Заказ: {}, Ошибка: {}",
                     command.getOrderId(), e.getMessage(), e);
 
             // 3. Сохраняем ошибку в OUTBOX

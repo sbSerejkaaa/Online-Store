@@ -23,7 +23,7 @@ public class PaymentFailedConsumer {
     public void handlePaymentFailed(@Payload PaymentFailedEvent event,
                                     @Headers Map<String, Object> headers) {
 
-        log.error("❌ [SAGA] Платёж не удался для заказа: {}, причина: {}",
+        log.error("Платёж не удался для заказа: {}, причина: {}",
                 event.getOrderId(), event.getErrorMessage());
 
         CompensateOrderCommand command = CompensateOrderCommand.builder()
@@ -32,6 +32,6 @@ public class PaymentFailedConsumer {
                 .build();
 
         commandPublisher.sendCancelOrder(command, headers);
-        log.info("🔄 Компенсация запущена для заказа: {}", event.getOrderId());
+        log.info("Компенсация запущена для заказа: {}", event.getOrderId());
     }
 }

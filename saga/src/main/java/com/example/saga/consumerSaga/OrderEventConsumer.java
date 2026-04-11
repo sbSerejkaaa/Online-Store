@@ -22,7 +22,7 @@ public class OrderEventConsumer {
     public void handleOrderCreated(@Payload OrderCreatedEvent event,
                                    @Headers Map<String, Object> headers) {
 
-        log.info("📦 [SAGA] Получен заказ: {}", event.getOrderId());
+        log.info("Получен заказ: {}", event.getOrderId());
 
         ReserveProductCommand command = ReserveProductCommand.builder()
                 .orderId(event.getOrderId())
@@ -32,6 +32,6 @@ public class OrderEventConsumer {
                 .build();
 
         commandPublisher.sendReserveProduct(command, headers);
-        log.info("✅ Команда ReserveProduct отправлена для заказа: {}", event.getOrderId());
+        log.info("Команда ReserveProduct отправлена для заказа: {}", event.getOrderId());
     }
 }

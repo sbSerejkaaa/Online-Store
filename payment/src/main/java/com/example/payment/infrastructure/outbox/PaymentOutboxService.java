@@ -46,10 +46,10 @@ public class PaymentOutboxService {
 
             outboxRepository.save(outbox);
 
-            log.info("📦 [OUTBOX] Saved PAYMENT_COMPLETED for order: {}", command.getOrderId());
+            log.info("Saved PAYMENT_COMPLETED for order: {}", command.getOrderId());
 
         } catch (Exception e) {
-            log.error("❌ [OUTBOX] Failed to save successful payment for order: {}",
+            log.error("Failed to save successful payment for order: {}",
                     command.getOrderId(), e);
             // Не бросаем исключение, чтобы не откатывать основную транзакцию
         }
@@ -81,11 +81,11 @@ public class PaymentOutboxService {
 
             outboxRepository.save(outbox);
 
-            log.info("📦 [OUTBOX] Saved PAYMENT_FAILED for order: {}, error: {}",
+            log.info("Saved PAYMENT_FAILED for order: {}, error: {}",
                     command.getOrderId(), errorMessage);
 
         } catch (Exception e) {
-            log.error("❌ [OUTBOX] Failed to save failed payment for order: {}",
+            log.error("Failed to save failed payment for order: {}",
                     command.getOrderId(), e);
         }
     }

@@ -45,7 +45,7 @@ public class AddMoneyBankAccountHandlerImpl implements PaymentCommandHandler<Add
                     command.getBankAccountId(),
                     command.getAmount()
             );
-            log.debug("✅ [ОБРАБОТЧИК ПОПОЛНЕНИЯ] Операция пополнения завершена");
+            log.debug("Операция пополнения завершена");
 
             // 3. СОЗДАНИЕ ОТВЕТА
             AddFundsBankAccountResponse response = new AddFundsBankAccountResponse(
@@ -53,13 +53,13 @@ public class AddMoneyBankAccountHandlerImpl implements PaymentCommandHandler<Add
                     updatedAccount.getBalance()
             );
 
-            log.info("✅ [ОБРАБОТЧИК ПОПОЛНЕНИЯ] Пополнение счета успешно завершено. " +
+            log.info("Пополнение счета успешно завершено. " +
                     "Счет: {}, Новый баланс: {}", updatedAccount.getId(), updatedAccount.getBalance());
 
             return response;
 
         } catch (Exception e) {
-            log.error("❌ [ОБРАБОТЧИК ПОПОЛНЕНИЯ] Ошибка при пополнении счета. Trace ID: {}, Ошибка: {}",
+            log.error("Ошибка при пополнении счета. Trace ID: {}, Ошибка: {}",
                     command.getTraceId(), e.getMessage(), e);
             throw new PaymentProcessingException("Не удалось пополнить счет", e);
         }
