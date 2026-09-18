@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.productName}">Товар</title>
+    <link rel="stylesheet" th:href="@{/product/css/space-style.css}">
+</head>
+<body>
+<div class="space-bg" style="background-image: url('/images/image-1.jpg');"></div>
+<canvas id="stars"></canvas>
+
+<!-- ★ ИЗМЕНЕНО: добавлена кнопка "Корзина" -->
+<div class="top-right-buttons">
+    <a href="/cart" class="btn-catalog">🛒 Корзина</a>
+    <a href="/profile" class="btn-catalog">👤 Личный кабинет</a>
+    <a href="/" class="btn-home">🛒 Каталог</a>
+</div>
+
+<div class="product-detail-wrapper">
+    <div class="product-detail-card">
+        <div class="product-detail-image">
+            <img th:src="${product.imageUrl}" th:alt="${product.productName}">
+        </div>
+
+        <div class="product-detail-info">
+            <h1 th:text="${product.productName}">Название</h1>
+
+            <div class="detail-divider"></div>
+
+            <div class="detail-price" th:text="${product.price} + ' ₽'">Цена</div>
+
+            <div class="detail-stock">
+                <span th:if="${product.quantity > 0}">✅ В наличии: <span th:text="${product.quantity}">0</span> шт</span>
+                <span th:if="${product.quantity == 0}" class="out-of-stock">❌ Нет в наличии</span>
+            </div>
+
+            <div class="detail-description">
+                <h3>Описание</h3>
+                <p th:text="${product.description}">Описание товара</p>
+            </div>
+
+            <div class="detail-actions">
+                <a th:href="@{/catalog}" class="btn-back">← Вернуться в каталог</a>
+                <!-- ★ ИЗМЕНЕНО: кнопка "Купить" теперь с data-атрибутами и onclick -->
+                <button type="button"
+                        class="btn-buy"
+                        th:disabled="${product.quantity == 0}"
+                        th:attr="data-product-id=${product.productId},
+                                 data-product-name=${product.productName},
+                                 data-product-image=${product.imageUrl},
+                                 data-product-price=${product.price}"
+                        onclick="addToCart(this)">
+                    🛒 Купить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ★ ДОБАВЛЕНО: JS для кнопки "Купить" -->
+<script>
+    function addToCart(button) {
+        const body = {
+            productId: button.dataset.productId,
+            productName: button.dataset.productName,
+            imageUrl: button.dataset.productImage,
+            price: button.dataset.productPrice,
+            quantity: 1
+        };
+
+        fetch('/api/cart/items', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(body)
+        })
+        .then(response => {
+            if (response.status === 401) {
+                alert('Войдите в аккаунт, чтобы добавить в корзину');
+                window.location.href = '/login';
+                return null;
+            }
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error('Ошибка ' + response.status + ': ' + text);
+                });
+            }
+            return response.json();
+        })
+        .then(cart => {
+            if (cart) {
+                const original = button.innerHTML;
+                button.innerHTML = '✅ Добавлено';
+                button.disabled = true;
+                setTimeout(() => {
+                    button.innerHTML = original;
+                    button.disabled = false;
+                }, 1500);
+            }
+        })
+        .catch(err => {
+            console.error('Ошибка добавления в корзину:', err);
+            alert('Не удалось добавить в корзину');
+        });
+    }
+</script>
+
+<script th:src="@{/product/js/space-script.js}"></script>
+</body>
+</html>

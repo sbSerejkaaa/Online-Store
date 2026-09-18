@@ -18,17 +18,24 @@ public class EntityProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    
-    @Column(name = "product_name")
+
+    @Column(name = "product_name", nullable = false)
     private String productName;
 
-    @Column(name = "quantity")
+    @Column(name = "description", length = 2000)
+    private String description;
+
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
+    @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "price", precision = 10, scale = 2)
+    @Column(name = "price", precision = 10, scale = 2, nullable = false)
     private BigDecimal price;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private ProductStatus status;
 
     @Column(name = "created_at")
@@ -47,6 +54,8 @@ public class EntityProduct {
         if (createdAt == null) {
             createdAt = Instant.now();
         }
+        if (status == null) {
+            status = ProductStatus.ACTIVE;
+        }
     }
-
 }

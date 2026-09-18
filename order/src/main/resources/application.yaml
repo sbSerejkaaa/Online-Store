@@ -1,19 +1,19 @@
 server:
-  port: 8081
+  port: 8083
 
 spring:
   application:
     name: order-service
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/orders_db}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/order_db}
     username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:password}
+    password: 12345qwert
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: ${HIBERNATE_DDL_AUTO:create-drop}
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
     show-sql: true
     properties:
       hibernate:
@@ -31,14 +31,23 @@ spring:
       type: single
       ack-mode: manual
 
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+    instance-id: ${spring.application.name}:${server.port}
+    prefer-ip-address: false
+
 management:
   endpoints:
-     web:
+    web:
       exposure:
-         include: health, prometheus, metrics, info
+        include: health, prometheus, metrics, info
   metrics:
     export:
-       prometheus:
+      prometheus:
         enabled: true
     tags:
       application: ${spring.application.name:unknown}

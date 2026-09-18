@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Админ-панель</title>
+    <link rel="stylesheet" th:href="@{/auth/css/space-style.css}">
+</head>
+<body>
+<div class="space-bg" style="background-image: url('/auth/images/image-1.jpg');"></div>
+<canvas id="stars"></canvas>
+
+<div class="content">
+    <div class="welcome-box">
+        <div class="logo">👑</div>
+        <h1>Админ-панель</h1>
+        <p>Только для администраторов</p>
+
+        <div class="info-card" style="margin: 20px 0;">
+            <div class="info-label">Твой ID</div>
+            <div class="info-value" th:text="${userId}">userId</div>
+        </div>
+
+        <div class="info-card" style="margin: 20px 0;">
+            <div class="info-label">Твои права</div>
+            <div class="info-value" th:text="${authorities}">[ROLE_ADMIN]</div>
+        </div>
+
+        <div class="buttons">
+            <a href="/profile" class="btn btn-login">← В личный кабинет</a>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/auth/js/space-script.js}"></script>
+</body>
+</html>

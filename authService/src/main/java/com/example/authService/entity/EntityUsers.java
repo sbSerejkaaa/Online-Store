@@ -1,4 +1,5 @@
 package com.example.authService.entity;
+
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
@@ -28,11 +29,16 @@ public class EntityUsers {
     @Column(name = "registration_date", nullable = false, updatable = false)
     private Instant registrationDate;
 
-    public EntityUsers(String userName, String email, String password){
+    // НОВОЕ ПОЛЕ
+    @Column(name = "role", nullable = false, length = 20)
+    private String role;
+
+    public EntityUsers(String userName, String email, String password) {
         this.userName = userName;
         this.email = email;
         this.password = password;
         this.registrationDate = Instant.now();
+        this.role = "USER";  // по умолчанию USER
     }
 
     @PrePersist
@@ -40,6 +46,8 @@ public class EntityUsers {
         if (registrationDate == null) {
             registrationDate = Instant.now();
         }
+        if (role == null) {
+            role = "USER";
+        }
     }
-
 }

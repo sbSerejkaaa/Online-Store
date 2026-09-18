@@ -58,4 +58,17 @@ public class BankAccountQueryService {
         log.debug("Balance for account {}: {}", bankAccountId, balance);
         return balance;
     }
+
+    /**
+     * ПОЛУЧЕНИЕ БАЛАНСА ПО CUSTOMER ID
+     */
+    public BigDecimal getBalanceByCustomerId(UUID customerId) {
+        log.debug("Getting balance for customer: {}", customerId);
+
+        BankAccount account = findByCustomerId(customerId);
+        BigDecimal balance = account.getBalance();
+
+        log.debug("Balance for customer {}: {}", customerId, balance);
+        return balance;
+    }
 }

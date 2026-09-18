@@ -1,4 +1,7 @@
 package com.example.authService.controller;
+
+import com.example.authService.dto.LoginRequest;
+import com.example.authService.dto.LoginResponse;
 import com.example.authService.dto.UserRegistrationRequest;
 import com.example.authService.dto.UserResponse;
 import com.example.authService.service.UserService;
@@ -19,4 +22,9 @@ public class AuthController {
         return userService.registeredUser(request);
     }
 
+    @PostMapping("/login")
+    public LoginResponse loginUser(@RequestBody LoginRequest request) {
+        String[] tokens = userService.loginUser(request.getEmail(), request.getPassword());
+        return new LoginResponse(tokens[0], tokens[1]);
+    }
 }

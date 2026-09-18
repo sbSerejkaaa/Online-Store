@@ -12,8 +12,9 @@ import java.util.UUID;
 public class Product {
     private UUID productId;
     private String productName;
+    private String description;
+    private String imageUrl;
     private Integer quantity;
     private BigDecimal price;
-
 
 }

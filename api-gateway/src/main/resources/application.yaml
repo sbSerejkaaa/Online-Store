@@ -1,0 +1,82 @@
+server:
+  port: 8080
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            # ===== ПУБЛИЧНЫЕ МАРШРУТЫ AUTH (без JWT) =====
+            - id: auth-public
+              uri: lb://AUTH-SERVICE
+              predicates:
+                - Path=/api/auth/login, /api/auth/register, /api/auth/refresh, /login, /register, /logout
+              filters:
+                - RewriteLocationResponseHeader=AS_IN_REQUEST, Location, localhost:8080
+
+            # ===== СТАТИКА AUTH (публичная) =====
+            - id: auth-static
+              uri: lb://AUTH-SERVICE
+              predicates:
+                - Path=/auth/css/**, /auth/js/**, /auth/images/**
+
+            # ===== ГЛАВНАЯ (публичная) =====
+            - id: auth-home
+              uri: lb://AUTH-SERVICE
+              predicates:
+                - Path=/
+              filters:
+                - RewriteLocationResponseHeader=AS_IN_REQUEST, Location, localhost:8080
+
+            # ===== ЗАЩИЩЁННЫЕ МАРШРУТЫ AUTH (нужен JWT) =====
+            - id: auth-protected
+              uri: lb://AUTH-SERVICE
+              predicates:
+                - Path=/profile, /admin
+              filters:
+                - JwtAuth
+                - RewriteLocationResponseHeader=AS_IN_REQUEST, Location, localhost:8080
+
+            # ===== PRODUCT IMAGES (публичные) =====
+            - id: product-images
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/images/**
+
+            # ===== PRODUCT API (защищённый) =====
+            - id: product-service
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/api/inv/**, /api/products/**
+              filters:
+                - JwtAuth
+
+            # ===== PRODUCT PAGES + СТАТИКА (публичные) =====
+            - id: product-pages
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/product/**, /catalog/**, /cart
+
+            # ===== CART SERVICE (защищённый) =====
+            - id: cart-service
+              uri: lb://CART-SERVICE
+              predicates:
+                - Path=/api/cart/**
+              filters:
+                - JwtAuth
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+    instance-id: ${spring.application.name}:${server.port}
+    prefer-ip-address: false
+
+jwt:
+  secret: ${JWT_SECRET:superSecretKeyForAuthService2025MustBeLongEnoughForHS256}

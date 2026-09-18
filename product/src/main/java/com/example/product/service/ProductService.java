@@ -15,6 +15,7 @@ public interface ProductService {
     void cancelReservation(Product productToCancel, UUID orderId);
 
     List<Product> findAll();
+    Product findById(UUID id);
 
     BigDecimal calculateTotalAmount(String productName, Integer quantity);
 

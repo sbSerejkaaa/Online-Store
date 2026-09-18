@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина</title>
+    <link rel="stylesheet" th:href="@{/product/css/space-style.css}">
+</head>
+<body>
+<div class="space-bg" style="background-image: url('/images/image-1.jpg');"></div>
+<canvas id="stars"></canvas>
+
+<div class="top-right-buttons">
+    <a href="/profile" class="btn-catalog">👤 Личный кабинет</a>
+    <a href="/catalog" class="btn-home">📦 Каталог</a>
+</div>
+
+<div class="catalog-wrapper">
+    <div class="catalog-header">
+        <h1>🛒 Корзина</h1>
+    </div>
+
+    <div id="cart-content">
+        <div class="empty-message">Загрузка...</div>
+    </div>
+
+    <div id="cart-summary" style="margin-top: 30px; display: none;">
+        <div style="font-size: 24px; color: #ffd700; font-weight: bold; text-align: right;">
+            Итого: <span id="cart-total">0</span> ₽
+        </div>
+    </div>
+</div>
+
+<script>
+    function loadCart() {
+        fetch('/api/cart', { credentials: 'include' })
+            .then(r => {
+                if (r.status === 401) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                return r.json();
+            })
+            .then(cart => {
+                if (!cart) return;
+                renderCart(cart);
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('cart-content').innerHTML =
+                    '<div class="empty-message">Ошибка загрузки корзины</div>';
+            });
+    }
+
+    function renderCart(cart) {
+        const container = document.getElementById('cart-content');
+        const summary = document.getElementById('cart-summary');
+
+        if (!cart.items || cart.items.length === 0) {
+            container.innerHTML = '<div class="empty-message">📦 Корзина пуста</div>';
+            summary.style.display = 'none';
+            return;
+        }
+
+        let html = '<div class="products-grid">';
+        let total = 0;
+
+        cart.items.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            total += itemTotal;
+
+            html += `
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="${item.imageUrl || ''}" alt="${item.productName}">
+                    </div>
+                    <div class="product-name">${item.productName}</div>
+                    <div class="product-divider"></div>
+                    <div class="product-price">${item.price} ₽</div>
+                    <div class="quantity" style="display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 0;">
+                        <button onclick="updateQuantity('${item.productId}', ${item.quantity - 1})"
+                                style="width:32px;height:32px;padding:0;margin:0;border-radius:8px;background:rgba(255,255,255,0.2);color:white;border:none;font-size:18px;cursor:pointer;">−</button>
+                        <span style="color:white;font-weight:bold;">${item.quantity} шт</span>
+                        <button onclick="updateQuantity('${item.productId}', ${item.quantity + 1})"
+                                style="width:32px;height:32px;padding:0;margin:0;border-radius:8px;background:rgba(255,255,255,0.2);color:white;border:none;font-size:18px;cursor:pointer;">+</button>
+                    </div>
+                    <button class="btn-detail"
+                            style="background: rgba(255,80,80,0.5); color: white; border: 1px solid rgba(255,100,100,0.5);"
+                            onclick="removeItem('${item.productId}')">
+                        🗑 Удалить
+                    </button>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
+        document.getElementById('cart-total').textContent = total.toFixed(2);
+        summary.style.display = 'block';
+    }
+
+    function updateQuantity(productId, quantity) {
+        if (quantity < 1) {
+            removeItem(productId);
+            return;
+        }
+
+        fetch('/api/cart/items/' + productId, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ quantity: quantity })
+        })
+        .then(r => r.json())
+        .then(cart => renderCart(cart))
+        .catch(err => console.error(err));
+    }
+
+    function removeItem(productId) {
+        fetch('/api/cart/items/' + productId, {
+            method: 'DELETE',
+            credentials: 'include'
+        })
+        .then(r => r.json())
+        .then(cart => renderCart(cart))
+        .catch(err => console.error(err));
+    }
+
+    loadCart();
+</script>
+
+<script th:src="@{/product/js/space-script.js}"></script>
+</body>
+</html>

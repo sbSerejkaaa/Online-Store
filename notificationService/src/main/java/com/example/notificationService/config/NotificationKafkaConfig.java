@@ -38,11 +38,7 @@ public class NotificationKafkaConfig {
     public NewTopic userRegisteredDltTopic() {
         return TopicBuilder.name("user-registered-topic.DLT")
                 .partitions(3)
-                .replicas(3)
-                .configs(Map.of(
-                        "retention.ms", "1209600000",
-                        "min.insync.replicas", "2"
-                ))
+                .replicas(1)
                 .build();
     }
     @Bean

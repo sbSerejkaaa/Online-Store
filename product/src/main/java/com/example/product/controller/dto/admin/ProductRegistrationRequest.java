@@ -14,6 +14,10 @@ public class ProductRegistrationRequest {
     @NotNull(message = "Название товара не может быть пустым")
     private String nameProduct;
 
+    private String description;
+
+    private String imageUrl;
+
     @NotNull(message = "Количество товара не может равняться null")
     private Integer quantity;
 

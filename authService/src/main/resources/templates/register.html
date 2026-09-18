@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link rel="stylesheet" th:href="@{/auth/css/space-style.css}">
+</head>
+<body>
+<div class="space-bg" style="background-image: url('/auth/images/image-1.jpg');"></div>
+<canvas id="stars"></canvas>
+
+<div class="content">
+    <div class="welcome-box">
+        <div class="logo">🛒</div>
+        <h2>Регистрация</h2>
+        <p class="subtitle">Создайте аккаунт в нашем магазине</p>
+
+        <div class="error" th:if="${error}" th:text="${error}"></div>
+        <div class="success" th:if="${success}" th:text="${success}"></div>
+
+        <form th:action="@{/register}" method="post">
+            <div class="form-group">
+                <label>Имя пользователя</label>
+                <input type="text" name="userName" placeholder="Введите имя" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" placeholder="example@mail.ru" required>
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" name="password" placeholder="Минимум 6 символов" required>
+            </div>
+            <button type="submit">Создать аккаунт</button>
+        </form>
+
+        <a href="/" class="back-link">← На главную</a>
+    </div>
+</div>
+
+<script th:src="@{/auth/js/space-script.js}"></script>
+</body>
+</html>

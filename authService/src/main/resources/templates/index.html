@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Store</title>
+    <link rel="stylesheet" th:href="@{/auth/css/space-style.css}">
+</head>
+<body>
+<div class="space-bg" style="background-image: url('/auth/images/image-1.jpg');"></div>
+<canvas id="stars"></canvas>
+
+<div class="content">
+    <div class="welcome-box">
+        <div class="logo">🛒</div>
+        <h1>Online Store</h1>
+        <p>Добро пожаловать в наш магазин</p>
+        <div class="buttons">
+            <a href="/register" class="btn btn-register">Зарегистрироваться</a>
+            <a href="/login" class="btn btn-login">Войти</a>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/auth/js/space-script.js}"></script>
+</body>
+</html>

@@ -32,16 +32,16 @@ public class ConsumerOrder {
         String correlationId = (String) headers.get("correlationId");
         String commandType = (String) headers.get("commandType");
 
-        log.info("Received {} command. Order: {}, Correlation: {}",
-                commandType, command.getOrderId(), correlationId);
+        log.info("Received {} command. Order: {}, Amount: {}, Correlation: {}",
+                commandType, command.getOrderId(), command.getTotalAmount(), correlationId);
 
         if (!"CONFIRM_ORDER".equals(commandType)) {
             return;
         }
 
         try {
-            // Меняем статус заказа на "Оформлен"
-            orderServiceImpl.confirmOrder(command.getOrderId());
+            // Передаём оба параметра: orderId и totalAmount
+            orderServiceImpl.confirmOrder(command.getOrderId(), command.getTotalAmount());
             log.info("Order confirmed: {}", command.getOrderId());
 
         } catch (Exception e) {

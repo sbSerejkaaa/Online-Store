@@ -5,7 +5,7 @@ import com.example.core.status.OrderStatus;
 import com.example.order.mapper.OrderEntityMapper;
 import com.example.order.entity.OrderEntity;
 import com.example.order.repository.OrderRepository;
-import com.example.order.service.command.CancelOrderCommand;
+
 import com.example.order.service.command.ConfirmOrderCommand;
 import com.example.order.service.command.CreateOrderCommand;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -33,19 +34,17 @@ public class OrderServiceImpl implements OrderService{
 
     @Override
     @Transactional
-    public void confirmOrder(UUID orderId) {
-        OrderEntity order = null;
-        try {
-            order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new Exception("Order not found: " + orderId));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public void confirmOrder(UUID orderId, BigDecimal totalAmount) {
 
-        order.setStatus(OrderStatus.CONFIRMED);
-        orderRepository.save(order);
+            OrderEntity order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
 
-        log.info("Order {} confirmed successfully", orderId);
+            order.setStatus(OrderStatus.CONFIRMED);
+            order.setTotalAmount(totalAmount);  // ← вот оно!
+            orderRepository.save(order);
+
+            log.info("Order {} confirmed successfully with amount {}", orderId, totalAmount);
+
     }
 
     @Override

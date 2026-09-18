@@ -36,4 +36,5 @@ public class AddProductController {
         log.info("Заказ создан: {}", response.getNameInventory());
         return ResponseEntity.accepted().body(response);
     }
+
 }

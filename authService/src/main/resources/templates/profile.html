@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">  <!-- ★ ИЗМЕНЕНО: добавили xmlns:sec -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет</title>
+    <link rel="stylesheet" th:href="@{/auth/css/space-style.css}">
+</head>
+<body>
+<div class="space-bg" style="background-image: url('/auth/images/image-1.jpg');"></div>
+<canvas id="stars"></canvas>
+
+<div class="content">
+    <div class="profile-container">
+        <!-- Шапка -->
+        <div class="profile-header">
+            <div class="avatar">👤</div>
+            <div class="user-info">
+                <h2 th:text="${userName}">Сергей</h2>
+                <span class="badge">⭐ Постоянный клиент</span>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🛒</div>
+                <div class="stat-value">0</div>
+                <div class="stat-label">Заказов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-value">0 ₽</div>
+                <div class="stat-label">Потрачено</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">❤️</div>
+                <div class="stat-value">0</div>
+                <div class="stat-label">Избранное</div>
+            </div>
+        </div>
+
+        <!-- Баланс -->
+        <div class="balance-section">
+            <div>
+                <div class="balance-title">💰 Баланс</div>
+            </div>
+            <div class="balance-value">0 ₽</div>
+            <a href="#" class="btn-deposit">💳 Пополнить</a>
+        </div>
+
+        <!-- Бонусы -->
+        <div class="bonus-section">
+            <div class="bonus-header">
+                <span class="bonus-title">🎁 Бонусные баллы</span>
+                <span class="bonus-value">0 / 1000</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%;"></div>
+            </div>
+            <div class="progress-text">До уровня VIP: 1000 баллов</div>
+        </div>
+
+        <!-- Персональные данные -->
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-icon">📧</div>
+                <div>
+                    <div class="info-label">Email</div>
+                    <div class="info-value" th:text="${email}">test@mail.ru</div>
+                </div>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">📅</div>
+                <div>
+                    <div class="info-label">Дата регистрации</div>
+                    <div class="info-value" th:text="${registrationDate}">2026-09-07</div>
+                </div>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">📱</div>
+                <div>
+                    <div class="info-label">Телефон</div>
+                    <div class="info-value">Не указан</div>
+                </div>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">📍</div>
+                <div>
+                    <div class="info-label">Адрес</div>
+                    <div class="info-value">Не указан</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки -->
+        <div class="actions">
+            <a href="/catalog" class="btn-catalog">🛒 Каталог товаров</a>
+            <a href="/admin" class="btn-home" sec:authorize="hasRole('ADMIN')">👑 Админ-панель</a>  <!-- ★ ИЗМЕНЕНО: добавлена кнопка админа -->
+            <a href="/" class="btn-home">🏠 На главную</a>
+            <a href="/logout" class="btn-logout">🚪 Выйти</a>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/auth/js/space-script.js}"></script>
+</body>
+</html>

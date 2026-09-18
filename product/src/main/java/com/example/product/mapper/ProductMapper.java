@@ -37,6 +37,8 @@ public class ProductMapper {
 
         productModel.setProductId(entityProduct.getId());
         productModel.setProductName(entityProduct.getProductName());
+        productModel.setDescription(entityProduct.getDescription());
+        productModel.setImageUrl(entityProduct.getImageUrl());
         productModel.setQuantity(entityProduct.getQuantity());
         productModel.setPrice(entityProduct.getPrice());
         // Status

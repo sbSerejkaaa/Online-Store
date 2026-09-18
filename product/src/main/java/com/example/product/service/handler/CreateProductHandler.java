@@ -17,6 +17,7 @@ public class CreateProductHandler {
 
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+
     @Transactional
     public Product handle(AddProductOnWarehouseCommand command){
 
@@ -24,6 +25,9 @@ public class CreateProductHandler {
 
         EntityProduct entityProduct = new EntityProduct
                 (command.getNameProduct(), command.getQuantity(), command.getPrice());
+
+        entityProduct.setDescription(command.getDescription());
+        entityProduct.setImageUrl(command.getImageUrl());
 
         log.info("Сохранили в Бд наш товар {}" , entityProduct.getProductName());
         EntityProduct savedEntity = productRepository.save(entityProduct);

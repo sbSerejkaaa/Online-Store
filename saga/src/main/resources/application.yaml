@@ -1,5 +1,5 @@
 server:
-  port: 8084
+  port: 8085
 
 spring:
   application:
@@ -19,6 +19,15 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+    instance-id: ${spring.application.name}:${server.port}
+    prefer-ip-address: false
+
 management:
   endpoints:
     web:
@@ -36,4 +45,3 @@ logging:
     com.example.saga: DEBUG
     org.springframework.kafka: DEBUG
     org.springframework.transaction: DEBUG
-    com.example.saga.consumerSaga: DEBUG

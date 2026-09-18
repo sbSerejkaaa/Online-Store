@@ -10,6 +10,7 @@ import org.apache.kafka.common.errors.TimeoutException;
 import org.apache.kafka.common.errors.TopicAuthorizationException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,11 +22,22 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final KafkaTemplate<String, UserRegisteredEvent> kafkaTemplate;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
     private static final String USER_REGISTERED_TOPIC = "user-registered-topic";
 
-    public UserService(UserRepository userRepository, KafkaTemplate<String, UserRegisteredEvent> kafkaTemplate) {
+    private final RefreshTokenService refreshTokenService;
+
+    public UserService(UserRepository userRepository,
+                       KafkaTemplate<String, UserRegisteredEvent> kafkaTemplate,
+                       PasswordEncoder passwordEncoder,
+                       JwtService jwtService,
+                       RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.kafkaTemplate = kafkaTemplate;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Transactional
@@ -37,7 +49,14 @@ public class UserService {
                     + request.getEmail() + " уже существует.");
         }
 
-        EntityUsers newEntityUsers = new EntityUsers(request.getUserName(), request.getEmail(), request.getPassword());
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+        EntityUsers newEntityUsers = new EntityUsers(
+                request.getUserName(),
+                request.getEmail(),
+                encodedPassword
+        );
+
         EntityUsers savedUser = userRepository.save(newEntityUsers);
 
         sendUserRegisteredEvent(savedUser);
@@ -46,6 +65,30 @@ public class UserService {
         return mapToResponse(savedUser);
     }
 
+    public String[] loginUser(String email, String password) {
+        EntityUsers user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("Неверный пароль");
+        }
+
+        // Передаём роль в оба токена
+        String accessToken = jwtService.generateAccessToken(
+                user.getId().toString(),
+                user.getEmail(),
+                user.getRole()
+        );
+        String refreshToken = jwtService.generateRefreshToken(
+                user.getId().toString(),
+                user.getEmail(),
+                user.getRole()
+        );
+
+        refreshTokenService.save(user.getId().toString(), refreshToken);
+
+        return new String[]{accessToken, refreshToken};
+    }
 
     private void sendUserRegisteredEvent(EntityUsers user) {
         try {

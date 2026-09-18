@@ -26,8 +26,7 @@ public class AuthKafkaConfig {
     public NewTopic userRegisteredTopic(){
         return TopicBuilder.name("user-registered-topic")
                 .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas", "2"))
+                .replicas(1)
                 .build();
     }
 

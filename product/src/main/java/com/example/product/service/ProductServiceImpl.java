@@ -4,6 +4,7 @@ import com.example.core.commandSaga.ReserveProductCommand;
 import com.example.core.exception.ProductInsufficientQuantityException;
 import com.example.core.model.Product;
 import com.example.product.entity.EntityProduct;
+import com.example.product.mapper.ProductMapper;
 import com.example.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ public class ProductServiceImpl implements ProductService{
 
     private final ProductRepository productRepository;
     private final ProductOutboxService outboxService;
+    private final ProductMapper productMapper;
 
     // МЕТОД ДЛЯ КЭШИРОВАНИЯ ТОВАРА
     // Храним в Redis по ключу "products::имя_товара"
@@ -41,6 +43,13 @@ public class ProductServiceImpl implements ProductService{
         log.info("Кэш для товара {} очищен", productName);
     }
 
+    @Override
+    @Transactional
+    public Product findById(UUID id) {
+        EntityProduct entity = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Товар не найден: " + id));
+        return productMapper.toModel(entity);
+    }
 
     @Override
     @Transactional
@@ -82,12 +91,8 @@ public class ProductServiceImpl implements ProductService{
     @Override
     @Transactional
     public List<Product> findAll() {
-         return productRepository.findAll().stream()
-                .map(entity -> new Product(
-                        entity.getId(),
-                        entity.getProductName(),
-                        entity.getQuantity(),
-                        entity.getPrice()))
+        return productRepository.findAll().stream()
+                .map(productMapper::toModel)
                 .collect(Collectors.toList());
     }
 

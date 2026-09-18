@@ -4,6 +4,7 @@ import com.example.core.status.OrderStatus;
 import lombok.Builder;
 import lombok.Value;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Value
@@ -13,4 +14,6 @@ public class ConfirmOrderCommand {
     OrderStatus status;
     UUID commandId;
     Long timestamp;
+    BigDecimal totalAmount;
+
 }
