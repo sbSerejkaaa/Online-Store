@@ -5,6 +5,20 @@ spring:
   application:
     name: saga-service
 
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5437/saga_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:12345qwert}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
   kafka:
     bootstrap-servers: localhost:29092
     consumer:
@@ -14,7 +28,6 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.example.core.*"
-        spring.json.value.default.type: "com.example.core.event.order.OrderCreatedEvent"
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -43,5 +56,5 @@ management:
 logging:
   level:
     com.example.saga: DEBUG
-    org.springframework.kafka: DEBUG
+    org.springframework.kafka: INFO
     org.springframework.transaction: DEBUG

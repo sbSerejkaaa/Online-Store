@@ -9,14 +9,15 @@ import java.util.UUID;
 
 public interface ProductService {
 
-    // Admin
-    void reserveProduct(ReserveProductCommand command, BigDecimal totalAmount);
+    void reserveProduct(ReserveProductCommand command,
+                        BigDecimal unitPrice,
+                        BigDecimal totalAmount);
 
     void cancelReservation(Product productToCancel, UUID orderId);
 
     List<Product> findAll();
+
     Product findById(UUID id);
 
-    BigDecimal calculateTotalAmount(String productName, Integer quantity);
-
+    BigDecimal calculateUnitPrice(String productName);
 }

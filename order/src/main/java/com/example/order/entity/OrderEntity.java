@@ -6,7 +6,10 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+
 @Entity
 @Table(name = "orders")
 @Setter
@@ -23,19 +26,18 @@ public class OrderEntity {
     @Column(name = "user_id")
     private UUID userId;
 
-    @Column(name = "product_name")
-    private String productName;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<OrderItemEntity> items = new ArrayList<>();
 
-    @Column(name = "quantity")
-    private Integer quantity;
-
-    @Column(name = "total_amount")
+    @Column(name = "total_amount", precision = 10, scale = 2)
     private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private OrderStatus status;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @PrePersist
@@ -43,5 +45,11 @@ public class OrderEntity {
         if (createdAt == null) {
             createdAt = Instant.now();
         }
+    }
+
+    // Удобный метод для добавления item (держит двустороннюю связь)
+    public void addItem(OrderItemEntity item) {
+        items.add(item);
+        item.setOrder(this);
     }
 }

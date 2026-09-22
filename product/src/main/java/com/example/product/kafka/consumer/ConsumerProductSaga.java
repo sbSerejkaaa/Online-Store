@@ -22,6 +22,7 @@ import java.util.Map;
 )
 @RequiredArgsConstructor
 public class ConsumerProductSaga {
+
     private final ProductService productService;
     private final ProductOutboxService outboxService;
 
@@ -30,46 +31,32 @@ public class ConsumerProductSaga {
             @Payload ReserveProductCommand command,
             @Headers Map<String, Object> headers) {
 
-        // 1. ИЗВЛЕКАЕМ МЕТАДАННЫЕ
         String correlationId = (String) headers.get("correlationId");
         String commandType = (String) headers.get("commandType");
-        String sagaId = (String) headers.get("sagaId");
 
-        // 2. ПРОВЕРЯЕМ ТИП КОМАНДЫ
         if (!"RESERVE_PRODUCT".equals(commandType)) {
-            log.warn("Тип команды не соответствует методу резервации : {}", commandType);
+            log.warn("Неизвестный тип команды: {}", commandType);
             return;
         }
 
-        // 3. ВЫПОЛНЯЕМ БИЗНЕС-ЛОГИКУ
+        log.info("Резервация: orderId={}, product={}, qty={}, correlationId={}",
+                command.getOrderId(), command.getProductName(),
+                command.getQuantity(), correlationId);
+
         try {
+            BigDecimal unitPrice = productService.calculateUnitPrice(command.getProductName());
+            BigDecimal totalAmount = unitPrice.multiply(BigDecimal.valueOf(command.getQuantity()));
 
-            log.info("Начало резервации товара по заказу: {}", command.getOrderId());
+            productService.reserveProduct(command, unitPrice, totalAmount);
 
-            // 1. РАССЧИТЫВАЕМ СУММУ
-            log.info("Расчет суммы для оплаты");
-            BigDecimal totalAmount = productService.calculateTotalAmount(
-                    command.getProductName(),
-                    command.getQuantity()
-            );
-            log.info("Сумма для оплаты: {}", totalAmount);
-
-            // 2. РЕЗЕРВИРУЕМ ТОВАР
-            productService.reserveProduct(command, totalAmount);
-            log.info("Продукт зарезервирован, соxранен в БД и Outbox");
-
+            log.info("Продукт зарезервирован. Order: {}, totalAmount: {}",
+                    command.getOrderId(), totalAmount);
 
         } catch (Exception e) {
-            log.error("Ошибка обработки команды. Order: {}", command.getOrderId(), e);
+            log.error("Ошибка резервации. Order: {}, причина: {}",
+                    command.getOrderId(), e.getMessage(), e);
 
-            // Сохраняем событие об ошибке в OUTBOX
             outboxService.saveReservationFailed(command, e.getMessage());
-
-            // Бросаем исключение чтобы Kafka сделал ретрай
-            throw e;
         }
-
     }
 }
-
-

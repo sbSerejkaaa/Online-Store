@@ -1,6 +1,5 @@
 package com.example.core.event.product;
 
-import com.example.core.status.ProductStatus;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -14,12 +13,11 @@ import java.util.UUID;
 @Builder
 public class ProductReservedEvent {
     private UUID orderId;
-    private UUID userId;           // ← ДОБАВИТЬ! (для Payment Service)
+    private UUID productId;
     private String productName;
-    private Integer quantity;      // ← зарезервированное количество
-    private BigDecimal unitPrice;  // ← цена за штуку (переименовать!)
-    private BigDecimal totalAmount; // ← ОБЩАЯ сумма (ДОБАВИТЬ!)
-    private Instant createdAt;
+    private Integer quantity;
+    private BigDecimal unitPrice;
+    private BigDecimal totalAmount;
     private UUID accountId;
-
+    private Instant createdAt;
 }

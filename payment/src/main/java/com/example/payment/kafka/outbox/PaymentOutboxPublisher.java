@@ -7,9 +7,7 @@ import com.example.payment.infrastructure.persistence.repository.PaymentOutboxRe
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
@@ -27,115 +25,93 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class PaymentOutboxPublisher {
+
+    private static final String PAYMENT_COMPLETED_TOPIC = "payment.event.topic";
+    private static final String PAYMENT_FAILED_TOPIC = "payment.failed.topic";
+
     private final PaymentOutboxRepository outboxRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    @Scheduled(fixedDelay = 5000)  // Каждые 5 секунд
+    @Scheduled(fixedDelay = 5000)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void publishPendingEvents() {
-        log.debug("Проверка наличия ожидающих событий");
+        Instant cutoff = Instant.now().minus(5, ChronoUnit.SECONDS);
 
-        // Берем события созданные за последний час (чтобы не грузить старые)
-        Instant cutoff = Instant.now().minus(1, ChronoUnit.HOURS);
+        List<PaymentOutbox> pendingEvents = outboxRepository.findByStatusAndCreatedAtBefore(
+                PaymentOutbox.OutboxStatus.PENDING,
+                cutoff,
+                PageRequest.of(0, 100)
+        );
 
-        // Получаем максимум 100 событий за раз
+        if (pendingEvents.isEmpty()) return;
 
-        List<PaymentOutbox> pendingEvents = outboxRepository
-                .findByStatusAndCreatedAtBefore(
-                        PaymentOutbox.OutboxStatus.PENDING,
-                        cutoff,
-                        PageRequest.of(0, 100)
-                );
-
-        if (pendingEvents.isEmpty()) {
-            log.debug("Не найдено ожидающих событий");
-            return;
-        }
-
-        log.info("Публикация {} ожидающих событий", pendingEvents.size());
+        log.info("OutboxPublisher: {} PENDING events", pendingEvents.size());
 
         for (PaymentOutbox outbox : pendingEvents) {
             try {
-                // Публикуем событие в Kafka
                 publishToKafka(outbox);
 
-                // Помечаем как отправленное
                 outbox.setStatus(PaymentOutbox.OutboxStatus.SENT);
                 outbox.setSentAt(Instant.now());
                 outboxRepository.save(outbox);
 
-                log.debug("Опубликовано: {} ({})",
+                log.info("OutboxPublisher: published {} ({})",
                         outbox.getEventId(), outbox.getEventType());
 
             } catch (Exception e) {
-                log.error("Не удалось опубликовать событие {}: {}",
+                log.error("OutboxPublisher: failed {}: {}",
                         outbox.getEventId(), e.getMessage());
-
-                // Помечаем как FAILED (можно будет повторить)
-                outbox.setStatus(PaymentOutbox.OutboxStatus.FAILED);
-                outboxRepository.save(outbox);
+                // Оставляем PENDING
             }
         }
     }
 
     private void publishToKafka(PaymentOutbox outbox) throws Exception {
         switch (outbox.getEventType()) {
-            case "PAYMENT_COMPLETED":
-                publishPaymentCompleted(outbox);
-                break;
-            case "PAYMENT_FAILED":
-                publishPaymentFailed(outbox);
-                break;
-            default:
-                log.warn("Неизвестный тип события: {}", outbox.getEventType());
+            case "PAYMENT_COMPLETED" -> publishPaymentCompleted(outbox);
+            case "PAYMENT_FAILED" -> publishPaymentFailed(outbox);
+            default -> throw new IllegalArgumentException(
+                    "Unknown eventType: " + outbox.getEventType());
         }
     }
 
     private void publishPaymentCompleted(PaymentOutbox outbox) throws Exception {
-        // Десериализуем JSON из payload
         PaymentCompletedEvent event = objectMapper.readValue(
-                outbox.getPayload(),
-                PaymentCompletedEvent.class
-        );
+                outbox.getPayload(), PaymentCompletedEvent.class);
 
         Message<PaymentCompletedEvent> message = MessageBuilder
                 .withPayload(event)
-                .setHeader(KafkaHeaders.TOPIC, "payment.event.topic")
+                .setHeader(KafkaHeaders.TOPIC, PAYMENT_COMPLETED_TOPIC)
                 .setHeader(KafkaHeaders.KEY, outbox.getAggregateId().toString())
-                .setHeader("eventId", outbox.getEventId())
+                .setHeader("eventId", outbox.getEventId().toString())
                 .setHeader("eventType", "PAYMENT_COMPLETED")
-                .setHeader("correlationId", "outbox-" + outbox.getId())  // или из payload
+                .setHeader("correlationId", "outbox-" + outbox.getId())
                 .setHeader("sourceService", "payment-service")
-                .setHeader("outboxId", outbox.getId())
                 .build();
 
-        kafkaTemplate.send(message);
+        kafkaTemplate.send(message).get();
 
-        log.info("Отправил PAYMENT_COMPLETED в Kafka. Заказ: {}",
-                outbox.getAggregateId());
+        log.info("Sent PAYMENT_COMPLETED. Order: {}", outbox.getAggregateId());
     }
 
     private void publishPaymentFailed(PaymentOutbox outbox) throws Exception {
         PaymentFailedEvent event = objectMapper.readValue(
-                outbox.getPayload(),
-                PaymentFailedEvent.class
-        );
+                outbox.getPayload(), PaymentFailedEvent.class);
 
         Message<PaymentFailedEvent> message = MessageBuilder
                 .withPayload(event)
-                .setHeader(KafkaHeaders.TOPIC, "payment.event.failed.topic")
+                .setHeader(KafkaHeaders.TOPIC, PAYMENT_FAILED_TOPIC)
                 .setHeader(KafkaHeaders.KEY, outbox.getAggregateId().toString())
-                .setHeader("eventId", outbox.getEventId())
+                .setHeader("eventId", outbox.getEventId().toString())
                 .setHeader("eventType", "PAYMENT_FAILED")
                 .setHeader("correlationId", "outbox-" + outbox.getId())
                 .setHeader("sourceService", "payment-service")
-                .setHeader("outboxId", outbox.getId())
                 .build();
 
-        kafkaTemplate.send(message);
+        kafkaTemplate.send(message).get();
 
-        log.info("Отправил PAYMENT_FAILED в Kafka. Заказ: {}, Ошибка: {}",
+        log.info("Sent PAYMENT_FAILED. Order: {}, Error: {}",
                 outbox.getAggregateId(), event.getErrorMessage());
     }
 }

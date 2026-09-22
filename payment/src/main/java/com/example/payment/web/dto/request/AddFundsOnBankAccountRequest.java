@@ -8,21 +8,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddFundsOnBankAccountRequest {
-    @NotNull(message = "ID пользователя не может быть null")
-    private UUID bankAccountId;;
 
-    @NotNull(message = "Сумма пополнения не может равняться 0")
-    BigDecimal amount;
-
-
-
-
-
+    @NotNull(message = "Сумма пополнения не может быть пустой")
+    @DecimalMin(value = "1.00", message = "Минимальная сумма пополнения — 1 рубль")
+    private BigDecimal amount;
 }

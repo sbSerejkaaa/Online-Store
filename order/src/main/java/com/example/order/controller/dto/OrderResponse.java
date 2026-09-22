@@ -1,25 +1,21 @@
 package com.example.order.controller.dto;
 
-import com.example.core.status.OrderStatus;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class OrderResponse {
-
     private UUID orderId;
-    private String productName;
-    private Integer quantity;
+    private List<OrderItemResponse> items;
     private BigDecimal totalAmount;
     private String status;
-
+    private Instant createdAt;
 }

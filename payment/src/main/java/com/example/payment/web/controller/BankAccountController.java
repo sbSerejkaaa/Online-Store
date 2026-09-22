@@ -17,13 +17,12 @@ public class BankAccountController {
 
     private final BankAccountQueryService bankAccountQueryService;
 
-    @GetMapping("/{customerId}/balance")
-    public ResponseEntity<BigDecimal> getBalance(@PathVariable UUID customerId) {
-        log.info("Запрос баланса для customer: {}", customerId);
+    @GetMapping("/balance")
+    public ResponseEntity<BigDecimal> getBalance(@RequestHeader("X-User-Id") UUID userId) {
+        log.info("Запрос баланса для userId={}", userId);
 
-        BigDecimal balance = bankAccountQueryService.getBalanceByCustomerId(customerId);
+        BigDecimal balance = bankAccountQueryService.getBalanceByCustomerId(userId);
 
-        log.info("Баланс для customer {}: {}", customerId, balance);
         return ResponseEntity.ok(balance);
     }
 }

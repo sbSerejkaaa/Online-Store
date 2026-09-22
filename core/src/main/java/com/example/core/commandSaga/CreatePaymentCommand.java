@@ -7,13 +7,11 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class CreatePaymentCommand {
     private UUID orderId;
     private UUID accountId;
-    private BigDecimal amount;
-    private String productName;
-    private Integer quantity;
+    private BigDecimal totalAmount;
 }

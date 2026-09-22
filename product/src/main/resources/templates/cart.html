@@ -25,13 +25,36 @@
     </div>
 
     <div id="cart-summary" style="margin-top: 30px; display: none;">
-        <div style="font-size: 24px; color: #ffd700; font-weight: bold; text-align: right;">
+        <div style="font-size: 24px; color: #ffd700; font-weight: bold; text-align: right; margin-bottom: 20px;">
             Итого: <span id="cart-total">0</span> ₽
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 15px;">
+            <button id="checkout-btn"
+                    onclick="checkout()"
+                    style="padding: 18px 40px; background: linear-gradient(135deg, #ffd700 0%, #ff9500 100%); color: #1a0f2e; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; letter-spacing: 1px;">
+                ✅ Оформить заказ
+            </button>
+        </div>
+    </div>
+
+    <!-- Модальное окно статуса заказа -->
+    <div id="status-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: rgba(10, 10, 30, 0.95); border: 2px solid rgba(255,255,255,0.3); border-radius: 25px; padding: 40px; max-width: 500px; text-align: center;">
+            <div id="status-icon" style="font-size: 60px; margin-bottom: 20px;">⏳</div>
+            <div id="status-text" style="color: white; font-size: 20px; margin-bottom: 20px;">Оформляем заказ...</div>
+            <div id="status-detail" style="color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 20px;"></div>
+            <button id="status-close"
+                    onclick="closeStatusModal()"
+                    style="padding: 12px 30px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; font-size: 15px; cursor: pointer; display: none;">
+                Закрыть
+            </button>
         </div>
     </div>
 </div>
 
 <script>
+    let cartItems = [];
+
     function loadCart() {
         fetch('/api/cart', { credentials: 'include' })
             .then(r => {
@@ -43,6 +66,7 @@
             })
             .then(cart => {
                 if (!cart) return;
+                cartItems = cart.items || [];
                 renderCart(cart);
             })
             .catch(err => {
@@ -104,7 +128,6 @@
             removeItem(productId);
             return;
         }
-
         fetch('/api/cart/items/' + productId, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -112,7 +135,7 @@
             body: JSON.stringify({ quantity: quantity })
         })
         .then(r => r.json())
-        .then(cart => renderCart(cart))
+        .then(cart => { cartItems = cart.items || []; renderCart(cart); })
         .catch(err => console.error(err));
     }
 
@@ -122,8 +145,124 @@
             credentials: 'include'
         })
         .then(r => r.json())
-        .then(cart => renderCart(cart))
+        .then(cart => { cartItems = cart.items || []; renderCart(cart); })
         .catch(err => console.error(err));
+    }
+
+    function clearCart() {
+        return fetch('/api/cart', {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+    }
+
+    function showStatusModal(icon, text, detail) {
+        document.getElementById('status-icon').textContent = icon;
+        document.getElementById('status-text').textContent = text;
+        document.getElementById('status-detail').textContent = detail || '';
+        document.getElementById('status-close').style.display = 'none';
+        document.getElementById('status-modal').style.display = 'flex';
+    }
+
+    function closeStatusModal() {
+        document.getElementById('status-modal').style.display = 'none';
+        loadCart();
+    }
+
+    function updateStatusDetail(detail) {
+        document.getElementById('status-detail').textContent = detail;
+    }
+
+    async function checkout() {
+        if (cartItems.length === 0) return;
+
+        // Оформляем заказ через order-service
+        // accountId берём из localStorage? Нет — сделаем через cookie-сессию
+        // Но order-service требует accountId в OrderRequest.
+        // ВАЖНО: сейчас accountId = userId из JWT. Возьмём его из текущего ответа корзины.
+        // Пока костыль — fetch profile, но позже сделаем через X-User-Id на бэке.
+
+        // Простое решение: получаем accountId из /api/cart (userId)
+        const cartResponse = await fetch('/api/cart', { credentials: 'include' });
+        const cart = await cartResponse.json();
+        const accountId = cart.userId; // UUID текущего юзера
+
+        const items = cartItems.map(item => ({
+            productId: item.productId,
+            productName: item.productName,
+            quantity: item.quantity,
+            unitPrice: item.price
+        }));
+
+        showStatusModal('⏳', 'Оформляем заказ...', 'Проверяем наличие и списываем средства');
+
+        try {
+            const response = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ accountId, items })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error('HTTP ' + response.status + ': ' + errorText);
+            }
+
+            const order = await response.json();
+            console.log('Order created:', order);
+
+            // Polling статуса
+            await pollOrderStatus(order.orderId);
+
+        } catch (err) {
+            console.error('Checkout error:', err);
+            showStatusModal('❌', 'Ошибка оформления', err.message);
+            document.getElementById('status-close').style.display = 'inline-block';
+        }
+    }
+
+    async function pollOrderStatus(orderId) {
+        const MAX_ATTEMPTS = 20;    // 20 * 2 сек = 40 сек максимум
+        const INTERVAL_MS = 2000;
+
+        for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            await sleep(INTERVAL_MS);
+
+            try {
+                const r = await fetch('/api/orders/' + orderId, { credentials: 'include' });
+                if (!r.ok) continue;
+
+                const order = await r.json();
+                console.log('Order status:', order.status, order);
+
+                if (order.status === 'CONFIRMED') {
+                    showStatusModal('✅', 'Заказ подтверждён!', 'Итого: ' + order.totalAmount + ' ₽');
+                    await clearCart();
+                    document.getElementById('status-close').style.display = 'inline-block';
+                    return;
+                }
+
+                if (order.status === 'CANCELLED') {
+                    showStatusModal('❌', 'Заказ отменён', 'Товара нет на складе или недостаточно средств');
+                    document.getElementById('status-close').style.display = 'inline-block';
+                    return;
+                }
+
+                updateStatusDetail('Проверка... (' + attempt + '/' + MAX_ATTEMPTS + ')');
+
+            } catch (err) {
+                console.error('Polling error:', err);
+            }
+        }
+
+        // Не дождались финального статуса
+        showStatusModal('⏱', 'Заказ обрабатывается', 'Проверьте позже в личном кабинете');
+        document.getElementById('status-close').style.display = 'inline-block';
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     loadCart();

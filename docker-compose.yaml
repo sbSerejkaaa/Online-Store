@@ -73,6 +73,20 @@ services:
     networks:
       - app-network
 
+  # БД для Saga Service
+  postgres-saga:
+    image: postgres:15-alpine
+    container_name: postgres-saga
+    environment:
+      POSTGRES_DB: saga_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345qwert
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres_saga_data:/var/lib/postgresql/data
+    networks:
+      - app-network
   # Kafka 4.0 в KRaft режиме
   kafka:
     image: apache/kafka:4.0.0
@@ -144,6 +158,7 @@ volumes:
   postgres_product_data:
   postgres_payment_data:
   postgres_notification_data:
+  postgres_saga_data:
   kafka_data:
 
 networks:

@@ -30,41 +30,32 @@ public class ProcessPaymentService {
     private final AccountValidation accountValidation;
     private final PaymentOutboxService outboxService;
 
-    /**
-     * СПИСАНИЕ СРЕДСТВ ЗА ЗАКАЗ ИЗ KAFKA КОМАНДЫ
-     */
     public void withdrawForOrder(CreatePaymentCommand command) {
-        log.info("Starting withdrawal from Kafka command. Order: {}, Customer: {}, Amount: {}",
-                command.getOrderId(), command.getAccountId(), command.getAmount());
+        log.info("Withdrawal for order: {}, account: {}, amount: {}",
+                command.getOrderId(), command.getAccountId(), command.getTotalAmount());
 
-        // 1. Находим счет по customerId
         BankAccount account = bankAccountQueryService.findById(command.getAccountId());
 
-        // 2. Валидация счета и суммы
-        accountValidation.validateForWithdrawal(account, command.getAmount());
+        accountValidation.validateForWithdrawal(account, command.getTotalAmount());
 
-        // 3. Списываем средства
-        BigDecimal newBalance = account.getBalance().subtract(command.getAmount());
+        BigDecimal newBalance = account.getBalance().subtract(command.getTotalAmount());
         account.setBalance(newBalance);
         bankAccountRepository.save(account);
 
-        // 4. Создаем запись о платеже
         Payment payment = paymentFactory.createFromCommand(command, account);
-        payment.setStatus(PaymentStatus.COMPLETED); // Сразу завершаем, т.к. списание прошло
+        payment.setStatus(PaymentStatus.COMPLETED);
         paymentRepository.save(payment);
 
-        // 5. СОХРАНЯЕМ В OUTBOX через отдельный сервис
         outboxService.saveSuccessfulPayment(command, payment);
 
-        log.info("Withdrawal successful. Order: {}, Account: {}, New balance: {}",
-                command.getOrderId(), account.getId(), newBalance);
+        log.info("Withdrawal successful. Order: {}, New balance: {}",
+                command.getOrderId(), newBalance);
     }
 
     public void handlePaymentFailed(CreatePaymentCommand command, String errorMessage) {
         log.error("Payment failed. Order: {}, Error: {}",
                 command.getOrderId(), errorMessage);
 
-        // Сохраняем в outbox
         outboxService.saveFailedPayment(command, errorMessage);
     }
 }

@@ -8,8 +8,6 @@ import com.example.product.mapper.ProductMapper;
 import com.example.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,71 +19,48 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class ProductServiceImpl implements ProductService{
+public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final ProductOutboxService outboxService;
     private final ProductMapper productMapper;
 
-    // МЕТОД ДЛЯ КЭШИРОВАНИЯ ТОВАРА
-    // Храним в Redis по ключу "products::имя_товара"
-    @Cacheable(value = "products", key = "#productName")
-    public EntityProduct getCachedProduct(String productName) {
-        log.info("ЗАПРОС В БД для товара: {}", productName);
-        return productRepository.findByProductName(productName)
-                .orElseThrow(() -> new RuntimeException("Товар не найден: " + productName));
-    }
-
-    // ОЧИСТКА КЭША ПРИ ИЗМЕНЕНИИ ТОВАРА
-    @CacheEvict(value = "products", key = "#productName")
-    public void evictProductCache(String productName) {
-        log.info("Кэш для товара {} очищен", productName);
-    }
-
     @Override
     @Transactional
-    public Product findById(UUID id) {
-        EntityProduct entity = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Товар не найден: " + id));
-        return productMapper.toModel(entity);
-    }
+    public void reserveProduct(ReserveProductCommand command,
+                               BigDecimal unitPrice,
+                               BigDecimal totalAmount) {
 
-    @Override
-    @Transactional
-    public void reserveProduct(ReserveProductCommand command, BigDecimal totalAmount) {
-        // 1. ЛОГИКА РЕЗЕРВАЦИИ
         EntityProduct productEntity = productRepository.findByProductName(command.getProductName())
-                .orElseThrow(() -> new RuntimeException("Товар не найден"));
+                .orElseThrow(() -> new RuntimeException(
+                        "Товар не найден: " + command.getProductName()));
 
         if (command.getQuantity() > productEntity.getQuantity()) {
-            throw new ProductInsufficientQuantityException(productEntity.getId(), null);
+            throw new ProductInsufficientQuantityException(
+                    productEntity.getId(), command.getOrderId());
         }
 
         productEntity.setQuantity(productEntity.getQuantity() - command.getQuantity());
         productRepository.save(productEntity);
 
-        log.info("Зарезервировано {} шт товара '{}'", command.getQuantity(), command.getProductName());
+        log.info("Зарезервировано {} шт товара '{}'",
+                command.getQuantity(), command.getProductName());
 
-        // 2. СОХРАНЕНИЕ В OUTBOX (В ТОЙ ЖЕ ТРАНЗАКЦИИ)
-        outboxService.saveProductReserved(command, productEntity.getId(), totalAmount);
-
-        // 3. ОЧИЩАЕМ КЭШ, ТАК КАК КОЛИЧЕСТВО ИЗМЕНИЛОСЬ
-        evictProductCache(command.getProductName());
-
-        log.info("Outbox сохранен для order: {}", command.getOrderId());
+        outboxService.saveProductReserved(
+                command,
+                productEntity.getId(),
+                unitPrice,
+                totalAmount
+        );
     }
 
     @Override
     @Transactional
     public void cancelReservation(Product productToCancel, UUID orderId) {
-        EntityProduct productEntity = productRepository.findById(productToCancel.getProductId()).orElseThrow();
+        EntityProduct productEntity = productRepository.findById(productToCancel.getProductId())
+                .orElseThrow();
         productEntity.setQuantity(productEntity.getQuantity() + productToCancel.getQuantity());
         productRepository.save(productEntity);
-
-        // ОЧИЩАЕМ КЭШ, ТАК КАК КОЛИЧЕСТВО ИЗМЕНИЛОСЬ
-        evictProductCache(productEntity.getProductName());
-
     }
 
     @Override
@@ -98,20 +73,17 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     @Transactional
-    public BigDecimal calculateTotalAmount(String productName, Integer quantity) {
-        // 1. Берём товар из Redis (или БД при первом запросе)
-        EntityProduct cachedProduct = getCachedProduct(productName);
+    public Product findById(UUID id) {
+        EntityProduct entity = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Товар не найден: " + id));
+        return productMapper.toModel(entity);
+    }
 
-        // 2. Свежий остаток — отдельный быстрый запрос в БД
-        int actualQuantity = productRepository.getQuantityByName(productName);
-        // ПРОВЕРКА + РАСЧЕТ
-        if (quantity > actualQuantity) {
-            throw new ProductInsufficientQuantityException(cachedProduct.getId(), null);
-        }
-
-        //  РАССЧИТЫВАЕМ СУММУ
-        return cachedProduct.getPrice().multiply(new BigDecimal(quantity));
-
+    @Override
+    @Transactional
+    public BigDecimal calculateUnitPrice(String productName) {
+        EntityProduct product = productRepository.findByProductName(productName)
+                .orElseThrow(() -> new RuntimeException("Товар не найден: " + productName));
+        return product.getPrice();
     }
 }
-

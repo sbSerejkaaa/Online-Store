@@ -1,14 +1,16 @@
 package com.example.order.service.handler;
 
 import com.example.core.event.order.OrderCreatedEvent;
+import com.example.core.event.order.dto.OrderItemDto;
 import com.example.core.model.Orders;
 import com.example.core.status.OrderStatus;
-import com.example.order.kafka.producer.ProducerOrder;
-import com.example.order.mapper.OrderEntityMapper;
 import com.example.order.entity.OrderEntity;
+import com.example.order.entity.OrderItemEntity;
+import com.example.order.mapper.OrderEntityMapper;
 import com.example.order.mapper.OrderEventMapper;
 import com.example.order.repository.OrderRepository;
 import com.example.order.service.command.CreateOrderCommand;
+import com.example.order.service.outbox.OrderOutboxService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,46 +20,47 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class CreateOrderHandler {
+
     private final OrderRepository orderRepository;
     private final OrderEntityMapper entityMapper;
     private final OrderEventMapper orderEventMapper;
-    private final ProducerOrder eventPublisher;
+    private final OrderOutboxService outboxService;
 
     @Transactional
     public Orders handle(CreateOrderCommand command) {
-        log.info("Создание заказа для продукта: {}", command.getProductName());
+        log.info("Создание заказа с {} товарами для accountId={}",
+                command.getItems().size(), command.getAccountId());
 
-        // command УЖЕ содержит:
-        // - productName (валидированный)
-        // - quantity (валидированный)
-        // - commandId (сгенерированный)
-        // - timestamp (добавленный)
-
-        // 1. СОЗДАЕМ OrderEntity БЕЗ СУММЫ
+        // 1. СОЗДАЕМ OrderEntity
         OrderEntity entity = OrderEntity.builder()
-                .productName(command.getProductName())
-                .quantity(command.getQuantity())
                 .status(OrderStatus.IN_PROCESS)
                 .build();
 
+        // 2. ДОБАВЛЯЕМ items
+        for (OrderItemDto itemDto : command.getItems()) {
+            OrderItemEntity itemEntity = OrderItemEntity.builder()
+                    .productId(itemDto.getProductId())
+                    .productName(itemDto.getProductName())
+                    .quantity(itemDto.getQuantity())
+                    .unitPrice(itemDto.getUnitPrice())
+                    .build();
+            entity.addItem(itemEntity);
+        }
 
-
-        // totalAmount = null (сумму рассчитает ProductService)
-
-        // 2. СОХРАНЯЕМ в БД
+        // 3. СОХРАНЯЕМ (каскадом сохранятся items)
         OrderEntity savedEntity = orderRepository.save(entity);
 
-        // 3. Маппим в Доменную модель
+        // 4. МАППИМ в доменную модель
         Orders order = entityMapper.toDomain(savedEntity);
 
-        // 4. Создаем ивент БЕЗ СУММЫ
+        // 5. СОЗДАЕМ event
         OrderCreatedEvent event = orderEventMapper.toEvent(order);
         event.setAccountId(command.getAccountId());
 
-        // 5. Отправляем в Kafka для Саги
-        eventPublisher.publishOrderCreated(event);
+        // 6. ❗ КЛАДЕМ в outbox (в той же транзакции)
+        outboxService.saveOrderCreated(event);
 
-        log.info("OrderCreatedEvent отправлен в сагу: {}", order.getId());
+        log.info("Order создан и событие в outbox: orderId={}", order.getId());
         return order;
     }
 }

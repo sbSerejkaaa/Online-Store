@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">  <!-- ★ ИЗМЕНЕНО: добавили xmlns:sec -->
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,11 +43,15 @@
 
         <!-- Баланс -->
         <div class="balance-section">
-            <div>
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                 <div class="balance-title">💰 Баланс</div>
+                <div class="balance-value" id="balance-value">— ₽</div>
             </div>
-            <div class="balance-value">0 ₽</div>
-            <a href="#" class="btn-deposit">💳 Пополнить</a>
+            <button class="btn-deposit"
+                    onclick="openDepositModal()"
+                    style="cursor:pointer;background:rgba(0,200,150,0.3);color:white;padding:14px 25px;border-radius:12px;font-size:15px;font-weight:bold;border:1px solid rgba(0,200,150,0.3);letter-spacing:1px;white-space:nowrap;">
+                💳 Пополнить
+            </button>
         </div>
 
         <!-- Бонусы -->
@@ -97,12 +101,123 @@
         <!-- Кнопки -->
         <div class="actions">
             <a href="/catalog" class="btn-catalog">🛒 Каталог товаров</a>
-            <a href="/admin" class="btn-home" sec:authorize="hasRole('ADMIN')">👑 Админ-панель</a>  <!-- ★ ИЗМЕНЕНО: добавлена кнопка админа -->
+            <a href="/admin" class="btn-home" sec:authorize="hasRole('ADMIN')">👑 Админ-панель</a>
             <a href="/" class="btn-home">🏠 На главную</a>
             <a href="/logout" class="btn-logout">🚪 Выйти</a>
         </div>
     </div>
 </div>
+
+<!-- Модалка пополнения -->
+<div id="deposit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: rgba(10, 10, 30, 0.95); border: 2px solid rgba(255,255,255,0.3); border-radius: 25px; padding: 40px; max-width: 450px; width: 90%; text-align: center;">
+        <div style="font-size: 50px; margin-bottom: 15px;">💳</div>
+        <h2 style="color: white; margin-bottom: 20px; font-size: 22px;">Пополнение баланса</h2>
+
+        <input type="number"
+               id="deposit-amount"
+               placeholder="Сумма (₽)"
+               min="1"
+               style="width: 100%; padding: 14px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: 18px; text-align: center; margin-bottom: 20px; box-sizing: border-box;">
+
+        <div id="deposit-error" style="display: none; color: #ffcccc; background: rgba(255,0,0,0.2); padding: 10px; border-radius: 10px; margin-bottom: 15px;"></div>
+        <div id="deposit-success" style="display: none; color: #ccffcc; background: rgba(0,200,0,0.2); padding: 10px; border-radius: 10px; margin-bottom: 15px;"></div>
+
+        <div style="display: flex; gap: 10px;">
+            <button onclick="closeDepositModal()"
+                    style="flex: 1; padding: 14px; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; cursor: pointer; font-size: 15px;">
+                Отмена
+            </button>
+            <button onclick="submitDeposit()"
+                    id="deposit-submit"
+                    style="flex: 1; padding: 14px; background: linear-gradient(135deg, #00c896, #00a070); color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: bold;">
+                Пополнить
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadBalance() {
+        try {
+            const response = await fetch('/api/v1/payments/balance', { credentials: 'include' });
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+
+            const balance = await response.json();
+            document.getElementById('balance-value').textContent = Number(balance).toFixed(2) + ' ₽';
+        } catch (err) {
+            console.error('Balance load error:', err);
+            document.getElementById('balance-value').textContent = '— ₽';
+        }
+    }
+
+    function openDepositModal() {
+        document.getElementById('deposit-amount').value = '';
+        document.getElementById('deposit-error').style.display = 'none';
+        document.getElementById('deposit-success').style.display = 'none';
+        document.getElementById('deposit-modal').style.display = 'flex';
+    }
+
+    function closeDepositModal() {
+        document.getElementById('deposit-modal').style.display = 'none';
+    }
+
+    async function submitDeposit() {
+        const amount = parseFloat(document.getElementById('deposit-amount').value);
+        const errorDiv = document.getElementById('deposit-error');
+        const successDiv = document.getElementById('deposit-success');
+        const submitBtn = document.getElementById('deposit-submit');
+
+        errorDiv.style.display = 'none';
+        successDiv.style.display = 'none';
+
+        if (!amount || amount < 1) {
+            errorDiv.textContent = 'Введите сумму больше 1 ₽';
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Обработка...';
+
+        try {
+            const response = await fetch('/api/v1/payments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ amount: amount })
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error('HTTP ' + response.status + ': ' + errText);
+            }
+
+            const result = await response.json();
+            console.log('Deposit result:', result);
+
+            successDiv.textContent = '✅ Баланс пополнен на ' + amount + ' ₽';
+            successDiv.style.display = 'block';
+
+            await loadBalance();
+
+            setTimeout(() => {
+                closeDepositModal();
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Пополнить';
+            }, 1500);
+
+        } catch (err) {
+            console.error('Deposit error:', err);
+            errorDiv.textContent = 'Ошибка: ' + err.message;
+            errorDiv.style.display = 'block';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Пополнить';
+        }
+    }
+
+    loadBalance();
+</script>
 
 <script th:src="@{/auth/js/space-script.js}"></script>
 </body>

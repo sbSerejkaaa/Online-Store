@@ -1,7 +1,8 @@
 package com.example.payment.infrastructure.outbox;
 
-
 import com.example.core.commandSaga.CreatePaymentCommand;
+import com.example.core.event.payment.PaymentCompletedEvent;
+import com.example.core.failedEvent.payment.PaymentFailedEvent;
 import com.example.payment.infrastructure.persistence.entity.Payment;
 import com.example.payment.infrastructure.persistence.outboxEntity.PaymentOutbox;
 import com.example.payment.infrastructure.persistence.repository.PaymentOutboxRepository;
@@ -12,36 +13,33 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Instant;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(propagation = Propagation.MANDATORY)  // Должен вызываться внутри существующей транзакции
 public class PaymentOutboxService {
+
     private final PaymentOutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
 
-    /**
-     * Сохраняет успешный платеж в outbox
-     */
+    @Transactional(propagation = Propagation.MANDATORY)
     public void saveSuccessfulPayment(CreatePaymentCommand command, Payment payment) {
         try {
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("orderId", command.getOrderId().toString());
-            payload.put("amount", command.getAmount());
-            payload.put("accountId", command.getAccountId().toString());
-            payload.put("paymentId", payment.getId().toString());
-            payload.put("completedAt", java.time.Instant.now().toString());
+            PaymentCompletedEvent event = PaymentCompletedEvent.builder()
+                    .orderId(command.getOrderId())
+                    .paymentId(payment.getId())
+                    .accountId(command.getAccountId())
+                    .amount(command.getTotalAmount())
+                    .completedAt(Instant.now())
+                    .build();
 
-
-            String jsonPayload = objectMapper.writeValueAsString(payload);
+            String payload = objectMapper.writeValueAsString(event);
 
             PaymentOutbox outbox = PaymentOutbox.builder()
                     .eventType("PAYMENT_COMPLETED")
                     .aggregateId(command.getOrderId())
-                    .payload(jsonPayload)
+                    .payload(payload)
                     .build();
 
             outboxRepository.save(outbox);
@@ -51,32 +49,26 @@ public class PaymentOutboxService {
         } catch (Exception e) {
             log.error("Failed to save successful payment for order: {}",
                     command.getOrderId(), e);
-            // Не бросаем исключение, чтобы не откатывать основную транзакцию
+            throw new RuntimeException("Failed to save outbox event", e);
         }
     }
 
-    /**
-     * Сохраняет неуспешный платеж в outbox
-     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveFailedPayment(CreatePaymentCommand command, String errorMessage) {
         try {
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("orderId", command.getOrderId().toString());
-            payload.put("amount", command.getAmount());
-            payload.put("errorMessage", errorMessage);
-            payload.put("failedAt", java.time.Instant.now().toString());
+            PaymentFailedEvent event = PaymentFailedEvent.builder()
+                    .orderId(command.getOrderId())
+                    .accountId(command.getAccountId())
+                    .errorMessage(errorMessage)
+                    .failedAt(Instant.now())
+                    .build();
 
-            if (command.getAccountId() != null) {
-                payload.put("accountId", command.getAccountId().toString());
-            }
-
-
-            String jsonPayload = objectMapper.writeValueAsString(payload);
+            String payload = objectMapper.writeValueAsString(event);
 
             PaymentOutbox outbox = PaymentOutbox.builder()
                     .eventType("PAYMENT_FAILED")
                     .aggregateId(command.getOrderId())
-                    .payload(jsonPayload)
+                    .payload(payload)
                     .build();
 
             outboxRepository.save(outbox);
@@ -87,6 +79,7 @@ public class PaymentOutboxService {
         } catch (Exception e) {
             log.error("Failed to save failed payment for order: {}",
                     command.getOrderId(), e);
+            throw new RuntimeException("Failed to save outbox failure event", e);
         }
     }
 }

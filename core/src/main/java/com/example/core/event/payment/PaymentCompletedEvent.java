@@ -6,15 +6,15 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-@Data
-@Builder
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class PaymentCompletedEvent {
-
-    UUID orderId;
-    BigDecimal amount;
-    Instant completedAt;
-    UUID accountId;
-
+    private UUID orderId;
+    private UUID paymentId;
+    private UUID accountId;
+    private BigDecimal amount;
+    private Instant completedAt;
 }

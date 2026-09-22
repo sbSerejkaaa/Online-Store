@@ -1,18 +1,18 @@
 package com.example.core.failedEvent.payment;
 
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-@Value
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class PaymentFailedEvent {
-    UUID orderId;
-    UUID customerId;
-    String productName;
-    Integer quantity;
-    String errorMessage;
+    private UUID orderId;
+    private UUID accountId;
+    private String errorMessage;
+    private Instant failedAt;
 }

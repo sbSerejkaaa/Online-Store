@@ -61,6 +61,22 @@ spring:
               predicates:
                 - Path=/product/**, /catalog/**, /cart
 
+            # ===== ORDER API (защищённый) =====
+            - id: order-service
+              uri: lb://ORDER-SERVICE
+              predicates:
+                - Path=/api/orders/**
+              filters:
+                - JwtAuth
+
+            # ===== PAYMENT API (защищённый) =====
+            - id: payment-service
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/v1/payments/**
+              filters:
+                - JwtAuth
+
             # ===== CART SERVICE (защищённый) =====
             - id: cart-service
               uri: lb://CART-SERVICE

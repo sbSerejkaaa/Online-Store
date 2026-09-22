@@ -1,13 +1,11 @@
 package com.example.core.model;
 
 import com.example.core.status.OrderStatus;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Setter
@@ -15,11 +13,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Orders {
-    private UUID id;           //  orderId (маппится явно)
-    private String productName; // productName (автоматически)
-    private Integer quantity;   // quantity (автоматически)
-    private BigDecimal totalAmount; // totalAmount (автоматически)
-    private OrderStatus status; // status (автоматически)
-    private Instant createdAt;  // createdAt (автоматически)
-
+    private UUID id;
+    private UUID userId;
+    private List<OrderItem> items;
+    private BigDecimal totalAmount;
+    private OrderStatus status;
+    private Instant createdAt;
 }

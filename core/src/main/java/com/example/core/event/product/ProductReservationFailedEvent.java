@@ -1,10 +1,10 @@
 package com.example.core.event.product;
 
-import com.example.core.status.ProductStatus;
 import lombok.*;
 
 import java.time.Instant;
 import java.util.UUID;
+
 @Setter
 @Getter
 @NoArgsConstructor
@@ -12,8 +12,9 @@ import java.util.UUID;
 @Builder
 public class ProductReservationFailedEvent {
     private UUID orderId;
+    private UUID productId;
     private String productName;
     private Integer productQuantity;
-    private ProductStatus status;
+    private String errorMessage;
     private Instant createdAt;
 }

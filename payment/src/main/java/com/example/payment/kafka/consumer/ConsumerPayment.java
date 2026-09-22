@@ -1,6 +1,5 @@
 package com.example.payment.kafka.consumer;
 
-
 import com.example.core.commandSaga.CreatePaymentCommand;
 import com.example.payment.infrastructure.service.payment.ProcessPaymentService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-
 @Slf4j
 @Component
 @KafkaListener(
@@ -22,16 +20,16 @@ import java.util.Map;
 )
 @RequiredArgsConstructor
 public class ConsumerPayment {
-    private final ProcessPaymentService paymentService;
 
+    private final ProcessPaymentService paymentService;
 
     @KafkaHandler
     public void handleProcessPaymentCommand(
             @Payload CreatePaymentCommand command,
             @Headers Map<String, Object> headers) {
 
-        log.info("Получена команда. Order: {}, Amount: {}",
-                command.getOrderId(), command.getAmount());
+        log.info("Получена команда PROCESS_PAYMENT. Order: {}, Amount: {}",
+                command.getOrderId(), command.getTotalAmount());
 
         String correlationId = (String) headers.get("correlationId");
         String commandType = (String) headers.get("commandType");
@@ -44,8 +42,6 @@ public class ConsumerPayment {
         try {
             log.info("Обрабатываем оплату заказа: {}", command.getOrderId());
 
-            // 1. ВЫПОЛНЯЕМ СПИСАНИЕ СРЕДСТВ + СОХРАНЕНИЕ В OUTBOX
-            // Внутри withdrawForOrder() уже есть outboxService.saveSuccessfulPayment()
             paymentService.withdrawForOrder(command);
 
             log.info("Оплата успешно обработана и сохранена в OUTBOX. Заказ: {}",
@@ -55,15 +51,10 @@ public class ConsumerPayment {
             log.error("Ошибка оплаты. Заказ: {}, Ошибка: {}",
                     command.getOrderId(), e.getMessage(), e);
 
-            // 3. Сохраняем ошибку в OUTBOX
-            // ProcessPaymentService.handlePaymentFailed() уже делает это
             paymentService.handlePaymentFailed(command, e.getMessage());
 
-            // 4. ПРОБРАСЫВАЕМ исключение для ретрая Kafka
-            throw e;
+            // НЕ бросаем — иначе Kafka ретраит, а FAILED уже записан в outbox
+            // (для ретраев используем NonRetryableException в будущем)
         }
     }
 }
-
-
-

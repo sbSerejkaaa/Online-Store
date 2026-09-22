@@ -1,6 +1,8 @@
 package com.example.product.service;
 
 import com.example.core.commandSaga.ReserveProductCommand;
+import com.example.core.event.product.ProductReservationFailedEvent;
+import com.example.core.event.product.ProductReservedEvent;
 import com.example.product.entity.ProductOutbox;
 import com.example.product.repository.ProductOutboxRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,50 +14,45 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(propagation = Propagation.MANDATORY)
 public class ProductOutboxService {
+
     private final ProductOutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
 
-    /**
-     * Сохраняет событие успешной резервации товара
-     */
-    public void saveProductReserved(ReserveProductCommand command, UUID productId, BigDecimal totalAmount) {
-
-
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void saveProductReserved(ReserveProductCommand command,
+                                    UUID productId,
+                                    BigDecimal unitPrice,
+                                    BigDecimal totalAmount) {
         try {
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("orderId", command.getOrderId().toString());
-            payload.put("productName", command.getProductName());
-            payload.put("quantity", command.getQuantity());
-            payload.put("productId", productId.toString());
-            payload.put("totalAmount", totalAmount);
-            payload.put("reservedAt", Instant.now().toString());
-            payload.put("accountId", command.getAccountId().toString());
+            ProductReservedEvent event = ProductReservedEvent.builder()
+                    .orderId(command.getOrderId())
+                    .productId(productId)
+                    .productName(command.getProductName())
+                    .quantity(command.getQuantity())
+                    .unitPrice(unitPrice)
+                    .totalAmount(totalAmount)
+                    .accountId(command.getAccountId())
+                    .createdAt(Instant.now())
+                    .build();
 
-            String jsonPayload = objectMapper.writeValueAsString(payload);
-
-            if (jsonPayload == null || jsonPayload.trim().isEmpty() || jsonPayload.equals("null")) {
-                log.error("CRITICAL: payload is null for order {}", command.getOrderId());
-                throw new RuntimeException("Payload is null for order " + command.getOrderId());
-            }
+            String payload = objectMapper.writeValueAsString(event);
 
             ProductOutbox outbox = ProductOutbox.builder()
                     .eventType("PRODUCT_RESERVED")
                     .aggregateId(command.getOrderId())
-                    .payload(jsonPayload)
+                    .payload(payload)
                     .build();
 
             outboxRepository.save(outbox);
 
-            log.info("Saved PRODUCT_RESERVED for order: {}", command.getOrderId());
+            log.info("Saved PRODUCT_RESERVED for order: {}, productId: {}",
+                    command.getOrderId(), productId);
 
         } catch (Exception e) {
             log.error("Failed to save PRODUCT_RESERVED for order: {}",
@@ -64,56 +61,23 @@ public class ProductOutboxService {
         }
     }
 
-
-       /**
-     * Сохраняет событие освобождения резервации
-     */
-       /*
-    public void saveReservationReleased(ReleaseProductReservationCommand command) {
-        try {
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("orderId", command.getOrderId().toString());
-            payload.put("reason", command.getReason());
-            payload.put("releasedAt", Instant.now().toString());
-
-            String jsonPayload = objectMapper.writeValueAsString(payload);
-
-            ProductOutbox outbox = ProductOutbox.builder()
-                    .eventType("PRODUCT_RESERVATION_RELEASED")
-                    .aggregateId(command.getOrderId())
-                    .payload(jsonPayload)
-                    .build();
-
-            outboxRepository.save(outbox);
-
-            log.info("Saved PRODUCT_RESERVATION_RELEASED for order: {}",
-                    command.getOrderId());
-
-        } catch (Exception e) {
-            log.error("Failed to save reservation release for order: {}",
-                    command.getOrderId(), e);
-        }
-    }
-    /*
-
-    /**
-     * Сохраняет событие ошибки резервации
-     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveReservationFailed(ReserveProductCommand command, String errorMessage) {
         try {
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("orderId", command.getOrderId().toString());
-            payload.put("productName", command.getProductName());
-            payload.put("quantity", command.getQuantity());
-            payload.put("errorMessage", errorMessage);
-            payload.put("failedAt", Instant.now().toString());
+            ProductReservationFailedEvent event = ProductReservationFailedEvent.builder()
+                    .orderId(command.getOrderId())
+                    .productName(command.getProductName())
+                    .productQuantity(command.getQuantity())
+                    .errorMessage(errorMessage)
+                    .createdAt(Instant.now())
+                    .build();
 
-            String jsonPayload = objectMapper.writeValueAsString(payload);
+            String payload = objectMapper.writeValueAsString(event);
 
             ProductOutbox outbox = ProductOutbox.builder()
                     .eventType("PRODUCT_RESERVATION_FAILED")
                     .aggregateId(command.getOrderId())
-                    .payload(jsonPayload)
+                    .payload(payload)
                     .build();
 
             outboxRepository.save(outbox);
@@ -127,5 +91,4 @@ public class ProductOutboxService {
             throw new RuntimeException("Failed to save outbox failure event", e);
         }
     }
-
 }

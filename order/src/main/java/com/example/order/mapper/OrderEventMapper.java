@@ -1,15 +1,38 @@
 package com.example.order.mapper;
 
 import com.example.core.event.order.OrderCreatedEvent;
+import com.example.core.event.order.dto.OrderItemDto;
+import com.example.core.model.OrderItem;
 import com.example.core.model.Orders;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-public interface OrderEventMapper {
-    @Mapping(source = "id", target = "orderId")
-    @Mapping(source = "productName", target = "productName")
-    @Mapping(source = "quantity", target = "quantity")
+import java.util.List;
+import java.util.stream.Collectors;
 
-    OrderCreatedEvent toEvent(Orders order);
+@Component
+public class OrderEventMapper {
+
+    public OrderCreatedEvent toEvent(Orders order) {
+        if (order == null) return null;
+
+        List<OrderItemDto> items = order.getItems() == null ? List.of() :
+                order.getItems().stream()
+                        .map(this::toItemDto)
+                        .collect(Collectors.toList());
+
+        return OrderCreatedEvent.builder()
+                .orderId(order.getId())
+                .items(items)
+                // accountId будет установлен в handler
+                .build();
+    }
+
+    private OrderItemDto toItemDto(OrderItem item) {
+        return OrderItemDto.builder()
+                .productId(item.getProductId())
+                .productName(item.getProductName())
+                .quantity(item.getQuantity())
+                .unitPrice(item.getUnitPrice())
+                .build();
+    }
 }

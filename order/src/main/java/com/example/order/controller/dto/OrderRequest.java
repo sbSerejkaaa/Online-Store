@@ -1,12 +1,11 @@
 package com.example.order.controller.dto;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Setter
@@ -14,17 +13,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderRequest {
-    @NotNull(message = "Имя продукта не может быть пустым")
-    private String productName;
 
-    @NotNull(message = "Количество не может быть пустым")
-    @Positive(message = "Количество должно быть положительным числом")
-    private Integer quantity;
-
+    @NotNull(message = "ID аккаунта не может быть пустым")
     private UUID accountId;
 
-
-    // TODO: Добавить когда будет авторизация
-    // private UUID userId;
-
+    @NotEmpty(message = "Заказ не может быть пустым")
+    @Valid
+    private List<OrderItemRequest> items;
 }
