@@ -33,6 +33,7 @@ public class CreateOrderHandler {
 
         // 1. СОЗДАЕМ OrderEntity
         OrderEntity entity = OrderEntity.builder()
+                .userId(command.getUserId())
                 .status(OrderStatus.IN_PROCESS)
                 .build();
 

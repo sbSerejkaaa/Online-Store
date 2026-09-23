@@ -4,13 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${product.productName}">Товар</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" th:href="@{/product/css/space-style.css}">
 </head>
 <body>
 <div class="space-bg" style="background-image: url('/images/image-1.jpg');"></div>
 <canvas id="stars"></canvas>
 
-<!-- ★ ИЗМЕНЕНО: добавлена кнопка "Корзина" -->
+<div id="clock-widget">
+    <div id="clock-time">00:00:00</div>
+    <div id="clock-date">-- --- ----</div>
+</div>
+
+<div id="phrase-widget">
+    <div id="phrase-text">Загрузка...</div>
+</div>
+
+<div id="online-widget">
+    <span class="online-dot"></span>
+    <span id="online-count">42</span> человек онлайн
+</div>
+
+<button id="golden-toggle" onclick="toggleGoldenMode()" aria-label="Золотой режим">
+    <span id="golden-icon">✨</span>
+    <span id="golden-label">Голубое</span>
+</button>
+
+<button id="music-toggle" onclick="toggleMusic()" aria-label="Включить музыку">
+    <span id="music-icon">▶</span>
+    <span id="music-label">Lo-fi</span>
+</button>
+
+<audio id="music-player" loop preload="none">
+    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
+</audio>
+
 <div class="top-right-buttons">
     <a href="/cart" class="btn-catalog">🛒 Корзина</a>
     <a href="/profile" class="btn-catalog">👤 Личный кабинет</a>
@@ -42,7 +74,6 @@
 
             <div class="detail-actions">
                 <a th:href="@{/catalog}" class="btn-back">← Вернуться в каталог</a>
-                <!-- ★ ИЗМЕНЕНО: кнопка "Купить" теперь с data-атрибутами и onclick -->
                 <button type="button"
                         class="btn-buy"
                         th:disabled="${product.quantity == 0}"
@@ -58,7 +89,6 @@
     </div>
 </div>
 
-<!-- ★ ДОБАВЛЕНО: JS для кнопки "Купить" -->
 <script>
     function addToCart(button) {
         const body = {

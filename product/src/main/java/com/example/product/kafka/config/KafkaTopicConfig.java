@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
 
 import java.util.Map;
+
 @Configuration
 public class KafkaTopicConfig {
     private static final int PARTITIONS = 3;
@@ -24,6 +25,11 @@ public class KafkaTopicConfig {
     @Bean
     public NewTopic productRequestDltTopic() {
         return buildDltTopic("product.event.topic.DLT");
+    }
+
+    @Bean
+    public NewTopic productFailedDltTopic() {
+        return buildDltTopic("product.failed.topic.DLT");
     }
 
     private NewTopic buildTopic(String name) {

@@ -14,13 +14,14 @@ import java.util.stream.Collectors;
 @Component
 public class OrderCommandConverter {
 
-    public CreateOrderCommand toCreateOrderCommand(OrderRequest request) {
+    public CreateOrderCommand toCreateOrderCommand(OrderRequest request, UUID userId) {
         List<OrderItemDto> items = request.getItems().stream()
                 .map(this::toItemDto)
                 .collect(Collectors.toList());
 
         return CreateOrderCommand.builder()
                 .accountId(request.getAccountId())
+                .userId(userId)
                 .items(items)
                 .commandId(UUID.randomUUID())
                 .timestamp(Instant.now())

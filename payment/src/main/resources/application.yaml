@@ -28,8 +28,6 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password: redis
-      username: default
   cache:
     type: redis
 
@@ -53,7 +51,3 @@ management:
         enabled: true
     tags:
       application: ${spring.application.name:unknown}
-
-logging:
-  level:
-    org.hibernate.type.descriptor.sql: TRACE

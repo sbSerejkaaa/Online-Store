@@ -112,6 +112,7 @@ public class SagaKafkaConfig {
 
         factory.setConsumerFactory(consumerFactory);
         factory.setCommonErrorHandler(errorHandler);
+        factory.setConcurrency(3);
         return factory;
 
     }

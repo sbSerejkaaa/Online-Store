@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,11 +35,9 @@ public class OrderServiceImpl implements OrderService {
     public void confirmOrder(UUID orderId, BigDecimal totalAmount) {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
-
         order.setStatus(OrderStatus.CONFIRMED);
         order.setTotalAmount(totalAmount);
         orderRepository.save(order);
-
         log.info("Order {} confirmed with amount {}", orderId, totalAmount);
     }
 
@@ -46,10 +46,8 @@ public class OrderServiceImpl implements OrderService {
     public void cancelOrder(UUID orderId) {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
-
         order.setStatus(OrderStatus.CANCELLED);
         orderRepository.save(order);
-
         log.info("Order cancelled: {}", orderId);
     }
 
@@ -59,5 +57,19 @@ public class OrderServiceImpl implements OrderService {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
         return entityMapper.toDomain(order);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Orders> getOrdersByUserId(UUID userId) {
+        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
+                .map(entityMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countByUserId(UUID userId) {
+        return orderRepository.countByUserId(userId);
     }
 }

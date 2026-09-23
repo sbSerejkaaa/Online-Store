@@ -59,7 +59,7 @@ spring:
             - id: product-pages
               uri: lb://PRODUCT-SERVICE
               predicates:
-                - Path=/product/**, /catalog/**, /cart
+                - Path=/product/**, /catalog/**, /cart, /orders
 
             # ===== ORDER API (защищённый) =====
             - id: order-service

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои заказы</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/product/css/space-style.css}">
+
+    <style>
+        .order-card {
+            background: rgba(10, 10, 30, 0.5);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .order-id {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            font-family: monospace;
+        }
+        .order-status {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .status-CONFIRMED { background: rgba(0, 200, 100, 0.3); color: #4effa1; border: 1px solid rgba(0, 200, 100, 0.5); }
+        .status-IN_PROCESS { background: rgba(255, 200, 0, 0.3); color: #ffd700; border: 1px solid rgba(255, 200, 0, 0.5); }
+        .status-CANCELLED { background: rgba(255, 80, 80, 0.3); color: #ff7b7b; border: 1px solid rgba(255, 80, 80, 0.5); }
+        .order-items {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            color: rgba(255, 255, 255, 0.9);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .order-total {
+            text-align: right;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffd700;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .order-date {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="space-bg" style="background-image: url('/images/image-1.jpg');"></div>
+<canvas id="stars"></canvas>
+
+<!-- ★ ЧАСЫ -->
+<div id="clock-widget" style="top: 30px !important; left: 40px !important; transform: scale(0.85) !important; transform-origin: top left !important;">
+    <div id="clock-time">00:00:00</div>
+    <div id="clock-date">-- --- ----</div>
+</div>
+
+<!-- ★ ФРАЗА -->
+<div id="phrase-widget" style="top: 180px !important; left: 40px !important; max-width: 350px !important;">
+    <div id="phrase-text">Мои заказы</div>
+</div>
+
+<!-- ★ СЧЁТЧИК ОНЛАЙН -->
+<div id="online-widget" style="top: 100px !important;">
+    <span class="online-dot"></span>
+    <span id="online-count">42</span> человек онлайн
+</div>
+
+<!-- ★ КНОПКА ЗОЛОТОГО РЕЖИМА -->
+<button id="golden-toggle" onclick="toggleGoldenMode()" aria-label="Золотой режим" style="bottom: 160px !important;">
+    <span id="golden-icon">✨</span>
+    <span id="golden-label">Голубое</span>
+</button>
+
+<!-- ★ ПЛЕЕР -->
+<button id="music-toggle" onclick="toggleMusic()" aria-label="Включить музыку" style="bottom: 100px !important;">
+    <span id="music-icon">▶</span>
+    <span id="music-label">Lo-fi</span>
+</button>
+
+<audio id="music-player" loop preload="none">
+    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
+</audio>
+
+<div class="top-right-buttons">
+    <a href="/profile" class="btn-catalog">👤 Личный кабинет</a>
+    <a href="/catalog" class="btn-home">📦 Каталог</a>
+</div>
+
+<div class="catalog-wrapper">
+    <div class="catalog-header">
+        <h1>📋 Мои заказы</h1>
+    </div>
+
+    <div id="orders-content">
+        <div class="empty-message">Загрузка...</div>
+    </div>
+</div>
+
+<script>
+    async function loadOrders() {
+        try {
+            const response = await fetch('/api/orders', { credentials: 'include' });
+
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+
+            const orders = await response.json();
+            renderOrders(orders);
+
+        } catch (err) {
+            console.error('Orders load error:', err);
+            document.getElementById('orders-content').innerHTML =
+                '<div class="empty-message">Ошибка загрузки заказов</div>';
+        }
+    }
+
+    function renderOrders(orders) {
+        const container = document.getElementById('orders-content');
+
+        if (!orders || orders.length === 0) {
+            container.innerHTML = '<div class="empty-message">📭 У вас пока нет заказов</div>';
+            return;
+        }
+
+        let html = '';
+
+        orders.forEach(order => {
+            const statusText = {
+                'CONFIRMED': '✅ Подтверждён',
+                'IN_PROCESS': '⏳ В обработке',
+                'CANCELLED': '❌ Отменён'
+            }[order.status] || order.status;
+
+            const date = order.createdAt ? new Date(order.createdAt).toLocaleString('ru-RU') : '—';
+
+            html += `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">#${order.orderId.substring(0, 8)}</div>
+                            <div class="order-date">${date}</div>
+                        </div>
+                        <div class="order-status status-${order.status}">${statusText}</div>
+                    </div>
+                    <div class="order-items">
+                        ${order.items.map(item => `
+                            <div class="order-item">
+                                <span>${item.productName}</span>
+                                <span>${item.quantity} шт × ${item.unitPrice} ₽</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="order-total">
+                        Итого: ${order.totalAmount != null ? order.totalAmount : '—'} ₽
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    loadOrders();
+</script>
+
+<script th:src="@{/product/js/space-script.js}"></script>
+</body>
+</html>

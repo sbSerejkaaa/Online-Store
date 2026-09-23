@@ -30,10 +30,10 @@ public class ProductOutboxScheduler {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 500)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void sendPendingEvents() {
-        Instant cutoffTime = Instant.now().minus(5, ChronoUnit.SECONDS);
+        Instant cutoffTime = Instant.now().minus(1, ChronoUnit.SECONDS);
 
         List<ProductOutbox> pendingEvents = outboxRepository.findByStatusAndCreatedAtBefore(
                 ProductOutbox.OutboxStatus.PENDING,

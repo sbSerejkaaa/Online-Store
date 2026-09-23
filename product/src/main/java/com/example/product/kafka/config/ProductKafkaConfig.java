@@ -105,6 +105,7 @@ public class ProductKafkaConfig {
 
         factory.setConsumerFactory(consumerFactory);
         factory.setCommonErrorHandler(errorHandler);
+        factory.setConcurrency(3);
         return factory;
     }
 }

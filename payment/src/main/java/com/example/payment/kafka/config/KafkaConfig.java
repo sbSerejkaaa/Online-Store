@@ -33,24 +33,18 @@ public class KafkaConfig {
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
         Map<String, Object> configProducer = new HashMap<>();
-        //Основа
         configProducer.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProducer.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProducer.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        //Надежность
         configProducer.put(ProducerConfig.ACKS_CONFIG, "all");
         configProducer.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
         configProducer.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 5);
-        //Таймауты
         configProducer.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 60000);
         configProducer.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 5000);
         configProducer.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 500);
-        //Батч-сайзинг
         configProducer.put(ProducerConfig.LINGER_MS_CONFIG, 100);
         configProducer.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
         configProducer.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
-
-
         return new DefaultKafkaProducerFactory<>(configProducer);
     }
 
@@ -68,11 +62,12 @@ public class KafkaConfig {
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
         config.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
 
-        config.put(JsonDeserializer.TRUSTED_PACKAGES, "com.example.core.*");
+        config.put(JsonDeserializer.TRUSTED_PACKAGES, "com.example.core.*,com.example.payment.*");
+        config.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, true);
+
         config.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-service-group");
 
         return new DefaultKafkaConsumerFactory<>(config);
-
     }
 
     @Bean
@@ -80,8 +75,11 @@ public class KafkaConfig {
         return new DeadLetterPublishingRecoverer(
                 kafkaTemplate,
                 (record, exception) -> {
-                    // Явно указываем правильное имя DLT топика
-                    return new TopicPartition("payment-reserved-topic.DLT", record.partition());
+                    String originalTopic = record.topic();
+                    String dltTopic = originalTopic + ".DLT";
+                    log.warn("Отправка в DLT: {} → {}, ошибка: {}",
+                            originalTopic, dltTopic, exception.getMessage());
+                    return new TopicPartition(dltTopic, record.partition());
                 }
         );
     }
@@ -89,8 +87,7 @@ public class KafkaConfig {
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory(
             ConsumerFactory<String, Object> consumerFactory,
-            DeadLetterPublishingRecoverer deadLetterPublishingRecoverer){
-
+            DeadLetterPublishingRecoverer deadLetterPublishingRecoverer) {
 
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(deadLetterPublishingRecoverer,
                 new FixedBackOff(3000, 3));
@@ -101,15 +98,14 @@ public class KafkaConfig {
         errorHandler.setRetryListeners(
                 (record, ex, deliveryAttempt)
                         -> log.info("РЕТРАЙ {} для сообщения: {}, ошибка: {}",
-                deliveryAttempt, record.key(), ex.getMessage()));
-
+                        deliveryAttempt, record.key(), ex.getMessage()));
 
         ConcurrentKafkaListenerContainerFactory<String, Object> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
 
         factory.setConsumerFactory(consumerFactory);
         factory.setCommonErrorHandler(errorHandler);
+        factory.setConcurrency(3);
         return factory;
-
     }
 }

@@ -12,6 +12,18 @@ body {
     background: #000;
 }
 
+/* ============================================================
+   ★★★ ЗОЛОТОЙ РЕЖИМ ★★★
+   ============================================================ */
+body.golden-mode {
+    filter: hue-rotate(30deg) saturate(1.6) brightness(1.1);
+    transition: filter 0.6s ease;
+}
+
+body.golden-mode .space-bg::after {
+    background: rgba(30, 10, 0, 0.4);
+}
+
 /* ===== ФОНОВЫЙ СЛОЙ ===== */
 .space-bg {
     position: fixed;
@@ -116,7 +128,7 @@ p {
     font-size: 14px;
 }
 
-/* ===== КНОПКИ ===== */
+/* ===== КНОПКИ (общие) ===== */
 .buttons {
     display: flex;
     gap: 20px;
@@ -135,6 +147,7 @@ p {
     display: block;
     transition: all 0.3s ease;
     letter-spacing: 1px;
+    width: auto;
 }
 
 .btn-register {
@@ -192,26 +205,6 @@ input:focus {
     background: rgba(255, 255, 255, 0.2);
     outline: none;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-}
-
-button {
-    width: 100%;
-    padding: 16px;
-    background: white;
-    color: #1a0f2e;
-    border: none;
-    border-radius: 12px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-bottom: 20px;
-    letter-spacing: 1px;
-}
-
-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
 }
 
 .back-link {
@@ -423,6 +416,7 @@ button:hover {
     transition: all 0.3s ease;
     letter-spacing: 1px;
     display: inline-block;
+    width: auto;
 }
 
 .btn-home {
@@ -437,6 +431,7 @@ button:hover {
     transition: all 0.3s ease;
     letter-spacing: 1px;
     display: inline-block;
+    width: auto;
 }
 
 .btn-logout {
@@ -451,6 +446,7 @@ button:hover {
     transition: all 0.3s ease;
     letter-spacing: 1px;
     display: inline-block;
+    width: auto;
 }
 
 .btn-catalog:hover,
@@ -575,6 +571,7 @@ button:hover {
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.3);
     transition: all 0.3s ease;
+    width: auto;
 }
 
 .btn-buy {
@@ -588,6 +585,8 @@ button:hover {
     cursor: pointer;
     transition: all 0.3s ease;
     letter-spacing: 1px;
+    width: auto;
+    margin: 0;
 }
 
 .btn-buy:disabled {
@@ -601,6 +600,295 @@ button:hover {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
+/* ============================================================
+   ★★★ ЧАСЫ (Orbitron, золото) ★★★
+   ============================================================ */
+#clock-widget {
+    position: fixed;
+    top: 106px;
+    left: 135px;
+    z-index: 100;
+    padding: 0;
+    background: transparent;
+    border: none;
+    text-align: left;
+    user-select: none;
+    pointer-events: none;
+}
+
+#clock-time {
+    font-family: 'Orbitron', 'Courier New', monospace;
+    font-size: 80px;
+    font-weight: 900;
+    letter-spacing: 8px;
+    line-height: 1;
+    background: linear-gradient(120deg, #fff3b0 0%, #ffd700 20%, #ffb800 40%, #ff9500 60%, #ffd700 80%, #fff3b0 100%);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 10px rgba(255, 200, 0, 0.7))
+            drop-shadow(0 0 25px rgba(255, 150, 0, 0.5))
+            drop-shadow(0 0 50px rgba(255, 100, 0, 0.3));
+    animation: goldenShift 4s linear infinite, clockPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes goldenShift {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+}
+
+@keyframes clockPulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 10px rgba(255, 200, 0, 0.7))
+                drop-shadow(0 0 25px rgba(255, 150, 0, 0.5))
+                drop-shadow(0 0 50px rgba(255, 100, 0, 0.3));
+        opacity: 1;
+    }
+    50% {
+        filter: drop-shadow(0 0 18px rgba(255, 220, 0, 1))
+                drop-shadow(0 0 40px rgba(255, 170, 0, 0.8))
+                drop-shadow(0 0 80px rgba(255, 100, 0, 0.5));
+        opacity: 0.95;
+    }
+}
+
+#clock-date {
+    font-family: 'Orbitron', 'Courier New', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 8px;
+    margin-top: 16px;
+    background: linear-gradient(120deg, #fff3b0 0%, #ffd700 25%, #ffb800 50%, #ffd700 75%, #fff3b0 100%);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-transform: uppercase;
+    filter: drop-shadow(0 0 6px rgba(255, 200, 0, 0.6))
+            drop-shadow(0 0 14px rgba(255, 150, 0, 0.4));
+    animation: goldenShift 5s linear infinite;
+}
+
+/* ============================================================
+   ★★★ ФРАЗА ★★★
+   ============================================================ */
+#phrase-widget {
+    position: fixed;
+    top: 260px;
+    left: 135px;
+    z-index: 100;
+    max-width: 400px;
+    pointer-events: none;
+    user-select: none;
+}
+
+#phrase-text {
+    font-family: 'Orbitron', 'Courier New', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    color: rgba(255, 220, 130, 0.85);
+    text-shadow: 0 0 8px rgba(255, 200, 0, 0.5), 0 0 20px rgba(255, 150, 0, 0.3);
+    opacity: 0;
+    animation: phraseFade 10s ease-in-out infinite;
+}
+
+@keyframes phraseFade {
+    0%, 10%   { opacity: 0; transform: translateY(5px); }
+    15%, 85%  { opacity: 1; transform: translateY(0); }
+    90%, 100% { opacity: 0; transform: translateY(-5px); }
+}
+
+/* ============================================================
+   ★★★ СЧЁТЧИК ОНЛАЙН ★★★
+   ============================================================ */
+#online-widget {
+    position: fixed;
+    top: 100px;
+    right: 40px;
+    z-index: 100;
+    padding: 10px 20px;
+    background: rgba(10, 10, 30, 0.5);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(0, 255, 100, 0.25);
+    border-radius: 30px;
+    color: #ccffcc;
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+    user-select: none;
+    box-shadow: 0 0 15px rgba(0, 255, 100, 0.15);
+}
+
+.online-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #00ff66;
+    box-shadow: 0 0 8px #00ff66, 0 0 16px #00ff66;
+    animation: onlinePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes onlinePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.6; transform: scale(1.2); }
+}
+
+#online-count {
+    color: #00ff88;
+    font-weight: 700;
+    font-size: 15px;
+    text-shadow: 0 0 8px rgba(0, 255, 100, 0.7);
+}
+
+/* ============================================================
+   ★★★ КНОПКА ЗОЛОТОГО РЕЖИМА ★★★
+   ============================================================ */
+#golden-toggle {
+    position: fixed;
+    bottom: 100px;
+    right: 40px;
+    z-index: 100;
+    width: auto !important;
+    min-width: 120px;
+    max-width: 200px;
+    padding: 14px 22px;
+    background: rgba(10, 10, 30, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 200, 0, 0.35);
+    border-radius: 14px;
+    color: #ffd700;
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(255, 200, 0, 0.2);
+}
+
+#golden-toggle:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 220, 0, 0.7);
+    box-shadow: 0 0 25px rgba(255, 200, 0, 0.4);
+    background: rgba(10, 10, 30, 0.8);
+}
+
+#golden-toggle.active {
+    color: #fff3b0;
+    border-color: rgba(255, 220, 0, 0.9);
+    background: rgba(80, 40, 0, 0.5);
+    animation: goldenGlow 2s ease-in-out infinite;
+}
+
+@keyframes goldenGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 200, 0, 0.4); }
+    50%      { box-shadow: 0 0 50px rgba(255, 220, 0, 0.9); }
+}
+
+#golden-icon {
+    font-size: 16px;
+    transition: transform 0.4s ease;
+}
+
+#golden-toggle.active #golden-icon {
+    animation: goldenSpin 3s linear infinite;
+}
+
+@keyframes goldenSpin {
+    0%   { transform: rotate(0deg) scale(1); }
+    50%  { transform: rotate(180deg) scale(1.3); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+/* ============================================================
+   ★★★ ПЛЕЕР ★★★
+   ============================================================ */
+#music-toggle {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    z-index: 100;
+    width: auto !important;
+    min-width: 120px;
+    max-width: 200px;
+    padding: 14px 22px;
+    background: rgba(10, 10, 30, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 200, 0, 0.35);
+    border-radius: 14px;
+    color: #ffd700;
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(255, 200, 0, 0.2);
+}
+
+#music-toggle:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 220, 0, 0.7);
+    box-shadow: 0 0 25px rgba(255, 200, 0, 0.4);
+    background: rgba(10, 10, 30, 0.8);
+}
+
+#music-toggle.playing {
+    color: #fff3b0;
+    border-color: rgba(255, 220, 0, 0.8);
+    animation: musicPlaying 2s ease-in-out infinite;
+}
+
+@keyframes musicPlaying {
+    0%, 100% { box-shadow: 0 0 15px rgba(255, 200, 0, 0.3); }
+    50%      { box-shadow: 0 0 35px rgba(255, 220, 0, 0.7); }
+}
+
+#music-icon {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+#music-toggle.playing #music-icon {
+    animation: musicBounce 1s ease-in-out infinite;
+}
+
+@keyframes musicBounce {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.3); }
+}
+
+/* ============================================================
+   ★ ФИКС: кнопки toggle не растягиваются на всю ширину ★
+   ============================================================ */
+#golden-toggle,
+#music-toggle {
+    width: auto !important;
+    flex: 0 0 auto;
+}
+
+/* ============================================================
+   ★ МОБИЛЬНАЯ ВЕРСИЯ ★
+   ============================================================ */
 @media (max-width: 768px) {
     .welcome-box {
         width: 100%;
@@ -620,4 +908,12 @@ button:hover {
         gap: 30px;
         padding: 25px;
     }
+    #clock-widget { top: 30px; left: 30px; }
+    #clock-time { font-size: 42px; letter-spacing: 4px; }
+    #clock-date { font-size: 12px; letter-spacing: 4px; }
+    #phrase-widget { top: 150px; left: 30px; max-width: 260px; }
+    #phrase-text { font-size: 11px; letter-spacing: 1.5px; }
+    #online-widget { top: 80px; right: 15px; padding: 8px 14px; font-size: 11px; }
+    #golden-toggle { bottom: 75px; right: 20px; min-width: 100px; padding: 10px 16px; font-size: 11px; }
+    #music-toggle { bottom: 20px; right: 20px; min-width: 100px; padding: 10px 16px; font-size: 11px; }
 }

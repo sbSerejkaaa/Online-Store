@@ -9,17 +9,13 @@ import java.util.Map;
 
 @Configuration
 public class KafkaTopicConfig {
+
     private static final int PARTITIONS = 3;
     private static final int REPLICAS = 1;
 
     @Bean
     public NewTopic orderRequestTopic() {
         return buildTopic("order.event.topic");
-    }
-
-    @Bean
-    public NewTopic orderFailedTopic() {
-        return buildTopic("order.failed.topic");
     }
 
     @Bean
@@ -45,5 +41,4 @@ public class KafkaTopicConfig {
                 ))
                 .build();
     }
-
 }

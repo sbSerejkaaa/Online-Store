@@ -34,7 +34,7 @@ public class ProcessPaymentService {
         log.info("Withdrawal for order: {}, account: {}, amount: {}",
                 command.getOrderId(), command.getAccountId(), command.getTotalAmount());
 
-        BankAccount account = bankAccountQueryService.findById(command.getAccountId());
+        BankAccount account = bankAccountQueryService.findByCustomerId(command.getAccountId());
 
         accountValidation.validateForWithdrawal(account, command.getTotalAmount());
 

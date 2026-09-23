@@ -15,7 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -31,28 +33,46 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<OrderResponse> createOrder(
+            @RequestHeader("X-User-Id") UUID userId,
             @RequestBody @Valid OrderRequest request) {
 
-        log.info("Создание заказа: {} товаров для accountId={}",
-                request.getItems().size(), request.getAccountId());
+        log.info("Создание заказа: {} товаров, userId={}", request.getItems().size(), userId);
 
-        CreateOrderCommand command = converter.toCreateOrderCommand(request);
+        CreateOrderCommand command = converter.toCreateOrderCommand(request, userId);
         OrderResponse response = orderProcessor.handleCommand(command);
 
         log.info("Заказ принят: {}", response.getOrderId());
         return ResponseEntity.accepted().body(response);
     }
 
-    /**
-     * Получить статус заказа (для polling)
-     */
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable UUID orderId) {
         log.debug("Запрос заказа: {}", orderId);
 
         Orders order = orderService.getOrder(orderId);
-        OrderResponse response = responseMapper.toResponse(order);
+        return ResponseEntity.ok(responseMapper.toResponse(order));
+    }
 
-        return ResponseEntity.ok(response);
+    /**
+     * Список заказов пользователя.
+     */
+    @GetMapping
+    public ResponseEntity<List<OrderResponse>> getMyOrders(
+            @RequestHeader("X-User-Id") UUID userId) {
+        log.debug("Запрос заказов userId={}", userId);
+
+        List<OrderResponse> orders = orderService.getOrdersByUserId(userId).stream()
+                .map(responseMapper::toResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(orders);
+    }
+
+    /**
+     * Количество заказов (для дашборда).
+     */
+    @GetMapping("/count")
+    public ResponseEntity<Long> getOrderCount(@RequestHeader("X-User-Id") UUID userId) {
+        return ResponseEntity.ok(orderService.countByUserId(userId));
     }
 }

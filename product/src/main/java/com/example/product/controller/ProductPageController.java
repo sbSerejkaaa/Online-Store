@@ -34,4 +34,9 @@ public class ProductPageController {
     public String showCartPage() {
         return "cart";
     }
+
+    @GetMapping("/orders")
+    public String showOrdersPage() {
+        return "orders";
+    }
 }

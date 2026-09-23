@@ -4,11 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Корзина</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" th:href="@{/product/css/space-style.css}">
 </head>
 <body>
 <div class="space-bg" style="background-image: url('/images/image-1.jpg');"></div>
 <canvas id="stars"></canvas>
+
+<!-- ★ ЧАСЫ -->
+<div id="clock-widget" style="top: 30px !important; left: 40px !important; transform: scale(0.85) !important; transform-origin: top left !important;">
+    <div id="clock-time">00:00:00</div>
+    <div id="clock-date">-- --- ----</div>
+</div>
+
+<!-- ★ ФРАЗА -->
+<div id="phrase-widget" style="top: 180px !important; left: 40px !important; max-width: 350px !important;">
+    <div id="phrase-text">Ваша корзина</div>
+</div>
+
+<!-- ★ СЧЁТЧИК ОНЛАЙН -->
+<div id="online-widget" style="top: 100px !important;">
+    <span class="online-dot"></span>
+    <span id="online-count">42</span> человек онлайн
+</div>
+
+<!-- ★ КНОПКА ЗОЛОТОГО РЕЖИМА -->
+<button id="golden-toggle" onclick="toggleGoldenMode()" aria-label="Золотой режим" style="bottom: 160px !important;">
+    <span id="golden-icon">✨</span>
+    <span id="golden-label">Голубое</span>
+</button>
+
+<!-- ★ ПЛЕЕР -->
+<button id="music-toggle" onclick="toggleMusic()" aria-label="Включить музыку" style="bottom: 100px !important;">
+    <span id="music-icon">▶</span>
+    <span id="music-label">Lo-fi</span>
+</button>
+
+<audio id="music-player" loop preload="none">
+    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
+</audio>
 
 <div class="top-right-buttons">
     <a href="/profile" class="btn-catalog">👤 Личный кабинет</a>
@@ -31,13 +69,12 @@
         <div style="display: flex; justify-content: flex-end; gap: 15px;">
             <button id="checkout-btn"
                     onclick="checkout()"
-                    style="padding: 18px 40px; background: linear-gradient(135deg, #ffd700 0%, #ff9500 100%); color: #1a0f2e; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; letter-spacing: 1px;">
+                    style="padding: 18px 40px; background: linear-gradient(135deg, #ffd700 0%, #ff9500 100%); color: #1a0f2e; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; letter-spacing: 1px; width: auto; margin: 0;">
                 ✅ Оформить заказ
             </button>
         </div>
     </div>
 
-    <!-- Модальное окно статуса заказа -->
     <div id="status-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
         <div style="background: rgba(10, 10, 30, 0.95); border: 2px solid rgba(255,255,255,0.3); border-radius: 25px; padding: 40px; max-width: 500px; text-align: center;">
             <div id="status-icon" style="font-size: 60px; margin-bottom: 20px;">⏳</div>
@@ -45,7 +82,7 @@
             <div id="status-detail" style="color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 20px;"></div>
             <button id="status-close"
                     onclick="closeStatusModal()"
-                    style="padding: 12px 30px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; font-size: 15px; cursor: pointer; display: none;">
+                    style="padding: 12px 30px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; font-size: 15px; cursor: pointer; display: none; width: auto; margin: 0;">
                 Закрыть
             </button>
         </div>
@@ -109,7 +146,7 @@
                                 style="width:32px;height:32px;padding:0;margin:0;border-radius:8px;background:rgba(255,255,255,0.2);color:white;border:none;font-size:18px;cursor:pointer;">+</button>
                     </div>
                     <button class="btn-detail"
-                            style="background: rgba(255,80,80,0.5); color: white; border: 1px solid rgba(255,100,100,0.5);"
+                            style="background: rgba(255,80,80,0.5); color: white; border: 1px solid rgba(255,100,100,0.5); width: 100%; margin: 0;"
                             onclick="removeItem('${item.productId}')">
                         🗑 Удалить
                     </button>
@@ -176,16 +213,9 @@
     async function checkout() {
         if (cartItems.length === 0) return;
 
-        // Оформляем заказ через order-service
-        // accountId берём из localStorage? Нет — сделаем через cookie-сессию
-        // Но order-service требует accountId в OrderRequest.
-        // ВАЖНО: сейчас accountId = userId из JWT. Возьмём его из текущего ответа корзины.
-        // Пока костыль — fetch profile, но позже сделаем через X-User-Id на бэке.
-
-        // Простое решение: получаем accountId из /api/cart (userId)
         const cartResponse = await fetch('/api/cart', { credentials: 'include' });
         const cart = await cartResponse.json();
-        const accountId = cart.userId; // UUID текущего юзера
+        const accountId = cart.userId;
 
         const items = cartItems.map(item => ({
             productId: item.productId,
@@ -212,7 +242,6 @@
             const order = await response.json();
             console.log('Order created:', order);
 
-            // Polling статуса
             await pollOrderStatus(order.orderId);
 
         } catch (err) {
@@ -223,7 +252,7 @@
     }
 
     async function pollOrderStatus(orderId) {
-        const MAX_ATTEMPTS = 20;    // 20 * 2 сек = 40 сек максимум
+        const MAX_ATTEMPTS = 20;
         const INTERVAL_MS = 2000;
 
         for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
@@ -256,7 +285,6 @@
             }
         }
 
-        // Не дождались финального статуса
         showStatusModal('⏱', 'Заказ обрабатывается', 'Проверьте позже в личном кабинете');
         document.getElementById('status-close').style.display = 'inline-block';
     }

@@ -27,6 +27,11 @@ public class KafkaTopicConfig {
         return buildDltTopic("payment.event.topic.DLT");
     }
 
+    @Bean
+    public NewTopic paymentFailedDltTopic() {
+        return buildDltTopic("payment.failed.topic.DLT");
+    }
+
     private NewTopic buildTopic(String name) {
         return TopicBuilder.name(name)
                 .partitions(PARTITIONS)
@@ -35,8 +40,8 @@ public class KafkaTopicConfig {
                 .build();
     }
 
-    private NewTopic buildDltTopic(String name) {
-        return TopicBuilder.name(name)
+    private NewTopic buildDltTopic(String nameDlt) {
+        return TopicBuilder.name(nameDlt)
                 .partitions(PARTITIONS)
                 .replicas(REPLICAS)
                 .configs(Map.of(
@@ -45,5 +50,4 @@ public class KafkaTopicConfig {
                 ))
                 .build();
     }
-
 }
