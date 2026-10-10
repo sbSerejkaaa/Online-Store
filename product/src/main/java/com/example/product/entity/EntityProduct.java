@@ -3,6 +3,7 @@ package com.example.product.entity;
 import com.example.core.status.ProductStatus;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
@@ -37,6 +38,11 @@ public class EntityProduct {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private ProductStatus status;
+
+    // ★ НОВОЕ: связь с категорией
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private EntityCategory category;
 
     @Column(name = "created_at")
     private Instant createdAt;

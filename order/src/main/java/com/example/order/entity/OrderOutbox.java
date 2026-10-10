@@ -39,6 +39,9 @@ public class OrderOutbox {
     @Column(name = "sent_at")
     private Instant sentAt;
 
+    @Column(name = "correlation_id", length = 64)
+    private String correlationId;
+
     @Column(name = "status", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private OutboxStatus status;

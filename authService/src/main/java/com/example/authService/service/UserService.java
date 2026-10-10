@@ -1,4 +1,5 @@
 package com.example.authService.service;
+
 import com.example.authService.dto.UserRegistrationRequest;
 import com.example.authService.dto.UserResponse;
 import com.example.authService.entity.EntityUsers;
@@ -8,8 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.errors.AuthenticationException;
 import org.apache.kafka.common.errors.TimeoutException;
 import org.apache.kafka.common.errors.TopicAuthorizationException;
+import org.slf4j.MDC;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,7 +78,6 @@ public class UserService {
             throw new RuntimeException("Неверный пароль");
         }
 
-        // Передаём роль в оба токена
         String accessToken = jwtService.generateAccessToken(
                 user.getId().toString(),
                 user.getEmail(),
@@ -96,24 +100,40 @@ public class UserService {
                     user.getUserName(), user.getRegistrationDate()
             );
 
+            // ★ correlationId из MDC или fallback
+            String correlationId = MDC.get("correlationId");
+            if (correlationId == null || correlationId.isBlank()) {
+                correlationId = "auth-" + user.getId();
+            }
+
+            Message<UserRegisteredEvent> message = MessageBuilder
+                    .withPayload(event)
+                    .setHeader(KafkaHeaders.TOPIC, USER_REGISTERED_TOPIC)
+                    .setHeader(KafkaHeaders.KEY, user.getId().toString())
+                    .setHeader("correlationId", correlationId)
+                    .setHeader("eventType", "USER_REGISTERED")
+                    .setHeader("sourceService", "auth-service")
+                    .build();
+
             CompletableFuture<SendResult<String, UserRegisteredEvent>> future =
-                    kafkaTemplate.send(USER_REGISTERED_TOPIC, user.getId().toString(), event);
-                    future.whenComplete((result, ex) -> {
-                        if (ex != null) {
-                            if (ex instanceof TimeoutException) {
-                                log.error("Таймаут соединения с Kafka");
-                            } else if (ex instanceof AuthenticationException) {
-                                log.error("Ошибка аутентификации в Kafka");
-                            } else if (ex instanceof TopicAuthorizationException) {
-                                log.error("Нет прав на запись в топик");
-                            } else {
-                                log.error("Другая ошибка: {}", ex.getMessage());
-                            }
-                        } else {
-                            log.info("Событие отправлено в топик: {}", USER_REGISTERED_TOPIC);
-                            log.info("UserId: {}, Email: {}", user.getId(), user.getEmail());
-                        }
-                    });
+                    kafkaTemplate.send(message);
+
+            future.whenComplete((result, ex) -> {
+                if (ex != null) {
+                    if (ex instanceof TimeoutException) {
+                        log.error("Таймаут соединения с Kafka");
+                    } else if (ex instanceof AuthenticationException) {
+                        log.error("Ошибка аутентификации в Kafka");
+                    } else if (ex instanceof TopicAuthorizationException) {
+                        log.error("Нет прав на запись в топик");
+                    } else {
+                        log.error("Другая ошибка: {}", ex.getMessage());
+                    }
+                } else {
+                    log.info("Событие отправлено в топик: {}", USER_REGISTERED_TOPIC);
+                    log.info("UserId: {}, Email: {}", user.getId(), user.getEmail());
+                }
+            });
 
         } catch (Exception e) {
             log.error("Ошибка при отправке события для пользователя {}: {}",

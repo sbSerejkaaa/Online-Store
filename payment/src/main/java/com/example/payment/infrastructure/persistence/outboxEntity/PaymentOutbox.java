@@ -44,6 +44,9 @@ public class PaymentOutbox {
     @Enumerated(EnumType.STRING)
     private OutboxStatus status;
 
+    @Column(name = "correlation_id", length = 64)
+    private String correlationId;
+
     public enum OutboxStatus {
         PENDING, SENT, FAILED
     }

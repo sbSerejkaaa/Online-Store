@@ -86,7 +86,9 @@ public class PaymentOutboxPublisher {
                 .setHeader(KafkaHeaders.KEY, outbox.getAggregateId().toString())
                 .setHeader("eventId", outbox.getEventId().toString())
                 .setHeader("eventType", "PAYMENT_COMPLETED")
-                .setHeader("correlationId", "outbox-" + outbox.getId())
+                .setHeader("correlationId", outbox.getCorrelationId() != null
+                        ? outbox.getCorrelationId()
+                        : "outbox-" + outbox.getId())
                 .setHeader("sourceService", "payment-service")
                 .build();
 
@@ -105,7 +107,9 @@ public class PaymentOutboxPublisher {
                 .setHeader(KafkaHeaders.KEY, outbox.getAggregateId().toString())
                 .setHeader("eventId", outbox.getEventId().toString())
                 .setHeader("eventType", "PAYMENT_FAILED")
-                .setHeader("correlationId", "outbox-" + outbox.getId())
+                .setHeader("correlationId", outbox.getCorrelationId() != null
+                        ? outbox.getCorrelationId()
+                        : "outbox-" + outbox.getId())
                 .setHeader("sourceService", "payment-service")
                 .build();
 

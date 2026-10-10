@@ -86,7 +86,9 @@ public class OrderOutboxScheduler {
                 .setHeader(KafkaHeaders.KEY, outbox.getAggregateId().toString())
                 .setHeader("eventId", outbox.getEventId().toString())
                 .setHeader("eventType", "ORDER_CREATED")
-                .setHeader("correlationId", "outbox-" + outbox.getId())
+                .setHeader("correlationId", outbox.getCorrelationId() != null
+                        ? outbox.getCorrelationId()
+                        : "outbox-" + outbox.getId())
                 .setHeader("sourceService", "order-service")
                 .build();
 

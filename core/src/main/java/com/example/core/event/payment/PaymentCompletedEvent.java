@@ -14,7 +14,7 @@ import java.util.UUID;
 public class PaymentCompletedEvent {
     private UUID orderId;
     private UUID paymentId;
-    private UUID accountId;
+    private UUID userId;
     private BigDecimal amount;
     private Instant completedAt;
 }

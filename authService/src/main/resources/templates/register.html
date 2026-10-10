@@ -8,40 +8,35 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" th:href="@{/auth/css/space-style.css}">
 </head>
 <body>
-<div class="space-bg" style="background-image: url('/auth/images/image-1.jpg');"></div>
+<div class="space-bg" style="background-image: url('/auth/images/fon.jpg');"></div>
 <canvas id="stars"></canvas>
 
+<!-- ★ ЧАСЫ -->
 <div id="clock-widget">
     <div id="clock-time">00:00:00</div>
     <div id="clock-date">-- --- ----</div>
 </div>
 
-<div id="phrase-widget">
-    <div id="phrase-text">Создайте аккаунт за 30 секунд</div>
+<!-- ★ ПРИВЕТСТВИЕ -->
+<div id="welcome-widget">
+    <div class="welcome-line line-1">Создайте аккаунт</div>
+    <div class="welcome-line line-2">за 30 секунд</div>
+    <div class="welcome-line line-3">и начните покупки</div>
 </div>
 
-<div id="online-widget">
-    <span class="online-dot"></span>
-    <span id="online-count">42</span> человек онлайн
+<!-- ★ ЛОГОТИП -->
+<div id="logo-widget">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-text">
+        <div class="logo-title">ONLINE STORE</div>
+    </div>
+    <div class="logo-icon">⚡</div>
 </div>
-
-<button id="golden-toggle" onclick="toggleGoldenMode()" aria-label="Золотой режим">
-    <span id="golden-icon">✨</span>
-    <span id="golden-label">Голубое</span>
-</button>
-
-<button id="music-toggle" onclick="toggleMusic()" aria-label="Включить музыку">
-    <span id="music-icon">▶</span>
-    <span id="music-label">Lo-fi</span>
-</button>
-
-<audio id="music-player" loop preload="none">
-    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
-</audio>
 
 <div class="content">
     <div class="welcome-box">

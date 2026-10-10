@@ -13,7 +13,6 @@ import java.util.UUID;
 public class CreateOrderCommand {
     UUID commandId;
     Instant timestamp;
-    UUID accountId;
     UUID userId;
     List<OrderItemDto> items;
 }

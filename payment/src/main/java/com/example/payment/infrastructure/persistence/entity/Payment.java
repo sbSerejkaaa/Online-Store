@@ -18,7 +18,7 @@ public class Payment extends BaseEntity {
     // Передается ID из BaseEntity, который является айди оплаты
 
     @NotNull
-    @Column(name = "order_id")
+    @Column(name = "order_id", nullable = false, unique = true)
     private UUID orderId;
     // ID заказа, который оплачивается
     // Связывает платеж с бизнес-процессом заказа

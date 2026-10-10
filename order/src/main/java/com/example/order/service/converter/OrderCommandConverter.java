@@ -20,7 +20,6 @@ public class OrderCommandConverter {
                 .collect(Collectors.toList());
 
         return CreateOrderCommand.builder()
-                .accountId(request.getAccountId())
                 .userId(userId)
                 .items(items)
                 .commandId(UUID.randomUUID())

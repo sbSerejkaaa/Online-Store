@@ -4,6 +4,7 @@ import com.example.core.commandSaga.CreatePaymentCommand;
 import com.example.payment.infrastructure.service.payment.ProcessPaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Headers;
@@ -28,19 +29,20 @@ public class ConsumerPayment {
             @Payload CreatePaymentCommand command,
             @Headers Map<String, Object> headers) {
 
-        log.info("Получена команда PROCESS_PAYMENT. Order: {}, Amount: {}",
-                command.getOrderId(), command.getTotalAmount());
-
         String correlationId = (String) headers.get("correlationId");
-        String commandType = (String) headers.get("commandType");
-
-        if (!"PROCESS_PAYMENT".equals(commandType)) {
-            log.warn("Игнорируем команду не-оплаты. Тип: {}", commandType);
-            return;
-        }
+        if (correlationId == null) correlationId = "unknown-" + command.getOrderId();
+        MDC.put("correlationId", correlationId);
 
         try {
-            log.info("Обрабатываем оплату заказа: {}", command.getOrderId());
+            log.info("Получена команда PROCESS_PAYMENT. Order: {}, UserId: {}, Amount: {}",
+                    command.getOrderId(), command.getUserId(), command.getTotalAmount());
+
+            String commandType = (String) headers.get("commandType");
+
+            if (!"PROCESS_PAYMENT".equals(commandType)) {
+                log.warn("Игнорируем команду не-оплаты. Тип: {}", commandType);
+                return;
+            }
 
             paymentService.withdrawForOrder(command);
 
@@ -53,8 +55,8 @@ public class ConsumerPayment {
 
             paymentService.handlePaymentFailed(command, e.getMessage());
 
-            // НЕ бросаем — иначе Kafka ретраит, а FAILED уже записан в outbox
-            // (для ретраев используем NonRetryableException в будущем)
+        } finally {
+            MDC.remove("correlationId");
         }
     }
 }

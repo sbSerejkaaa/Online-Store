@@ -1,13 +1,13 @@
 package com.example.saga.consumerSaga;
 
 import com.example.core.commandCancelSaga.CompensateOrderCommand;
-import com.example.core.commandCancelSaga.CompensateProductReservationCommand;
 import com.example.core.event.product.ProductReservationFailedEvent;
 import com.example.saga.persistence.entity.SagaState;
 import com.example.saga.service.SagaOutboxService;
 import com.example.saga.service.SagaStateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -30,51 +30,43 @@ public class ProductFailedConsumer {
             @Payload ProductReservationFailedEvent event,
             @Headers Map<String, Object> headers) {
 
-        log.error("Product reservation failed: orderId={}, productName={}, reason={}",
-                event.getOrderId(), event.getProductName(), event.getErrorMessage());
+        String correlationId = (String) headers.get("correlationId");
+        if (correlationId == null) correlationId = "unknown-" + event.getOrderId();
+        MDC.put("correlationId", correlationId);
 
-        // 1. Помечаем сагу как FAILED
-        SagaState state = stateService.incrementFailed(
-                event.getOrderId(),
-                event.getErrorMessage()
-        );
+        try {
+            log.error("Product reservation failed: orderId={}, productName={}, reason={}",
+                    event.getOrderId(), event.getProductName(), event.getErrorMessage());
 
-        // 2. Компенсация: освобождаем уже зарезервированные товары
-        //    (если есть зарезервированные — отправим команду на релиз)
-        //    Для простоты — отправляем компенсацию только если reservedItems > 0
-        if (state.getReservedItems() > 0) {
-            log.warn("Saga COMPENSATING: освобождаем {} зарезервированных товаров для orderId={}",
-                    state.getReservedItems(), event.getOrderId());
+            SagaState state = stateService.incrementFailed(
+                    event.getOrderId(),
+                    event.getErrorMessage()
+            );
 
-            CompensateProductReservationCommand compensateProduct =
-                    CompensateProductReservationCommand.builder()
-                            .orderId(event.getOrderId())
-                            .productName(event.getProductName())
-                            .quantity(event.getProductQuantity())
-                            .reason("PRODUCT_RESERVATION_FAILED")
-                            .build();
+            if (state.getReservedItems() > 0) {
+                log.warn("Saga COMPENSATING: освобождаем {} зарезервированных товаров для orderId={}",
+                        state.getReservedItems(), event.getOrderId());
+            }
 
-            // Пока шлём через CompensateOrderCommand — освобождение товаров сделаем в product-service по событию
-            // Для B1-минимума — просто отменяем заказ
+            CompensateOrderCommand compensateOrder = CompensateOrderCommand.builder()
+                    .orderId(event.getOrderId())
+                    .reason("Product reservation failed: " + event.getErrorMessage())
+                    .build();
+
+            stateService.markCompensating(event.getOrderId(),
+                    "Product reservation failed");
+
+            outboxService.save(
+                    event.getOrderId(),
+                    "saga.orders.commands",
+                    event.getOrderId().toString(),
+                    compensateOrder,
+                    "CANCEL_ORDER"
+            );
+
+            log.warn("Компенсация запущена для orderId={}", event.getOrderId());
+        } finally {
+            MDC.remove("correlationId");
         }
-
-        // 3. Компенсируем заказ (отмена)
-        CompensateOrderCommand compensateOrder = CompensateOrderCommand.builder()
-                .orderId(event.getOrderId())
-                .reason("Product reservation failed: " + event.getErrorMessage())
-                .build();
-
-        stateService.markCompensating(event.getOrderId(),
-                "Product reservation failed");
-
-        outboxService.save(
-                event.getOrderId(),
-                "saga.orders.commands",
-                event.getOrderId().toString(),
-                compensateOrder,
-                "CANCEL_ORDER"
-        );
-
-        log.warn("Компенсация запущена для orderId={}", event.getOrderId());
     }
 }

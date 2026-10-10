@@ -12,7 +12,7 @@ import java.util.UUID;
 @Builder
 public class PaymentFailedEvent {
     private UUID orderId;
-    private UUID accountId;
+    private UUID userId;
     private String errorMessage;
     private Instant failedAt;
 }

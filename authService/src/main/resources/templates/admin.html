@@ -11,7 +11,7 @@
     <link rel="stylesheet" th:href="@{/auth/css/space-style.css}">
 </head>
 <body>
-<div class="space-bg" style="background-image: url('/auth/images/image-1.jpg');"></div>
+<div class="space-bg" style="background-image: url('/auth/images/fon.jpg');"></div>
 <canvas id="stars"></canvas>
 
 <div id="clock-widget">
@@ -23,20 +23,6 @@
     <span class="online-dot"></span>
     <span id="online-count">42</span> человек онлайн
 </div>
-
-<button id="golden-toggle" onclick="toggleGoldenMode()" aria-label="Золотой режим" style="bottom: 160px;">
-    <span id="golden-icon">✨</span>
-    <span id="golden-label">Голубое</span>
-</button>
-
-<button id="music-toggle" onclick="toggleMusic()" aria-label="Включить музыку" style="bottom: 100px;">
-    <span id="music-icon">▶</span>
-    <span id="music-label">Lo-fi</span>
-</button>
-
-<audio id="music-player" loop preload="none">
-    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
-</audio>
 
 <div class="content">
     <div class="welcome-box">

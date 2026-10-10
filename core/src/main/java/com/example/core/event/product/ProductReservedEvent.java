@@ -18,6 +18,5 @@ public class ProductReservedEvent {
     private Integer quantity;
     private BigDecimal unitPrice;
     private BigDecimal totalAmount;
-    private UUID accountId;
     private Instant createdAt;
 }

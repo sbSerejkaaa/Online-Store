@@ -8,6 +8,7 @@ import com.example.saga.service.SagaOutboxService;
 import com.example.saga.service.SagaStateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -29,35 +30,41 @@ public class OrderEventConsumer {
     public void handleOrderCreated(@Payload OrderCreatedEvent event,
                                    @Headers Map<String, Object> headers) {
 
-        log.info("Получен заказ: orderId={}, items={}",
-                event.getOrderId(), event.getItems().size());
+        String correlationId = (String) headers.get("correlationId");
+        if (correlationId == null) correlationId = "unknown-" + event.getOrderId();
+        MDC.put("correlationId", correlationId);
 
-        // 1. Создаём SagaState
-        SagaState state = stateService.startSaga(
-                event.getOrderId(),
-                event.getAccountId(),
-                event.getItems().size()
-        );
+        try {
+            log.info("Получен заказ: orderId={}, userId={}, items={}",
+                    event.getOrderId(), event.getUserId(), event.getItems().size());
 
-        // 2. Для каждого item — отправляем ReserveProductCommand через outbox
-        for (OrderItemDto item : event.getItems()) {
-            ReserveProductCommand command = ReserveProductCommand.builder()
-                    .orderId(event.getOrderId())
-                    .accountId(event.getAccountId())
-                    .productName(item.getProductName())
-                    .quantity(item.getQuantity())
-                    .build();
-
-            outboxService.save(
+            SagaState state = stateService.startSaga(
                     event.getOrderId(),
-                    "saga.products.commands",
-                    event.getOrderId().toString(),
-                    command,
-                    "RESERVE_PRODUCT"
+                    event.getUserId(),
+                    event.getItems().size()
             );
-        }
 
-        log.info("Отправлено {} ReserveProductCommand для orderId={}",
-                event.getItems().size(), event.getOrderId());
+            for (OrderItemDto item : event.getItems()) {
+                ReserveProductCommand command = ReserveProductCommand.builder()
+                        .orderId(event.getOrderId())
+                        .productName(item.getProductName())
+                        .quantity(item.getQuantity())
+                        .build();
+
+                outboxService.save(
+                        event.getOrderId(),
+                        "saga.products.commands",
+                        event.getOrderId().toString(),
+                        command,
+                        "RESERVE_PRODUCT"
+                );
+            }
+
+            log.info("Отправлено {} ReserveProductCommand для orderId={}",
+                    event.getItems().size(), event.getOrderId());
+
+        } finally {
+            MDC.remove("correlationId");
+        }
     }
 }

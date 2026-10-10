@@ -8,51 +8,42 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" th:href="@{/product/css/space-style.css}">
 </head>
 <body>
-<div class="space-bg" style="background-image: url('/images/image-1.jpg');"></div>
+<div class="space-bg" style="background-image: url('/images/fon.jpg');"></div>
 <canvas id="stars"></canvas>
 
 <!-- ★ ЧАСЫ -->
-<div id="clock-widget" style="top: 30px !important; left: 40px !important; transform: scale(0.85) !important; transform-origin: top left !important;">
+<div id="clock-widget">
     <div id="clock-time">00:00:00</div>
     <div id="clock-date">-- --- ----</div>
 </div>
 
-<!-- ★ ФРАЗА -->
-<div id="phrase-widget" style="top: 180px !important; left: 40px !important; max-width: 350px !important;">
-    <div id="phrase-text">Ваша корзина</div>
-</div>
-
 <!-- ★ СЧЁТЧИК ОНЛАЙН -->
-<div id="online-widget" style="top: 100px !important;">
+<div id="online-widget">
     <span class="online-dot"></span>
     <span id="online-count">42</span> человек онлайн
 </div>
 
-<!-- ★ КНОПКА ЗОЛОТОГО РЕЖИМА -->
-<button id="golden-toggle" onclick="toggleGoldenMode()" aria-label="Золотой режим" style="bottom: 160px !important;">
-    <span id="golden-icon">✨</span>
-    <span id="golden-label">Голубое</span>
-</button>
+<!-- ★ ЛОГОТИП -->
+<div id="logo-widget">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-text">
+        <div class="logo-title">ONLINE STORE</div>
+    </div>
+    <div class="logo-icon">⚡</div>
+</div>
 
-<!-- ★ ПЛЕЕР -->
-<button id="music-toggle" onclick="toggleMusic()" aria-label="Включить музыку" style="bottom: 100px !important;">
-    <span id="music-icon">▶</span>
-    <span id="music-label">Lo-fi</span>
-</button>
-
-<audio id="music-player" loop preload="none">
-    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
-</audio>
-
+<!-- ★ ВЕРХНИЕ ПРАВЫЕ КНОПКИ -->
 <div class="top-right-buttons">
     <a href="/profile" class="btn-catalog">👤 Личный кабинет</a>
     <a href="/catalog" class="btn-home">📦 Каталог</a>
 </div>
 
+<!-- ★ КОРЗИНА -->
 <div class="catalog-wrapper">
     <div class="catalog-header">
         <h1>🛒 Корзина</h1>
@@ -62,27 +53,23 @@
         <div class="empty-message">Загрузка...</div>
     </div>
 
-    <div id="cart-summary" style="margin-top: 30px; display: none;">
-        <div style="font-size: 24px; color: #ffd700; font-weight: bold; text-align: right; margin-bottom: 20px;">
+    <div id="cart-summary" style="display: none;">
+        <div class="cart-total-row">
             Итого: <span id="cart-total">0</span> ₽
         </div>
-        <div style="display: flex; justify-content: flex-end; gap: 15px;">
-            <button id="checkout-btn"
-                    onclick="checkout()"
-                    style="padding: 18px 40px; background: linear-gradient(135deg, #ffd700 0%, #ff9500 100%); color: #1a0f2e; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; letter-spacing: 1px; width: auto; margin: 0;">
+        <div class="cart-actions">
+            <button id="checkout-btn" class="btn-checkout" onclick="checkout()">
                 ✅ Оформить заказ
             </button>
         </div>
     </div>
 
-    <div id="status-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: rgba(10, 10, 30, 0.95); border: 2px solid rgba(255,255,255,0.3); border-radius: 25px; padding: 40px; max-width: 500px; text-align: center;">
-            <div id="status-icon" style="font-size: 60px; margin-bottom: 20px;">⏳</div>
-            <div id="status-text" style="color: white; font-size: 20px; margin-bottom: 20px;">Оформляем заказ...</div>
-            <div id="status-detail" style="color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 20px;"></div>
-            <button id="status-close"
-                    onclick="closeStatusModal()"
-                    style="padding: 12px 30px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; font-size: 15px; cursor: pointer; display: none; width: auto; margin: 0;">
+    <div id="status-modal" class="status-modal-overlay">
+        <div class="status-modal-box">
+            <div id="status-icon" class="status-icon">⏳</div>
+            <div id="status-text" class="status-text">Оформляем заказ...</div>
+            <div id="status-detail" class="status-detail"></div>
+            <button id="status-close" class="status-close-btn" onclick="closeStatusModal()">
                 Закрыть
             </button>
         </div>
@@ -138,16 +125,12 @@
                     <div class="product-name">${item.productName}</div>
                     <div class="product-divider"></div>
                     <div class="product-price">${item.price} ₽</div>
-                    <div class="quantity" style="display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 0;">
-                        <button onclick="updateQuantity('${item.productId}', ${item.quantity - 1})"
-                                style="width:32px;height:32px;padding:0;margin:0;border-radius:8px;background:rgba(255,255,255,0.2);color:white;border:none;font-size:18px;cursor:pointer;">−</button>
-                        <span style="color:white;font-weight:bold;">${item.quantity} шт</span>
-                        <button onclick="updateQuantity('${item.productId}', ${item.quantity + 1})"
-                                style="width:32px;height:32px;padding:0;margin:0;border-radius:8px;background:rgba(255,255,255,0.2);color:white;border:none;font-size:18px;cursor:pointer;">+</button>
+                    <div class="quantity cart-quantity-row">
+                        <button onclick="updateQuantity('${item.productId}', ${item.quantity - 1})" class="cart-qty-btn">−</button>
+                        <span class="cart-qty-value">${item.quantity} шт</span>
+                        <button onclick="updateQuantity('${item.productId}', ${item.quantity + 1})" class="cart-qty-btn">+</button>
                     </div>
-                    <button class="btn-detail"
-                            style="background: rgba(255,80,80,0.5); color: white; border: 1px solid rgba(255,100,100,0.5); width: 100%; margin: 0;"
-                            onclick="removeItem('${item.productId}')">
+                    <button class="btn-detail btn-remove-cart" onclick="removeItem('${item.productId}')">
                         🗑 Удалить
                     </button>
                 </div>
@@ -213,9 +196,8 @@
     async function checkout() {
         if (cartItems.length === 0) return;
 
-        const cartResponse = await fetch('/api/cart', { credentials: 'include' });
-        const cart = await cartResponse.json();
-        const accountId = cart.userId;
+        // ★ УБРАЛИ: больше не запрашиваем /api/cart и не берём accountId
+        // accountId теперь резолвится на стороне payment-service по userId
 
         const items = cartItems.map(item => ({
             productId: item.productId,
@@ -231,7 +213,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ accountId, items })
+                body: JSON.stringify({ items })   // ★ только items
             });
 
             if (!response.ok) {

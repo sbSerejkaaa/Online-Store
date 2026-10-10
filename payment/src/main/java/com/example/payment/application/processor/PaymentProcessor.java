@@ -2,6 +2,10 @@ package com.example.payment.application.processor;
 
 import com.example.payment.application.handler.PaymentCommandHandler;
 import com.example.payment.application.processor.exception.PaymentProcessingException;
+import com.example.payment.infrastructure.service.exception.AccountBlockedException;
+import com.example.payment.infrastructure.service.exception.BankAccountNotFoundException;
+import com.example.payment.infrastructure.service.exception.InsufficientFundsException;
+import com.example.payment.infrastructure.service.exception.InvalidAmountException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -12,46 +16,37 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class PaymentProcessor {
+
     private final List<PaymentCommandHandler<?, ?>> handlers;
 
-    /**
-     * ОБРАБОТКА КОМАНДЫ
-     *
-     * ПАТТЕРН: DISPATCHER
-     * - Автоматически находит нужный handler для команды
-     * - Поддерживает любой тип команды (Create, Refund, Cancel, etc.)
-     */
     @SuppressWarnings("unchecked")
     public <T, R> R handleCommand(T command) {
         String commandType = command.getClass().getSimpleName();
 
         try {
-            // 1. НАЙТИ ПОДХОДЯЩИЙ HANDLER
             PaymentCommandHandler<T, R> handler = findHandler(command);
+            return handler.handle(command);
 
-            // 2. ВЫПОЛНИТЬ КОМАНДУ
-            R result = handler.handle(command);
-
-            return result;
+        } catch (AccountBlockedException
+                 | BankAccountNotFoundException
+                 | InsufficientFundsException
+                 | InvalidAmountException e) {
+            // ★ Доменные исключения пропускаем наружу — их обработает GlobalExceptionHandler
+            log.warn("Бизнес-ошибка при обработке {}: {}", commandType, e.getMessage());
+            throw e;
 
         } catch (Exception e) {
+            log.error("Техническая ошибка при обработке {}", commandType, e);
             throw new PaymentProcessingException(
                     "Failed to process command: " + commandType, e
             );
         }
     }
 
-    /**
-     * НАЙТИ HANDLER ДЛЯ КОМАНДЫ
-     */
     @SuppressWarnings("unchecked")
     private <T, R> PaymentCommandHandler<T, R> findHandler(T command) {
         return (PaymentCommandHandler<T, R>) handlers.stream()
-                .filter(handler -> {
-                    boolean canHandle = handler.canHandle(command);
-
-                    return canHandle;
-                })
+                .filter(handler -> handler.canHandle(command))
                 .findFirst()
                 .orElseThrow(() -> {
                     String errorMsg = "No handler found for command: " + command.getClass().getSimpleName();
@@ -59,5 +54,4 @@ public class PaymentProcessor {
                     return new IllegalArgumentException(errorMsg);
                 });
     }
-
 }

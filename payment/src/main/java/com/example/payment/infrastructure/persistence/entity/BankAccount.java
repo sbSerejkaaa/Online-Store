@@ -25,12 +25,13 @@ public class BankAccount extends BaseEntity {
     // ID пользователя в вашей системе
     // Связывает банковский счет с конкретным клиентом
 
-
+    @Builder.Default
     @Column(name = "balance", precision = 19, scale = 2)
     private BigDecimal balance = BigDecimal.ZERO;
     // Текущий баланс счета в рублях
     // precision=19, scale=2 = 17 цифр до запятой, 2 после
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private BankAccountStatus status = BankAccountStatus.ACTIVE;
     // Статус счета:

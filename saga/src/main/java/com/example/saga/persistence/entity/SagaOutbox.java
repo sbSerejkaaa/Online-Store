@@ -37,6 +37,9 @@ public class SagaOutbox {
     @Column(name = "command_type", nullable = false, length = 50)
     private String commandType;
 
+    @Column(name = "correlation_id", length = 64)
+    private String correlationId;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 

@@ -9,46 +9,28 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" th:href="@{/auth/css/space-style.css}">
 </head>
 <body>
-<div class="space-bg" style="background-image: url('/auth/images/image-1.jpg');"></div>
+<div class="space-bg" style="background-image: url('/auth/images/fon.jpg');"></div>
 <canvas id="stars"></canvas>
 
-<!-- ★ ЧАСЫ — сдвинуты в левый верхний угол + уменьшены -->
-<div id="clock-widget" style="top: 30px !important; left: 40px !important; transform: scale(0.85) !important; transform-origin: top left !important;">
+<!-- ★ ЧАСЫ — по центру только на этой странице -->
+<div id="clock-widget" style="top: 30px !important; left: 50% !important; transform: translateX(-50%) !important; text-align: center !important;">
     <div id="clock-time">00:00:00</div>
     <div id="clock-date">-- --- ----</div>
 </div>
 
-<!-- ★ ФРАЗА — ниже часов, чтобы не прилипала -->
-<div id="phrase-widget" style="top: 180px !important; left: 40px !important; max-width: 350px !important;">
-    <div id="phrase-text">Ваш личный кабинет</div>
+<!-- ★ ЛОГОТИП -->
+<div id="logo-widget">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-text">
+        <div class="logo-title">ONLINE STORE</div>
+    </div>
+    <div class="logo-icon">⚡</div>
 </div>
-
-<!-- ★ СЧЁТЧИК ОНЛАЙН -->
-<div id="online-widget" style="top: 100px !important;">
-    <span class="online-dot"></span>
-    <span id="online-count">42</span> человек онлайн
-</div>
-
-<!-- ★ КНОПКА ЗОЛОТОГО РЕЖИМА -->
-<button id="golden-toggle" onclick="toggleGoldenMode()" aria-label="Золотой режим" style="bottom: 160px !important;">
-    <span id="golden-icon">✨</span>
-    <span id="golden-label">Голубое</span>
-</button>
-
-<!-- ★ ПЛЕЕР -->
-<button id="music-toggle" onclick="toggleMusic()" aria-label="Включить музыку" style="bottom: 100px !important;">
-    <span id="music-icon">▶</span>
-    <span id="music-label">Lo-fi</span>
-</button>
-
-<audio id="music-player" loop preload="none">
-    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
-    Ваш браузер не поддерживает аудио.
-</audio>
 
 <!-- ★ ВЕРХНИЕ ПРАВЫЕ КНОПКИ -->
 <div class="top-right-buttons">
@@ -58,10 +40,12 @@
     <a href="/logout" class="btn-logout">🚪 Выйти</a>
 </div>
 
-<div class="content">
-    <div class="profile-container">
-        <!-- Шапка -->
-        <div class="profile-header">
+<!-- ★ ПРОФИЛЬ — ОДНА ШИРОКАЯ КОЛОНКА -->
+<div class="profile-wrapper" style="padding-top: 244px !important;">
+
+    <!-- ★ СЕКЦИЯ 1: Шапка + Статистика -->
+    <section class="profile-section profile-header-row">
+        <div class="profile-identity">
             <div class="avatar">👤</div>
             <div class="user-info">
                 <h2 th:text="${userName}">Сергей</h2>
@@ -69,8 +53,7 @@
             </div>
         </div>
 
-        <!-- Статистика -->
-        <div class="stats-grid">
+        <div class="stats-row">
             <a href="/orders" class="stat-card" style="text-decoration: none; cursor: pointer;">
                 <div class="stat-icon">🛒</div>
                 <div class="stat-value" id="orders-count">0</div>
@@ -87,8 +70,10 @@
                 <div class="stat-label">Избранное</div>
             </div>
         </div>
+    </section>
 
-        <!-- Баланс -->
+    <!-- ★ СЕКЦИЯ 2: Баланс + Бонусы -->
+    <section class="profile-section profile-money-row">
         <div class="balance-section">
             <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                 <div class="balance-title">💰 Баланс</div>
@@ -101,7 +86,6 @@
             </button>
         </div>
 
-        <!-- Бонусы -->
         <div class="bonus-section">
             <div class="bonus-header">
                 <span class="bonus-title">🎁 Бонусные баллы</span>
@@ -112,44 +96,83 @@
             </div>
             <div class="progress-text">До уровня VIP: 1000 баллов</div>
         </div>
+    </section>
 
-        <!-- Персональные данные -->
-        <div class="info-grid">
-            <div class="info-card">
-                <div class="info-icon">📧</div>
-                <div>
-                    <div class="info-label">Email</div>
-                    <div class="info-value" th:text="${email}">test@mail.ru</div>
-                </div>
-            </div>
-            <div class="info-card">
-                <div class="info-icon">📅</div>
-                <div>
-                    <div class="info-label">Дата регистрации</div>
-                    <div class="info-value" th:text="${registrationDate}">2026-09-07</div>
-                </div>
-            </div>
-            <div class="info-card">
-                <div class="info-icon">📱</div>
-                <div>
-                    <div class="info-label">Телефон</div>
-                    <div class="info-value">Не указан</div>
-                </div>
-            </div>
-            <div class="info-card">
-                <div class="info-icon">📍</div>
-                <div>
-                    <div class="info-label">Адрес</div>
-                    <div class="info-value">Не указан</div>
-                </div>
+    <!-- ★ СЕКЦИЯ 3: Персональные данные -->
+    <section class="profile-section profile-info-row">
+        <div class="info-card">
+            <div class="info-icon">📧</div>
+            <div>
+                <div class="info-label">Email</div>
+                <div class="info-value" th:text="${email}">test@mail.ru</div>
             </div>
         </div>
-    </div>
+
+        <div class="info-card">
+            <div class="info-icon">📅</div>
+            <div>
+                <div class="info-label">Дата регистрации</div>
+                <div class="info-value" th:text="${registrationDate}">2026-09-07</div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">📱</div>
+            <div>
+                <div class="info-label">Телефон</div>
+                <div class="info-value">Не указан</div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">📍</div>
+            <div>
+                <div class="info-label">Адрес</div>
+                <div class="info-value">Не указан</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ★ СЕКЦИЯ 4: Активности -->
+    <section class="profile-section profile-extra-row">
+        <div class="info-card">
+            <div class="info-icon">🔔</div>
+            <div>
+                <div class="info-label">Уведомления</div>
+                <div class="info-value">0 новых</div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">⭐</div>
+            <div>
+                <div class="info-label">Отзывы</div>
+                <div class="info-value">0 оставлено</div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">🎟️</div>
+            <div>
+                <div class="info-label">Купоны</div>
+                <div class="info-value">0 активных</div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">📊</div>
+            <div>
+                <div class="info-label">Скидка</div>
+                <div class="info-value">0 %</div>
+            </div>
+        </div>
+    </section>
+
 </div>
 
 <!-- Модалка пополнения -->
 <div id="deposit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
-    <div style="background: rgba(10, 10, 30, 0.95); border: 2px solid rgba(255,255,255,0.3); border-radius: 25px; padding: 40px; max-width: 450px; width: 90%; text-align: center;">
+    <div style="background: rgba(10, 10, 30, 0.95); border: 2px solid rgba(255,215,0,0.4); border-radius: 25px; padding: 40px; max-width: 450px; width: 90%; text-align: center;">
         <div style="font-size: 50px; margin-bottom: 15px;">💳</div>
         <h2 style="color: white; margin-bottom: 20px; font-size: 22px;">Пополнение баланса</h2>
 
@@ -157,7 +180,7 @@
                id="deposit-amount"
                placeholder="Сумма (₽)"
                min="1"
-               style="width: 100%; padding: 14px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: 18px; text-align: center; margin-bottom: 20px; box-sizing: border-box;">
+               style="width: 100%; padding: 14px; border-radius: 12px; border: 2px solid rgba(255,215,0,0.3); background: rgba(15,0,30,0.6); color: white; font-size: 18px; text-align: center; margin-bottom: 20px; box-sizing: border-box;">
 
         <div id="deposit-error" style="display: none; color: #ffcccc; background: rgba(255,0,0,0.2); padding: 10px; border-radius: 10px; margin-bottom: 15px;"></div>
         <div id="deposit-success" style="display: none; color: #ccffcc; background: rgba(0,200,0,0.2); padding: 10px; border-radius: 10px; margin-bottom: 15px;"></div>
@@ -169,7 +192,7 @@
             </button>
             <button onclick="submitDeposit()"
                     id="deposit-submit"
-                    style="flex: 1; padding: 14px; background: linear-gradient(135deg, #00c896, #00a070); color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: bold; width: auto; margin: 0;">
+                    style="flex: 1; padding: 14px; background: linear-gradient(135deg, #ffd700, #ff9500); color: #1a0f2e; border: none; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: bold; width: auto; margin: 0;">
                 Пополнить
             </button>
         </div>

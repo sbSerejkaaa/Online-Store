@@ -5,11 +5,12 @@ import com.example.payment.infrastructure.outbox.PaymentOutboxService;
 import com.example.payment.infrastructure.persistence.entity.BankAccount;
 import com.example.payment.infrastructure.persistence.entity.Payment;
 import com.example.payment.infrastructure.persistence.entity.factory.PaymentFactory;
-import com.example.payment.infrastructure.persistence.enums.PaymentStatus;
+import com.example.payment.infrastructure.persistence.enums.BankAccountStatus;
 import com.example.payment.infrastructure.persistence.repository.BankAccountRepository;
 import com.example.payment.infrastructure.persistence.repository.PaymentRepository;
-import com.example.payment.infrastructure.service.bankAccount.BankAccountQueryService;
-import com.example.payment.infrastructure.service.validation.AccountValidation;
+import com.example.payment.infrastructure.service.exception.AccountBlockedException;
+import com.example.payment.infrastructure.service.exception.BankAccountNotFoundException;
+import com.example.payment.infrastructure.service.exception.InsufficientFundsException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,40 +21,52 @@ import java.math.BigDecimal;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class ProcessPaymentService {
 
-    private final PaymentRepository paymentRepository;
     private final BankAccountRepository bankAccountRepository;
-    private final BankAccountQueryService bankAccountQueryService;
+    private final PaymentRepository paymentRepository;
     private final PaymentFactory paymentFactory;
-    private final AccountValidation accountValidation;
     private final PaymentOutboxService outboxService;
 
+    @Transactional
     public void withdrawForOrder(CreatePaymentCommand command) {
-        log.info("Withdrawal for order: {}, account: {}, amount: {}",
-                command.getOrderId(), command.getAccountId(), command.getTotalAmount());
+        log.info("Обработка оплаты для orderId={}, userId={}",
+                command.getOrderId(), command.getUserId());
 
-        BankAccount account = bankAccountQueryService.findByCustomerId(command.getAccountId());
 
-        accountValidation.validateForWithdrawal(account, command.getTotalAmount());
+        BankAccount bankAccount = bankAccountRepository
+                .findByCustomerIdForUpdate(command.getUserId())   // ← FOR UPDATE
+                .orElseThrow(() -> new BankAccountNotFoundException(
+                        "Bank account not found for userId: " + command.getUserId()));
 
-        BigDecimal newBalance = account.getBalance().subtract(command.getTotalAmount());
-        account.setBalance(newBalance);
-        bankAccountRepository.save(account);
 
-        Payment payment = paymentFactory.createFromCommand(command, account);
-        payment.setStatus(PaymentStatus.COMPLETED);
-        paymentRepository.save(payment);
+        if (bankAccount.getStatus() != BankAccountStatus.ACTIVE) {
+            throw new AccountBlockedException(
+                    "Bank account is " + bankAccount.getStatus());
+        }
 
-        outboxService.saveSuccessfulPayment(command, payment);
+        if (bankAccount.getBalance().compareTo(command.getTotalAmount()) < 0) {
+            throw new InsufficientFundsException(
+                    "Insufficient funds. Balance: " + bankAccount.getBalance()
+                            + ", required: " + command.getTotalAmount());
+        }
 
-        log.info("Withdrawal successful. Order: {}, New balance: {}",
-                command.getOrderId(), newBalance);
+        BigDecimal newBalance = bankAccount.getBalance().subtract(command.getTotalAmount());
+        bankAccount.setBalance(newBalance);
+        bankAccountRepository.save(bankAccount);
+
+        Payment payment = paymentFactory.createFromCommand(command, bankAccount);
+        Payment savedPayment = paymentRepository.save(payment);
+
+        log.info("Списано {} с кошелька userId={}. Новый баланс: {}",
+                command.getTotalAmount(), command.getUserId(), newBalance);
+
+        outboxService.saveSuccessfulPayment(command, savedPayment);
     }
 
+    @Transactional
     public void handlePaymentFailed(CreatePaymentCommand command, String errorMessage) {
-        log.error("Payment failed. Order: {}, Error: {}",
+        log.warn("Обработка failed payment: orderId={}, reason={}",
                 command.getOrderId(), errorMessage);
 
         outboxService.saveFailedPayment(command, errorMessage);

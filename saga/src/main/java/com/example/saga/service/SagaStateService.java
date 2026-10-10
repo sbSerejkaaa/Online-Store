@@ -18,10 +18,10 @@ public class SagaStateService {
     private final SagaStateRepository repository;
 
     @Transactional
-    public SagaState startSaga(UUID orderId, UUID accountId, int totalItems) {
+    public SagaState startSaga(UUID orderId, UUID userId, int totalItems) {
         SagaState state = SagaState.builder()
                 .orderId(orderId)
-                .accountId(accountId)
+                .userId(userId)
                 .status(SagaState.SagaStatus.RESERVING_PRODUCTS)
                 .totalItems(totalItems)
                 .reservedItems(0)
@@ -29,7 +29,7 @@ public class SagaStateService {
                 .totalAmount(BigDecimal.ZERO)
                 .build();
         SagaState saved = repository.save(state);
-        log.info("Saga started: orderId={}, totalItems={}", orderId, totalItems);
+        log.info("Saga started: orderId={}, userId={}, totalItems={}", orderId, userId, totalItems);
         return saved;
     }
 

@@ -42,8 +42,17 @@ public class AddFundsValidator {
      * ВАЛИДАЦИЯ СУММЫ ПОПОЛНЕНИЯ
      */
     private void validateAmount(BigDecimal amount) {
+        // ★ НОВОЕ: проверка на null
+        if (amount == null) {
+            throw new InvalidAmountException("Сумма пополнения не может быть пустой");
+        }
 
-        // Проверка максимальной суммы (например, 1 миллион)
+        // ★ НОВОЕ: проверка на положительность
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidAmountException("Сумма пополнения должна быть больше нуля");
+        }
+
+        // Проверка максимальной суммы
         BigDecimal maxAmount = new BigDecimal("1000000.00");
         if (amount.compareTo(maxAmount) > 0) {
             throw new InvalidAmountException("Сумма пополнения превышает максимальный лимит. Максимум: " + maxAmount);

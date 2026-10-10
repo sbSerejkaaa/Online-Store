@@ -28,16 +28,14 @@ public class CreateOrderHandler {
 
     @Transactional
     public Orders handle(CreateOrderCommand command) {
-        log.info("Создание заказа с {} товарами для accountId={}",
-                command.getItems().size(), command.getAccountId());
+        log.info("Создание заказа с {} товарами для userId={}",
+                command.getItems().size(), command.getUserId());
 
-        // 1. СОЗДАЕМ OrderEntity
         OrderEntity entity = OrderEntity.builder()
                 .userId(command.getUserId())
                 .status(OrderStatus.IN_PROCESS)
                 .build();
 
-        // 2. ДОБАВЛЯЕМ items
         for (OrderItemDto itemDto : command.getItems()) {
             OrderItemEntity itemEntity = OrderItemEntity.builder()
                     .productId(itemDto.getProductId())
@@ -48,17 +46,12 @@ public class CreateOrderHandler {
             entity.addItem(itemEntity);
         }
 
-        // 3. СОХРАНЯЕМ (каскадом сохранятся items)
         OrderEntity savedEntity = orderRepository.save(entity);
 
-        // 4. МАППИМ в доменную модель
         Orders order = entityMapper.toDomain(savedEntity);
 
-        // 5. СОЗДАЕМ event
         OrderCreatedEvent event = orderEventMapper.toEvent(order);
-        event.setAccountId(command.getAccountId());
 
-        // 6. ❗ КЛАДЕМ в outbox (в той же транзакции)
         outboxService.saveOrderCreated(event);
 
         log.info("Order создан и событие в outbox: orderId={}", order.getId());

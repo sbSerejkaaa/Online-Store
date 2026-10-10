@@ -9,9 +9,14 @@ import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -42,16 +47,25 @@ public class UserRegisteredConsumer {
     }
 
     @KafkaHandler
-    public void handleUserRegistration(UserRegisteredEvent event){
+    public void handleUserRegistration(
+            UserRegisteredEvent event,
+            @Headers Map<String, Object> headers) {
 
-        log.info("""
-             Получено событие регистрации!
-             User ID: {}
-             Email: {}
-             Время: {}
-            """, event.getUserId(), event.getEmail(), event.getEventTimestamp());
+        // ★ Читаем correlationId из Kafka headers → кладём в MDC
+        String correlationId = (String) headers.get("correlationId");
+        if (correlationId == null || correlationId.isBlank()) {
+            correlationId = "unknown-" + event.getUserId();
+        }
+        MDC.put("correlationId", correlationId);
 
         try {
+            log.info("""
+                 Получено событие регистрации!
+                 User ID: {}
+                 Email: {}
+                 Время: {}
+                """, event.getUserId(), event.getEmail(), event.getEventTimestamp());
+
             emailService.sendWelcomeEmail(event);
 
             successCounter.increment();
@@ -68,8 +82,9 @@ public class UserRegisteredConsumer {
             log.warn("Временная ошибка при обработке пользователя {}: {}",
                     event.getUserId(), e.getMessage());
             throw new RetryableException("Временная ошибка сервиса", e);
+
+        } finally {
+            MDC.remove("correlationId");
         }
-
     }
-
 }

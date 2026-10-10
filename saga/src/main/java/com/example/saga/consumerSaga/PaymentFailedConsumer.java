@@ -6,6 +6,7 @@ import com.example.saga.service.SagaOutboxService;
 import com.example.saga.service.SagaStateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -27,27 +28,33 @@ public class PaymentFailedConsumer {
     public void handlePaymentFailed(@Payload PaymentFailedEvent event,
                                     @Headers Map<String, Object> headers) {
 
-        log.error("Payment failed: orderId={}, reason={}",
-                event.getOrderId(), event.getErrorMessage());
+        String correlationId = (String) headers.get("correlationId");
+        if (correlationId == null) correlationId = "unknown-" + event.getOrderId();
+        MDC.put("correlationId", correlationId);
 
-        // 1. Помечаем сагу COMPENSATING
-        stateService.markCompensating(event.getOrderId(),
-                "Payment failed: " + event.getErrorMessage());
+        try {
+            log.error("Payment failed: orderId={}, reason={}",
+                    event.getOrderId(), event.getErrorMessage());
 
-        // 2. Компенсация — отмена заказа
-        CompensateOrderCommand command = CompensateOrderCommand.builder()
-                .orderId(event.getOrderId())
-                .reason("Payment failed: " + event.getErrorMessage())
-                .build();
+            stateService.markCompensating(event.getOrderId(),
+                    "Payment failed: " + event.getErrorMessage());
 
-        outboxService.save(
-                event.getOrderId(),
-                "saga.orders.commands",
-                event.getOrderId().toString(),
-                command,
-                "CANCEL_ORDER"
-        );
+            CompensateOrderCommand command = CompensateOrderCommand.builder()
+                    .orderId(event.getOrderId())
+                    .reason("Payment failed: " + event.getErrorMessage())
+                    .build();
 
-        log.warn("Компенсация запущена: orderId={}", event.getOrderId());
+            outboxService.save(
+                    event.getOrderId(),
+                    "saga.orders.commands",
+                    event.getOrderId().toString(),
+                    command,
+                    "CANCEL_ORDER"
+            );
+
+            log.warn("Компенсация запущена: orderId={}", event.getOrderId());
+        } finally {
+            MDC.remove("correlationId");
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.example.product.service.ProductOutboxService;
 import com.example.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Headers;
@@ -32,18 +33,21 @@ public class ConsumerProductSaga {
             @Headers Map<String, Object> headers) {
 
         String correlationId = (String) headers.get("correlationId");
-        String commandType = (String) headers.get("commandType");
-
-        if (!"RESERVE_PRODUCT".equals(commandType)) {
-            log.warn("Неизвестный тип команды: {}", commandType);
-            return;
-        }
-
-        log.info("Резервация: orderId={}, product={}, qty={}, correlationId={}",
-                command.getOrderId(), command.getProductName(),
-                command.getQuantity(), correlationId);
+        if (correlationId == null) correlationId = "unknown-" + command.getOrderId();
+        MDC.put("correlationId", correlationId);
 
         try {
+            String commandType = (String) headers.get("commandType");
+
+            if (!"RESERVE_PRODUCT".equals(commandType)) {
+                log.warn("Неизвестный тип команды: {}", commandType);
+                return;
+            }
+
+            log.info("Резервация: orderId={}, product={}, qty={}, correlationId={}",
+                    command.getOrderId(), command.getProductName(),
+                    command.getQuantity(), correlationId);
+
             BigDecimal unitPrice = productService.calculateUnitPrice(command.getProductName());
             BigDecimal totalAmount = unitPrice.multiply(BigDecimal.valueOf(command.getQuantity()));
 
@@ -57,6 +61,9 @@ public class ConsumerProductSaga {
                     command.getOrderId(), e.getMessage(), e);
 
             outboxService.saveReservationFailed(command, e.getMessage());
+
+        } finally {
+            MDC.remove("correlationId");
         }
     }
 }

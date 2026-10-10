@@ -8,6 +8,7 @@ import com.example.product.repository.ProductOutboxRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +38,6 @@ public class ProductOutboxService {
                     .quantity(command.getQuantity())
                     .unitPrice(unitPrice)
                     .totalAmount(totalAmount)
-                    .accountId(command.getAccountId())
                     .createdAt(Instant.now())
                     .build();
 
@@ -47,6 +47,7 @@ public class ProductOutboxService {
                     .eventType("PRODUCT_RESERVED")
                     .aggregateId(command.getOrderId())
                     .payload(payload)
+                    .correlationId(MDC.get("correlationId"))
                     .build();
 
             outboxRepository.save(outbox);
@@ -78,6 +79,7 @@ public class ProductOutboxService {
                     .eventType("PRODUCT_RESERVATION_FAILED")
                     .aggregateId(command.getOrderId())
                     .payload(payload)
+                    .correlationId(MDC.get("correlationId"))
                     .build();
 
             outboxRepository.save(outbox);

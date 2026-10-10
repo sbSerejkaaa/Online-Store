@@ -6,6 +6,7 @@ import com.example.saga.service.SagaOutboxService;
 import com.example.saga.service.SagaStateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -27,26 +28,32 @@ public class PaymentEventConsumer {
     public void handlePaymentProcessed(@Payload PaymentCompletedEvent event,
                                        @Headers Map<String, Object> headers) {
 
-        log.info("Payment completed: orderId={}, amount={}",
-                event.getOrderId(), event.getAmount());
+        String correlationId = (String) headers.get("correlationId");
+        if (correlationId == null) correlationId = "unknown-" + event.getOrderId();
+        MDC.put("correlationId", correlationId);
 
-        // 1. Отправляем ConfirmOrderCommand
-        ConfirmOrderCommand command = ConfirmOrderCommand.builder()
-                .orderId(event.getOrderId())
-                .totalAmount(event.getAmount())
-                .build();
+        try {
+            log.info("Payment completed: orderId={}, amount={}",
+                    event.getOrderId(), event.getAmount());
 
-        outboxService.save(
-                event.getOrderId(),
-                "saga.orders.commands",
-                event.getOrderId().toString(),
-                command,
-                "CONFIRM_ORDER"
-        );
+            ConfirmOrderCommand command = ConfirmOrderCommand.builder()
+                    .orderId(event.getOrderId())
+                    .totalAmount(event.getAmount())
+                    .build();
 
-        // 2. Помечаем сагу как COMPLETED
-        stateService.markCompleted(event.getOrderId());
+            outboxService.save(
+                    event.getOrderId(),
+                    "saga.orders.commands",
+                    event.getOrderId().toString(),
+                    command,
+                    "CONFIRM_ORDER"
+            );
 
-        log.info("Saga COMPLETED: orderId={}", event.getOrderId());
+            stateService.markCompleted(event.getOrderId());
+
+            log.info("Saga COMPLETED: orderId={}", event.getOrderId());
+        } finally {
+            MDC.remove("correlationId");
+        }
     }
 }

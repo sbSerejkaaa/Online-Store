@@ -4,23 +4,11 @@ import com.example.payment.infrastructure.persistence.entity.BankAccount;
 import com.example.payment.web.dto.response.AddFundsBankAccountResponse;
 import com.example.payment.application.command.AddingFundsToYourAccountCommand;
 import com.example.payment.infrastructure.service.bankAccount.AddFundsService;
-import com.example.payment.application.processor.exception.PaymentProcessingException;
 import com.example.payment.infrastructure.service.validation.AddFundsValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/**
- * CONCRETE HANDLER - обработчик команды создания платежа
- *
- * SINGLE RESPONSIBILITY PRINCIPLE:
- * - Отвечает ТОЛЬКО за обработку CreatePaymentCommand
- * - Не знает о других типах команд (Refund, Cancel, etc.)
- *
- * OPEN/CLOSED PRINCIPLE:
- * - Можно легко расширить новыми шагами обработки
- * - Не изменяя существующий код
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -34,36 +22,25 @@ public class AddMoneyBankAccountHandlerImpl implements PaymentCommandHandler<Add
     public AddFundsBankAccountResponse handle(AddingFundsToYourAccountCommand command) {
         log.info("Запуск процесса пополнения баланса. Trace ID: {}", command.getTraceId());
 
-        try {
-            // 1. ВАЛИДАЦИЯ КОМАНДЫ
+        // ★ Никаких try/catch — пусть доменные исключения летят наружу
+        addFundsValidator.validate(command);
+        log.debug("Валидация команды пройдена");
 
-            addFundsValidator.validate(command);
-            log.debug("Валидация команды пройдена");
+        BankAccount updatedAccount = addFundsService.deposit(
+                command.getBankAccountId(),
+                command.getAmount()
+        );
+        log.debug("Операция пополнения завершена");
 
-            // 2. ВЫПОЛНЕНИЕ БИЗНЕС-ОПЕРАЦИИ
-            BankAccount updatedAccount = addFundsService.deposit(
-                    command.getBankAccountId(),
-                    command.getAmount()
-            );
-            log.debug("Операция пополнения завершена");
+        AddFundsBankAccountResponse response = new AddFundsBankAccountResponse(
+                updatedAccount.getId(),
+                updatedAccount.getBalance()
+        );
 
-            // 3. СОЗДАНИЕ ОТВЕТА
-            AddFundsBankAccountResponse response = new AddFundsBankAccountResponse(
-                    updatedAccount.getId(),
-                    updatedAccount.getBalance()
-            );
+        log.info("Пополнение счета успешно завершено. Счет: {}, Новый баланс: {}",
+                updatedAccount.getId(), updatedAccount.getBalance());
 
-            log.info("Пополнение счета успешно завершено. " +
-                    "Счет: {}, Новый баланс: {}", updatedAccount.getId(), updatedAccount.getBalance());
-
-            return response;
-
-        } catch (Exception e) {
-            log.error("Ошибка при пополнении счета. Trace ID: {}, Ошибка: {}",
-                    command.getTraceId(), e.getMessage(), e);
-            throw new PaymentProcessingException("Не удалось пополнить счет", e);
-        }
-
+        return response;
     }
 
     @Override

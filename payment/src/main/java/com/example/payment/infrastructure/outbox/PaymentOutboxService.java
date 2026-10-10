@@ -9,6 +9,7 @@ import com.example.payment.infrastructure.persistence.repository.PaymentOutboxRe
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +30,7 @@ public class PaymentOutboxService {
             PaymentCompletedEvent event = PaymentCompletedEvent.builder()
                     .orderId(command.getOrderId())
                     .paymentId(payment.getId())
-                    .accountId(command.getAccountId())
+                    .userId(command.getUserId())
                     .amount(command.getTotalAmount())
                     .completedAt(Instant.now())
                     .build();
@@ -40,6 +41,7 @@ public class PaymentOutboxService {
                     .eventType("PAYMENT_COMPLETED")
                     .aggregateId(command.getOrderId())
                     .payload(payload)
+                    .correlationId(MDC.get("correlationId"))
                     .build();
 
             outboxRepository.save(outbox);
@@ -58,7 +60,7 @@ public class PaymentOutboxService {
         try {
             PaymentFailedEvent event = PaymentFailedEvent.builder()
                     .orderId(command.getOrderId())
-                    .accountId(command.getAccountId())
+                    .userId(command.getUserId())
                     .errorMessage(errorMessage)
                     .failedAt(Instant.now())
                     .build();
@@ -69,6 +71,7 @@ public class PaymentOutboxService {
                     .eventType("PAYMENT_FAILED")
                     .aggregateId(command.getOrderId())
                     .payload(payload)
+                    .correlationId(MDC.get("correlationId"))
                     .build();
 
             outboxRepository.save(outbox);

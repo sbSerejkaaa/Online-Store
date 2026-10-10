@@ -23,4 +23,6 @@ public class ProductRegistrationRequest {
 
     @NotNull(message = "Цена не может равняться null")
     private BigDecimal price;
+
+    private String categorySlug;
 }

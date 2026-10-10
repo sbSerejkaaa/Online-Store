@@ -3,63 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Store</title>
+    <title>Online Store — Интернет-магазин нового поколения</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" th:href="@{/auth/css/space-style.css}">
 </head>
 <body>
-<div class="space-bg" style="background-image: url('/auth/images/image-1.jpg');"></div>
+<div class="space-bg" style="background-image: url('/auth/images/fon.jpg');"></div>
 <canvas id="stars"></canvas>
 
-<!-- ★ ЧАСЫ -->
+<!-- ★ ЧАСЫ — левый верхний угол -->
 <div id="clock-widget">
     <div id="clock-time">00:00:00</div>
     <div id="clock-date">-- --- ----</div>
 </div>
 
-<!-- ★ ФРАЗА -->
+<!-- ★ ФРАЗЫ — левая колонка -->
 <div id="phrase-widget">
-    <div id="phrase-text">Добро пожаловать в Online Store</div>
+    <div id="phrase-list"></div>
 </div>
 
-<!-- ★ СЧЁТЧИК ОНЛАЙН -->
+<!-- ★ СЧЁТЧИК ОНЛАЙН — левый нижний угол -->
 <div id="online-widget">
     <span class="online-dot"></span>
     <span id="online-count">42</span> человек онлайн
 </div>
 
-<!-- ★ КНОПКА ЗОЛОТОГО РЕЖИМА -->
-<button id="golden-toggle" onclick="toggleGoldenMode()" aria-label="Золотой режим">
-    <span id="golden-icon">✨</span>
-    <span id="golden-label">Золото</span>
-</button>
-
-<!-- ★ ПЛЕЕР -->
-<button id="music-toggle" onclick="toggleMusic()" aria-label="Включить музыку">
-    <span id="music-icon">▶</span>
-    <span id="music-label">Lo-fi</span>
-</button>
-
-<audio id="music-player" loop preload="none">
-    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
-    Ваш браузер не поддерживает аудио.
-</audio>
-
-<div class="content">
-    <div class="welcome-box">
-        <div class="logo">🛒</div>
-        <h1>Online Store</h1>
-        <p>Добро пожаловать в наш магазин</p>
-        <div class="buttons">
-            <a href="/register" class="btn btn-register">Зарегистрироваться</a>
-            <a href="/login" class="btn btn-login">Войти</a>
-        </div>
-    </div>
+<!-- ★ КНОПКИ В ПРАВОМ ВЕРХНЕМ УГЛУ -->
+<div class="top-right-buttons">
+    <a href="/login" class="btn-catalog">🔑 Войти</a>
+    <a href="/register" class="btn-home">✨ Создать аккаунт</a>
 </div>
+
+<!-- ★ ЛОГОТИП — правый нижний угол -->
+<div id="logo-widget">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-text">
+        <div class="logo-title">ONLINE STORE</div>
+    </div>
+    <div class="logo-icon">⚡</div>
+</div>
+
+<div class="landing-wrapper">
+
+    <section class="hero">
+        <h1>Интернет-магазин нового поколения</h1>
+        <div class="hero-actions">
+            <a href="/catalog" class="btn-hero-primary">Перейти в магазин</a>
+        </div>
+    </section>
+
+    <section class="featured-section">
+        <h2>Хиты продаж</h2>
+        <div id="featured-products" class="products-grid">
+            <div class="empty-message">Загрузка...</div>
+        </div>
+    </section>
+
+    <section class="features-section">
+        <h2>Почему мы</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🚚</div>
+                <h3>Быстрая доставка</h3>
+                <p>За 1 день по городу и 3 дня по России</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💳</div>
+                <h3>Безопасная оплата</h3>
+                <p>Собственный платёжный шлюз с шифрованием</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">✅</div>
+                <h3>Гарантия 1 год</h3>
+                <p>Официальная гарантия от производителя</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎁</div>
+                <h3>Бонусы за покупки</h3>
+                <p>До 10% баллами на следующую покупку</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <h2>Готовы сделать первый заказ?</h2>
+        <p>Зарегистрируйтесь за 30 секунд и получите доступ к эксклюзивным скидкам</p>
+        <a href="/register" class="btn-hero-primary">🚀 Начать покупки</a>
+    </section>
+
+    <footer class="landing-footer">
+        <p>© 2026 Online Store · Сделано с ❤️ на Java + Spring Boot + Kafka</p>
+    </footer>
+
+</div>
+
+<script>
+    async function loadFeatured() {
+        try {
+            // ★ Запрашиваем 30 товаров (в кэше на бэке лежит 30)
+            const response = await fetch('/api/products/featured?limit=30');
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+
+            let products = await response.json();
+
+            // ★ Shuffle на клиенте + берём только 6
+            products = products.sort(() => Math.random() - 0.5).slice(0, 6);
+
+            renderFeatured(products);
+        } catch (err) {
+            console.error('Featured load error:', err);
+            document.getElementById('featured-products').innerHTML =
+                '<div class="empty-message">Не удалось загрузить товары</div>';
+        }
+    }
+
+    function renderFeatured(products) {
+        const container = document.getElementById('featured-products');
+
+        if (!products || products.length === 0) {
+            container.innerHTML = '<div class="empty-message">📦 Товаров пока нет</div>';
+            return;
+        }
+
+        let html = '';
+        products.forEach(product => {
+            html += `
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="${product.imageUrl || ''}" alt="${product.productName}">
+                    </div>
+                    <div class="product-name">${product.productName}</div>
+                    <div class="product-divider"></div>
+                    <div class="product-price">${product.price} ₽</div>
+                    <div class="quantity">Остаток: ${product.quantity} шт</div>
+                    <a href="/product/${product.productId}" class="btn-detail">Подробнее</a>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    loadFeatured();
+</script>
 
 <script th:src="@{/auth/js/space-script.js}"></script>
 </body>

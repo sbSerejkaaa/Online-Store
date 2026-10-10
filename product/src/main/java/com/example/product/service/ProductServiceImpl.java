@@ -8,10 +8,12 @@ import com.example.product.mapper.ProductMapper;
 import com.example.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -66,9 +68,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public List<Product> findAll() {
-        return productRepository.findAll().stream()
+        List<Product> products = productRepository.findAll().stream()
                 .map(productMapper::toModel)
                 .collect(Collectors.toList());
+        Collections.shuffle(products);
+        return products;
     }
 
     @Override
@@ -85,5 +89,35 @@ public class ProductServiceImpl implements ProductService {
         EntityProduct product = productRepository.findByProductName(productName)
                 .orElseThrow(() -> new RuntimeException("Товар не найден: " + productName));
         return product.getPrice();
+    }
+
+    @Override
+    @Cacheable(value = "featured", key = "'top30'", sync = true)
+    @Transactional(readOnly = true)
+    public List<Product> findFeatured(int limit) {
+        log.info("CACHE MISS: загрузка featured товаров из БД (top30)");
+        return productRepository.findAll().stream()
+                .limit(30)
+                .map(productMapper::toModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Product> findByCategorySlug(String slug) {
+        return productRepository.findByCategory_Slug(slug).stream()
+                .map(productMapper::toModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Product> searchByName(String query) {
+        if (query == null || query.isBlank()) {
+            return findAll();
+        }
+        return productRepository.searchByName(query.trim()).stream()
+                .map(productMapper::toModel)
+                .collect(Collectors.toList());
     }
 }

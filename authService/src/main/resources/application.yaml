@@ -1,9 +1,12 @@
 server:
   port: 8081
   forward-headers-strategy: native
+  shutdown: graceful
 spring:
   application:
     name: auth-service
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5435/auth_db}
     username: ${DB_USERNAME:postgres}
@@ -12,7 +15,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: ${HIBERNATE_DDL_AUTO:update}
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect

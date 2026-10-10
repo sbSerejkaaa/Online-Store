@@ -20,4 +20,10 @@ public interface ProductService {
     Product findById(UUID id);
 
     BigDecimal calculateUnitPrice(String productName);
+
+    List<Product> findFeatured(int limit);
+
+    List<Product> findByCategorySlug(String slug);
+
+    List<Product> searchByName(String query);
 }

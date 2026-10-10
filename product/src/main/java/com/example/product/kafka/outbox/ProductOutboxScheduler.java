@@ -99,7 +99,9 @@ public class ProductOutboxScheduler {
                 .setHeader(KafkaHeaders.KEY, key)
                 .setHeader("eventId", outbox.getEventId().toString())
                 .setHeader("eventType", eventType)
-                .setHeader("correlationId", "outbox-" + outbox.getId())
+                .setHeader("correlationId", outbox.getCorrelationId() != null
+                        ? outbox.getCorrelationId()
+                        : "outbox-" + outbox.getId())
                 .setHeader("sourceService", "product-service")
                 .setHeader("eventTimestamp", Instant.now().toString())
                 .build();

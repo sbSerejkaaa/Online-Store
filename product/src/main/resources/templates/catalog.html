@@ -8,74 +8,101 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" th:href="@{/product/css/space-style.css}">
 </head>
 <body>
-<div class="space-bg" style="background-image: url('/images/image-1.jpg');"></div>
+<div class="space-bg" style="background-image: url('/images/fon.jpg');"></div>
 <canvas id="stars"></canvas>
 
-<!-- ★ ЧАСЫ — как на profile -->
-<div id="clock-widget" style="top: 30px !important; left: 40px !important; transform: scale(0.85) !important; transform-origin: top left !important;">
+<!-- ★ ЧАСЫ -->
+<div id="clock-widget">
     <div id="clock-time">00:00:00</div>
     <div id="clock-date">-- --- ----</div>
 </div>
 
-<!-- ★ ФРАЗА — ниже часов -->
-<div id="phrase-widget" style="top: 180px !important; left: 40px !important; max-width: 350px !important;">
-    <div id="phrase-text">Каталог товаров</div>
+<!-- ★ ЛОГОТИП -->
+<div id="logo-widget">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-text">
+        <div class="logo-title">ONLINE STORE</div>
+    </div>
+    <div class="logo-icon">⚡</div>
 </div>
 
-<!-- ★ СЧЁТЧИК ОНЛАЙН -->
-<div id="online-widget" style="top: 100px !important;">
-    <span class="online-dot"></span>
-    <span id="online-count">42</span> человек онлайн
-</div>
-
-<!-- ★ КНОПКА ЗОЛОТОГО РЕЖИМА -->
-<button id="golden-toggle" onclick="toggleGoldenMode()" aria-label="Золотой режим" style="bottom: 160px !important;">
-    <span id="golden-icon">✨</span>
-    <span id="golden-label">Голубое</span>
-</button>
-
-<!-- ★ ПЛЕЕР -->
-<button id="music-toggle" onclick="toggleMusic()" aria-label="Включить музыку" style="bottom: 100px !important;">
-    <span id="music-icon">▶</span>
-    <span id="music-label">Lo-fi</span>
-</button>
-
-<audio id="music-player" loop preload="none">
-    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
-</audio>
-
+<!-- ★ ВЕРХНИЕ ПРАВЫЕ КНОПКИ -->
 <div class="top-right-buttons">
     <a href="/cart" class="btn-catalog">🛒 Корзина</a>
     <a href="/profile" class="btn-catalog">👤 Личный кабинет</a>
     <a href="/" class="btn-home">🏠 На главную</a>
 </div>
 
+<!-- ★ КАТАЛОГ -->
 <div class="catalog-wrapper">
+
+    <!-- ★ ЗАГОЛОВОК (перенесли наверх) -->
     <div class="catalog-header">
-        <h1>🛒 Каталог товаров</h1>
+        <h1>Каталог товаров</h1>
     </div>
 
-    <div class="products-grid">
-        <div class="product-card" th:each="product : ${products}">
-            <div class="product-image">
-                <img th:src="${product.imageUrl}" th:alt="${product.productName}">
-            </div>
-            <div class="product-name" th:text="${product.productName}">Название</div>
-            <div class="product-divider"></div>
-            <div class="product-price" th:text="${product.price} + ' ₽'">Цена</div>
-            <div class="quantity">
-                <span th:text="'Остаток: ' + ${product.quantity} + ' шт'">Остаток</span>
-            </div>
-            <a th:href="@{/product/{id}(id=${product.productId})}" class="btn-detail">Подробнее</a>
-        </div>
+    <!-- ★ ПОИСК -->
+    <div class="search-bar">
+        <form method="get" action="/catalog" class="search-form">
+            <input type="text"
+                   name="q"
+                   placeholder="🔍 Поиск товаров..."
+                   th:value="${searchQuery}"
+                   class="search-input">
+            <button type="submit" class="search-btn">Найти</button>
+        </form>
     </div>
 
-    <div class="empty-message" th:if="${#lists.isEmpty(products)}">
-        📦 Товаров пока нет. Загляните позже!
+    <!-- ★★★ ДВУХКОЛОНОЧНЫЙ LAYOUT ★★★ -->
+    <div class="catalog-layout">
+
+        <!-- ★ САЙДБАР: КАТЕГОРИИ (слева) -->
+        <aside class="categories-sidebar">
+            <h3 class="sidebar-title">Категории</h3>
+
+            <a href="/catalog"
+               class="category-btn"
+               th:classappend="${activeCategory == null} ? 'active'">
+                <span class="category-icon">🏠</span>
+                <span>Все</span>
+            </a>
+
+            <a th:each="cat : ${categories}"
+               th:href="@{/catalog(category=${cat.slug})}"
+               class="category-btn"
+               th:classappend="${activeCategory == cat.slug} ? 'active'">
+                <span class="category-icon" th:text="${cat.icon}">📱</span>
+                <span th:text="${cat.name}">Телефоны</span>
+            </a>
+        </aside>
+
+        <!-- ★ КОНТЕНТ: ТОВАРЫ (справа) -->
+        <main class="catalog-main">
+            <div class="products-grid">
+                <div class="product-card" th:each="product : ${products}">
+                    <div class="product-image">
+                        <img th:src="${product.imageUrl}" th:alt="${product.productName}">
+                    </div>
+                    <div class="product-name" th:text="${product.productName}">Название</div>
+                    <div class="product-divider"></div>
+                    <div class="product-price" th:text="${product.price} + ' ₽'">Цена</div>
+                    <div class="quantity">
+                        <span th:text="'Остаток: ' + ${product.quantity} + ' шт'">Остаток</span>
+                    </div>
+                    <a th:href="@{/product/{id}(id=${product.productId})}" class="btn-detail">Подробнее</a>
+                </div>
+            </div>
+
+            <div class="empty-message" th:if="${#lists.isEmpty(products)}">
+                📦 Товаров в этой категории пока нет
+            </div>
+        </main>
+
     </div>
 </div>
 

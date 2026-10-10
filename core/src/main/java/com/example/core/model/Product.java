@@ -11,6 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Product {
     private UUID productId;
+    private Category category;
     private String productName;
     private String description;
     private String imageUrl;

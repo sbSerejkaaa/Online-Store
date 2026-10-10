@@ -1,5 +1,6 @@
 package com.example.order.service.outbox;
 
+
 import com.example.core.event.order.OrderCreatedEvent;
 import com.example.order.entity.OrderOutbox;
 import com.example.order.repository.OrderOutboxRepository;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.MDC;
 
 @Slf4j
 @Service
@@ -28,6 +30,7 @@ public class OrderOutboxService {
                     .eventType("ORDER_CREATED")
                     .aggregateId(event.getOrderId())
                     .payload(payload)
+                    .correlationId(MDC.get("correlationId"))
                     .build();
 
             outboxRepository.save(outbox);

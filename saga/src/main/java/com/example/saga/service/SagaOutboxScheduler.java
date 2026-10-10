@@ -57,7 +57,9 @@ public class SagaOutboxScheduler {
                         .setHeader(KafkaHeaders.KEY, outbox.getMessageKey())
                         .setHeader("eventId", outbox.getEventId().toString())
                         .setHeader("commandType", outbox.getCommandType())
-                        .setHeader("correlationId", "saga-outbox-" + outbox.getId())
+                        .setHeader("correlationId", outbox.getCorrelationId() != null
+                                ? outbox.getCorrelationId()
+                                : "saga-outbox-" + outbox.getId())
                         .setHeader("sourceService", "saga-service")
                         .build();
 

@@ -20,8 +20,12 @@ public class SagaState {
     @Column(name = "order_id", nullable = false, updatable = false)
     private UUID orderId;
 
-    @Column(name = "account_id", nullable = false)
-    private UUID accountId;
+    @Version
+    @Column(name = "version")
+    private Long version;
+
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
     @Column(name = "status", nullable = false, length = 30)
     @Enumerated(EnumType.STRING)
@@ -49,13 +53,13 @@ public class SagaState {
     private Instant updatedAt;
 
     public enum SagaStatus {
-        STARTED,              // сага стартовала, шлём ReserveProductCommand
-        RESERVING_PRODUCTS,   // ждём ProductReservedEvent
-        PRODUCTS_RESERVED,    // все товары зарезервированы, шлём CreatePaymentCommand
-        PAYING,               // ждём PaymentCompletedEvent
-        COMPLETED,            // заказ подтверждён
-        COMPENSATING,         // откат
-        FAILED                // сага упала
+        STARTED,
+        RESERVING_PRODUCTS,
+        PRODUCTS_RESERVED,
+        PAYING,
+        COMPLETED,
+        COMPENSATING,
+        FAILED
     }
 
     @PrePersist

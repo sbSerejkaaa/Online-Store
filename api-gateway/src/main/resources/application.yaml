@@ -1,10 +1,13 @@
 server:
   port: 8080
   forward-headers-strategy: framework
+  shutdown: graceful
 
 spring:
   application:
     name: api-gateway
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
   cloud:
     gateway:
       server:
@@ -46,6 +49,18 @@ spring:
               uri: lb://PRODUCT-SERVICE
               predicates:
                 - Path=/images/**
+
+            # ===== CATEGORIES (публичный) =====
+            - id: product-categories
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/api/categories/**
+
+            # ===== PRODUCT FEATURED (публичный, для главной) =====
+            - id: product-featured
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/api/products/featured
 
             # ===== PRODUCT API (защищённый) =====
             - id: product-service

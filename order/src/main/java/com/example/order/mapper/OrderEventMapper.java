@@ -22,8 +22,8 @@ public class OrderEventMapper {
 
         return OrderCreatedEvent.builder()
                 .orderId(order.getId())
+                .userId(order.getUserId())
                 .items(items)
-                // accountId будет установлен в handler
                 .build();
     }
 

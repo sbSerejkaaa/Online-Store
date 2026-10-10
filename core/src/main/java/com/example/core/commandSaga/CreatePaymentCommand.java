@@ -12,6 +12,6 @@ import java.util.UUID;
 @Builder
 public class CreatePaymentCommand {
     private UUID orderId;
-    private UUID accountId;
+    private UUID userId;
     private BigDecimal totalAmount;
 }
