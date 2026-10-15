@@ -1,6 +1,7 @@
 package com.example.payment.application.handler;
 
 import com.example.payment.infrastructure.persistence.entity.BankAccount;
+import com.example.payment.infrastructure.service.audit.AuditService;
 import com.example.payment.web.dto.response.AddFundsBankAccountResponse;
 import com.example.payment.application.command.AddingFundsToYourAccountCommand;
 import com.example.payment.infrastructure.service.bankAccount.AddFundsService;
@@ -17,6 +18,7 @@ public class AddMoneyBankAccountHandlerImpl implements PaymentCommandHandler<Add
 
     private final AddFundsValidator addFundsValidator;
     private final AddFundsService addFundsService;
+    private final AuditService auditService;
 
     @Override
     public AddFundsBankAccountResponse handle(AddingFundsToYourAccountCommand command) {
@@ -35,6 +37,14 @@ public class AddMoneyBankAccountHandlerImpl implements PaymentCommandHandler<Add
         AddFundsBankAccountResponse response = new AddFundsBankAccountResponse(
                 updatedAccount.getId(),
                 updatedAccount.getBalance()
+        );
+
+        auditService.log(
+                updatedAccount.getCustomerId(),
+                "BALANCE_DEPOSIT",
+                "BankAccount",
+                updatedAccount.getId(),
+                "amount=" + command.getAmount() + ", newBalance=" + updatedAccount.getBalance()
         );
 
         log.info("Пополнение счета успешно завершено. Счет: {}, Новый баланс: {}",

@@ -8,6 +8,7 @@ import com.example.payment.infrastructure.persistence.entity.factory.PaymentFact
 import com.example.payment.infrastructure.persistence.enums.BankAccountStatus;
 import com.example.payment.infrastructure.persistence.repository.BankAccountRepository;
 import com.example.payment.infrastructure.persistence.repository.PaymentRepository;
+import com.example.payment.infrastructure.service.audit.AuditService;
 import com.example.payment.infrastructure.service.exception.AccountBlockedException;
 import com.example.payment.infrastructure.service.exception.BankAccountNotFoundException;
 import com.example.payment.infrastructure.service.exception.InsufficientFundsException;
@@ -27,6 +28,7 @@ public class ProcessPaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentFactory paymentFactory;
     private final PaymentOutboxService outboxService;
+    private final AuditService auditService;
 
     @Transactional
     public void withdrawForOrder(CreatePaymentCommand command) {
@@ -62,6 +64,14 @@ public class ProcessPaymentService {
                 command.getTotalAmount(), command.getUserId(), newBalance);
 
         outboxService.saveSuccessfulPayment(command, savedPayment);
+
+        auditService.log(
+                command.getUserId(),
+                "PAYMENT_SUCCESS",
+                "Payment",
+                savedPayment.getId(),
+                "amount=" + command.getTotalAmount() + ", orderId=" + command.getOrderId()
+        );
     }
 
     @Transactional
@@ -70,5 +80,13 @@ public class ProcessPaymentService {
                 command.getOrderId(), errorMessage);
 
         outboxService.saveFailedPayment(command, errorMessage);
+
+        auditService.log(
+                command.getUserId(),
+                "PAYMENT_FAILED",
+                "Order",
+                command.getOrderId(),
+                "reason=" + errorMessage
+        );
     }
 }

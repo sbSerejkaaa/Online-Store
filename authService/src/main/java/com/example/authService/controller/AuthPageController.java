@@ -1,5 +1,6 @@
 package com.example.authService.controller;
 
+import com.example.authService.dto.LoginRequest;
 import com.example.authService.dto.UserRegistrationRequest;
 import com.example.authService.entity.EntityUsers;
 import com.example.authService.repository.UserRepository;
@@ -8,14 +9,16 @@ import com.example.authService.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
@@ -33,12 +36,14 @@ public class AuthPageController {
     }
 
     @GetMapping("/register")
-    public String showRegisterPage() {
+    public String showRegisterPage(Model model) {
+        model.addAttribute("userRegistrationRequest", new UserRegistrationRequest());
         return "register";
     }
 
     @GetMapping("/login")
-    public String showLoginPage() {
+    public String showLoginPage(Model model) {
+        model.addAttribute("loginRequest", new LoginRequest());
         return "login";
     }
 
@@ -63,17 +68,25 @@ public class AuthPageController {
     }
 
     @PostMapping("/register")
-    public String processRegister(@RequestParam String userName,
-                                  @RequestParam String email,
-                                  @RequestParam String password,
+    public String processRegister(@Valid @ModelAttribute("userRegistrationRequest") UserRegistrationRequest request,
+                                  BindingResult bindingResult,
                                   HttpServletResponse response,
                                   Model model) {
+        // ★ Валидация
+        if (bindingResult.hasErrors()) {
+            String error = bindingResult.getFieldErrors().stream()
+                    .map(f -> f.getDefaultMessage())
+                    .findFirst()
+                    .orElse("Ошибка валидации");
+            model.addAttribute("error", error);
+            return "register";
+        }
+
         try {
-            UserRegistrationRequest request = new UserRegistrationRequest(userName, email, password);
             userService.registeredUser(request);
 
             // Сразу логиним — получаем [access, refresh]
-            String[] tokens = userService.loginUser(email, password);
+            String[] tokens = userService.loginUser(request.getEmail(), request.getPassword());
 
             // Access token — 15 минут
             Cookie accessCookie = new Cookie("access_token", tokens[0]);
@@ -89,7 +102,6 @@ public class AuthPageController {
             refreshCookie.setMaxAge(604800);
             response.addCookie(refreshCookie);
 
-            // Редирект на /profile — фильтр прочитает cookie и покажет профиль
             return "redirect:/profile";
 
         } catch (Exception e) {
@@ -99,21 +111,29 @@ public class AuthPageController {
     }
 
     @PostMapping("/login")
-    public String processLogin(@RequestParam String email,
-                               @RequestParam String password,
+    public String processLogin(@Valid @ModelAttribute("loginRequest") LoginRequest request,
+                               BindingResult bindingResult,
                                HttpServletResponse response,
                                Model model) {
-        try {
-            String[] tokens = userService.loginUser(email, password);
+        // ★ Валидация
+        if (bindingResult.hasErrors()) {
+            String error = bindingResult.getFieldErrors().stream()
+                    .map(f -> f.getDefaultMessage())
+                    .findFirst()
+                    .orElse("Ошибка валидации");
+            model.addAttribute("error", error);
+            return "login";
+        }
 
-            // Access token — 15 минут
+        try {
+            String[] tokens = userService.loginUser(request.getEmail(), request.getPassword());
+
             Cookie accessCookie = new Cookie("access_token", tokens[0]);
             accessCookie.setHttpOnly(true);
             accessCookie.setPath("/");
             accessCookie.setMaxAge(900);
             response.addCookie(accessCookie);
 
-            // Refresh token — 7 дней
             Cookie refreshCookie = new Cookie("refresh_token", tokens[1]);
             refreshCookie.setHttpOnly(true);
             refreshCookie.setPath("/");
@@ -121,6 +141,7 @@ public class AuthPageController {
             response.addCookie(refreshCookie);
 
             return "redirect:/profile";
+
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             return "login";
@@ -129,18 +150,8 @@ public class AuthPageController {
 
     @GetMapping("/logout")
     public String logout(HttpServletRequest request, HttpServletResponse response) {
-        System.out.println("===== LOGOUT ВЫЗВАН =====");
-
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("===== AUTH: " + auth);
 
-        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
-            String userId = (String) auth.getPrincipal();
-            System.out.println("===== УДАЛЯЮ КЛЮЧ: refresh:" + userId);
-            refreshTokenService.delete(userId);
-        } else {
-            System.out.println("===== НЕ АУТЕНТИФИЦИРОВАН, КЛЮЧ НЕ УДАЛЯЮ");
-        }
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             String userId = (String) auth.getPrincipal();
             refreshTokenService.delete(userId);

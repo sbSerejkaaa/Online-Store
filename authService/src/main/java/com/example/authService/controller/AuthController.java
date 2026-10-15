@@ -5,6 +5,7 @@ import com.example.authService.dto.LoginResponse;
 import com.example.authService.dto.UserRegistrationRequest;
 import com.example.authService.dto.UserResponse;
 import com.example.authService.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +19,12 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse registerUser(@RequestBody UserRegistrationRequest request) {
+    public UserResponse registerUser(@RequestBody @Valid UserRegistrationRequest request) {
         return userService.registeredUser(request);
     }
 
     @PostMapping("/login")
-    public LoginResponse loginUser(@RequestBody LoginRequest request) {
+    public LoginResponse loginUser(@RequestBody @Valid LoginRequest request) {
         String[] tokens = userService.loginUser(request.getEmail(), request.getPassword());
         return new LoginResponse(tokens[0], tokens[1]);
     }

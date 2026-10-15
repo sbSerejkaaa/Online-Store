@@ -29,9 +29,14 @@ public class EntityUsers {
     @Column(name = "registration_date", nullable = false, updatable = false)
     private Instant registrationDate;
 
-    // НОВОЕ ПОЛЕ
     @Column(name = "role", nullable = false, length = 20)
     private String role;
+
+    @Column(name = "failed_attempts", nullable = false)
+    private Integer failedAttempts = 0;
+
+    @Column(name = "lockout_until")
+    private Instant lockoutUntil;
 
     public EntityUsers(String userName, String email, String password) {
         this.userName = userName;

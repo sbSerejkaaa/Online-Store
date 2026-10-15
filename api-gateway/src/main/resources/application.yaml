@@ -55,12 +55,22 @@ spring:
               uri: lb://PRODUCT-SERVICE
               predicates:
                 - Path=/api/categories/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: productCB
+                    fallbackUri: forward:/fallback/product
 
             # ===== PRODUCT FEATURED (публичный, для главной) =====
             - id: product-featured
               uri: lb://PRODUCT-SERVICE
               predicates:
                 - Path=/api/products/featured
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: productCB
+                    fallbackUri: forward:/fallback/product
 
             # ===== PRODUCT API (защищённый) =====
             - id: product-service
@@ -69,12 +79,34 @@ spring:
                 - Path=/api/inv/**, /api/products/**
               filters:
                 - JwtAuth
+                - name: Retry
+                  args:
+                    retries: 3
+                    methods: GET
+                    series:
+                      - SERVER_ERROR
+                    exceptions:
+                      - java.io.IOException
+                    backoff:
+                      firstBackoff: 50ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: false
+                - name: CircuitBreaker
+                  args:
+                    name: productCB
+                    fallbackUri: forward:/fallback/product
 
             # ===== PRODUCT PAGES + СТАТИКА (публичные) =====
             - id: product-pages
               uri: lb://PRODUCT-SERVICE
               predicates:
                 - Path=/product/**, /catalog/**, /cart, /orders
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: productCB
+                    fallbackUri: forward:/fallback/product
 
             # ===== ORDER API (защищённый) =====
             - id: order-service
@@ -83,6 +115,10 @@ spring:
                 - Path=/api/orders/**
               filters:
                 - JwtAuth
+                - name: CircuitBreaker
+                  args:
+                    name: orderCB
+                    fallbackUri: forward:/fallback/order
 
             # ===== PAYMENT API (защищённый) =====
             - id: payment-service
@@ -91,6 +127,10 @@ spring:
                 - Path=/api/v1/payments/**
               filters:
                 - JwtAuth
+                - name: CircuitBreaker
+                  args:
+                    name: paymentCB
+                    fallbackUri: forward:/fallback/payment
 
             # ===== CART SERVICE (защищённый) =====
             - id: cart-service
@@ -103,11 +143,40 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
   instance:
-    hostname: localhost
+    hostname: ${EUREKA_HOSTNAME:localhost}
     instance-id: ${spring.application.name}:${server.port}
     prefer-ip-address: false
 
 jwt:
   secret: ${JWT_SECRET:superSecretKeyForAuthService2025MustBeLongEnoughForHS256}
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+    instances:
+      productCB:
+        base-config: default
+      paymentCB:
+        base-config: default
+      orderCB:
+        base-config: default
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 5s
+    instances:
+      productCB:
+        base-config: default
+      paymentCB:
+        base-config: default
+      orderCB:
+        base-config: default

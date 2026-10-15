@@ -1,5 +1,5 @@
 services:
-  # БД для Auth Service
+  # ===== POSTGRESQL =====
   postgres-auth:
     image: postgres:15-alpine
     container_name: postgres-auth
@@ -13,7 +13,12 @@ services:
       - postgres_auth_data:/var/lib/postgresql/data
     networks:
       - app-network
-  # БД для Order Service
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   postgres-order:
     image: postgres:15-alpine
     container_name: postgres-order
@@ -27,8 +32,12 @@ services:
       - postgres_order_data:/var/lib/postgresql/data
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # БД для Product Service
   postgres-product:
     image: postgres:15-alpine
     container_name: postgres-product
@@ -42,8 +51,12 @@ services:
       - postgres_product_data:/var/lib/postgresql/data
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # БД для Payment Service
   postgres-payment:
     image: postgres:15-alpine
     container_name: postgres-payment
@@ -57,8 +70,12 @@ services:
       - postgres_payment_data:/var/lib/postgresql/data
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # БД для Notification Service
   postgres-notification:
     image: postgres:15-alpine
     container_name: postgres-notification
@@ -72,8 +89,12 @@ services:
       - postgres_notification_data:/var/lib/postgresql/data
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # БД для Saga Service
   postgres-saga:
     image: postgres:15-alpine
     container_name: postgres-saga
@@ -87,7 +108,13 @@ services:
       - postgres_saga_data:/var/lib/postgresql/data
     networks:
       - app-network
-  # Kafka 4.0 в KRaft режиме
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===== KAFKA =====
   kafka:
     image: apache/kafka:4.0.0
     container_name: kafka
@@ -111,8 +138,13 @@ services:
       - kafka_data:/var/lib/kafka/data
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
 
-  # Redis
+  # ===== REDIS =====
   redis:
     image: redis:7-alpine
     container_name: redis
@@ -120,7 +152,13 @@ services:
       - "6379:6379"
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # ===== MAILHOG =====
   mailhog:
     image: mailhog/mailhog:latest
     container_name: mailhog
@@ -130,6 +168,7 @@ services:
     networks:
       - app-network
 
+  # ===== PROMETHEUS =====
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -142,6 +181,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  # ===== GRAFANA =====
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -151,6 +191,210 @@ services:
       - app-network
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
+
+  # ===== DISCOVERY SERVER =====
+  discovery-server:
+    build:
+      context: .
+      dockerfile: discovery-server/Dockerfile
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    networks:
+      - app-network
+
+  # ===== API GATEWAY =====
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      EUREKA_HOSTNAME: api-gateway
+      JWT_SECRET: superSecretKeyForAuthService2025MustBeLongEnoughForHS256
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - discovery-server
+    networks:
+      - app-network
+
+  # ===== AUTH SERVICE =====
+  auth-service:
+    build:
+      context: .
+      dockerfile: authService/Dockerfile
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      DB_URL: jdbc:postgresql://postgres-auth:5432/auth_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: password
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      EUREKA_HOSTNAME: auth-service
+      JWT_SECRET: superSecretKeyForAuthService2025MustBeLongEnoughForHS256
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+    networks:
+      - app-network
+
+  # ===== PRODUCT SERVICE =====
+  product-service:
+    build:
+      context: .
+      dockerfile: product/Dockerfile
+    container_name: product-service
+    ports:
+      - "8082:8082"
+    environment:
+      DB_URL: jdbc:postgresql://postgres-product:5432/inventory_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: 12345qwert
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      EUREKA_HOSTNAME: product-service
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      postgres-product:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+    networks:
+      - app-network
+
+  # ===== ORDER SERVICE =====
+  order-service:
+    build:
+      context: .
+      dockerfile: order/Dockerfile
+    container_name: order-service
+    ports:
+      - "8083:8083"
+    environment:
+      DB_URL: jdbc:postgresql://postgres-order:5432/order_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: 12345qwert
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      EUREKA_HOSTNAME: order-service
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      postgres-order:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+    networks:
+      - app-network
+
+  # ===== PAYMENT SERVICE =====
+  payment-service:
+    build:
+      context: .
+      dockerfile: payment/Dockerfile
+    container_name: payment-service
+    ports:
+      - "8084:8084"
+    environment:
+      DB_URL: jdbc:postgresql://postgres-payment:5432/payment_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: 12345qwert
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      EUREKA_HOSTNAME: payment-service
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      postgres-payment:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+    networks:
+      - app-network
+
+  # ===== SAGA SERVICE =====
+  saga-service:
+    build:
+      context: .
+      dockerfile: saga/Dockerfile
+    container_name: saga-service
+    ports:
+      - "8085:8085"
+    environment:
+      DB_URL: jdbc:postgresql://postgres-saga:5432/saga_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: 12345qwert
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      EUREKA_HOSTNAME: saga-service
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      postgres-saga:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+    networks:
+      - app-network
+
+  # ===== CART SERVICE =====
+  cart-service:
+    build:
+      context: .
+      dockerfile: cart-service/Dockerfile
+    container_name: cart-service
+    ports:
+      - "8087:8087"
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      EUREKA_HOSTNAME: cart-service
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - discovery-server
+      - redis
+    networks:
+      - app-network
+
+  # ===== NOTIFICATION SERVICE (опционально) =====
+  notification-service:
+    build:
+      context: .
+      dockerfile: notificationService/Dockerfile
+    container_name: notification-service
+    ports:
+      - "8086:8086"
+    environment:
+      DB_URL: jdbc:postgresql://postgres-notification:5432/notification_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: 12345qwert
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      EUREKA_HOSTNAME: notification-service
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      postgres-notification:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+    networks:
+      - app-network
 
 volumes:
   postgres_auth_data:

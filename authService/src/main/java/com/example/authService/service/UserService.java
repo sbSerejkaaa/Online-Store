@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -72,11 +73,36 @@ public class UserService {
 
     public String[] loginUser(String email, String password) {
         EntityUsers user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+                .orElseThrow(() -> new RuntimeException("Неверный email или пароль"));
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Неверный пароль");
+        // Проверка блокировки
+        if (user.getLockoutUntil() != null
+                && user.getLockoutUntil().isAfter(Instant.now())) {
+            long minutes = java.time.Duration.between(Instant.now(), user.getLockoutUntil()).toMinutes();
+            throw new RuntimeException("Аккаунт заблокирован на " + minutes + " мин");
         }
+
+        // Неверный пароль
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            int attempts = user.getFailedAttempts() == null ? 0 : user.getFailedAttempts();
+            attempts++;
+
+            if (attempts >= 5) {
+                user.setLockoutUntil(Instant.now().plus(java.time.Duration.ofMinutes(15)));
+                user.setFailedAttempts(0);
+                userRepository.save(user);
+                throw new RuntimeException("Слишком много попыток. Аккаунт заблокирован на 15 минут");
+            }
+
+            user.setFailedAttempts(attempts);
+            userRepository.save(user);
+            throw new RuntimeException("Неверный email или пароль. Осталось попыток: " + (5 - attempts));
+        }
+
+        // Успех — сброс
+        user.setFailedAttempts(0);
+        user.setLockoutUntil(null);
+        userRepository.save(user);
 
         String accessToken = jwtService.generateAccessToken(
                 user.getId().toString(),
