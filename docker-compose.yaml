@@ -173,7 +173,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus:/etc/prometheus
     ports:
       - "9090:9090"
     networks:
@@ -181,6 +181,14 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  # ===== ZIPKIN =====
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - app-network
   # ===== GRAFANA =====
   grafana:
     image: grafana/grafana:latest
@@ -190,7 +198,9 @@ services:
     networks:
       - app-network
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=12345qwert
+    volumes:
+      - grafana_data:/var/lib/grafana
 
   # ===== DISCOVERY SERVER =====
   discovery-server:
@@ -363,6 +373,8 @@ services:
     environment:
       EUREKA_URL: http://discovery-server:8761/eureka/
       EUREKA_HOSTNAME: cart-service
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       SPRING_PROFILES_ACTIVE: docker
     depends_on:
       - discovery-server
@@ -404,6 +416,7 @@ volumes:
   postgres_notification_data:
   postgres_saga_data:
   kafka_data:
+  grafana_data:
 
 networks:
   app-network:

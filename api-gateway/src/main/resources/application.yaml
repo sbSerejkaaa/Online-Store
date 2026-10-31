@@ -13,7 +13,6 @@ spring:
       server:
         webflux:
           routes:
-            # ===== ПУБЛИЧНЫЕ МАРШРУТЫ AUTH (без JWT) =====
             - id: auth-public
               uri: lb://AUTH-SERVICE
               predicates:
@@ -21,13 +20,11 @@ spring:
               filters:
                 - RewriteLocationResponseHeader=AS_IN_REQUEST, Location, localhost:8080
 
-            # ===== СТАТИКА AUTH (публичная) =====
             - id: auth-static
               uri: lb://AUTH-SERVICE
               predicates:
                 - Path=/auth/css/**, /auth/js/**, /auth/images/**
 
-            # ===== ГЛАВНАЯ (публичная) =====
             - id: auth-home
               uri: lb://AUTH-SERVICE
               predicates:
@@ -35,7 +32,6 @@ spring:
               filters:
                 - RewriteLocationResponseHeader=AS_IN_REQUEST, Location, localhost:8080
 
-            # ===== ЗАЩИЩЁННЫЕ МАРШРУТЫ AUTH (нужен JWT) =====
             - id: auth-protected
               uri: lb://AUTH-SERVICE
               predicates:
@@ -44,13 +40,11 @@ spring:
                 - JwtAuth
                 - RewriteLocationResponseHeader=AS_IN_REQUEST, Location, localhost:8080
 
-            # ===== PRODUCT IMAGES (публичные) =====
             - id: product-images
               uri: lb://PRODUCT-SERVICE
               predicates:
                 - Path=/images/**
 
-            # ===== CATEGORIES (публичный) =====
             - id: product-categories
               uri: lb://PRODUCT-SERVICE
               predicates:
@@ -61,7 +55,6 @@ spring:
                     name: productCB
                     fallbackUri: forward:/fallback/product
 
-            # ===== PRODUCT FEATURED (публичный, для главной) =====
             - id: product-featured
               uri: lb://PRODUCT-SERVICE
               predicates:
@@ -72,11 +65,22 @@ spring:
                     name: productCB
                     fallbackUri: forward:/fallback/product
 
-            # ===== PRODUCT API (защищённый) =====
+            # ★ ДОБАВЛЕННЫЙ БЛОК: публичный доступ к каталогу и пагинации
+            - id: product-public
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/api/products/featured, /api/products/page, /api/categories/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: productCB
+                    fallbackUri: forward:/fallback/product
+
+            # ★ ИЗМЕНЕНО: убрали /api/products/** из JwtAuth, оставили только админку
             - id: product-service
               uri: lb://PRODUCT-SERVICE
               predicates:
-                - Path=/api/inv/**, /api/products/**
+                - Path=/api/inv/**
               filters:
                 - JwtAuth
                 - name: Retry
@@ -97,7 +101,6 @@ spring:
                     name: productCB
                     fallbackUri: forward:/fallback/product
 
-            # ===== PRODUCT PAGES + СТАТИКА (публичные) =====
             - id: product-pages
               uri: lb://PRODUCT-SERVICE
               predicates:
@@ -108,7 +111,6 @@ spring:
                     name: productCB
                     fallbackUri: forward:/fallback/product
 
-            # ===== ORDER API (защищённый) =====
             - id: order-service
               uri: lb://ORDER-SERVICE
               predicates:
@@ -120,7 +122,6 @@ spring:
                     name: orderCB
                     fallbackUri: forward:/fallback/order
 
-            # ===== PAYMENT API (защищённый) =====
             - id: payment-service
               uri: lb://PAYMENT-SERVICE
               predicates:
@@ -132,7 +133,6 @@ spring:
                     name: paymentCB
                     fallbackUri: forward:/fallback/payment
 
-            # ===== CART SERVICE (защищённый) =====
             - id: cart-service
               uri: lb://CART-SERVICE
               predicates:
@@ -151,6 +151,9 @@ eureka:
 
 jwt:
   secret: ${JWT_SECRET:superSecretKeyForAuthService2025MustBeLongEnoughForHS256}
+
+admin:
+  api-key: ${ADMIN_API_KEY:admin-secret-key-12345}
 
 resilience4j:
   circuitbreaker:
@@ -180,3 +183,10 @@ resilience4j:
         base-config: default
       orderCB:
         base-config: default
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans

@@ -3,16 +3,19 @@ package com.example.product.service;
 import com.example.core.commandSaga.ReserveProductCommand;
 import com.example.core.exception.ProductInsufficientQuantityException;
 import com.example.core.model.Product;
+import com.example.product.controller.rest.user.dto.ProductPageResponse;
 import com.example.product.entity.EntityProduct;
 import com.example.product.mapper.ProductMapper;
 import com.example.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -119,5 +122,39 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.searchByName(query.trim()).stream()
                 .map(productMapper::toModel)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProductPageResponse findPage(Instant cursor, int size) {
+        // если курсора нет (первый запрос) — берём «сейчас» (то есть все записи)
+        Instant effectiveCursor = cursor != null ? cursor : Instant.now();
+
+        // просим на 1 больше — чтобы узнать, есть ли ещё страницы
+        List<EntityProduct> rows = productRepository.findPageByCursor(
+                effectiveCursor,
+                PageRequest.of(0, size + 1)
+        );
+
+        // если вернулось больше чем size — значит есть следующая страница
+        boolean hasNext = rows.size() > size;
+
+        // отрезаем лишний элемент
+        List<EntityProduct> page = hasNext ? rows.subList(0, size) : rows;
+
+        // маппим в модели
+        List<Product> items = page.stream()
+                .map(productMapper::toModel)
+                .collect(Collectors.toList());
+
+        // курсор = createdAt последнего товара на странице (или null если конец)
+        Instant nextCursor = hasNext && !page.isEmpty()
+                ? page.get(page.size() - 1).getCreatedAt()
+                : null;
+
+        return ProductPageResponse.builder()
+                .items(items)
+                .nextCursor(nextCursor)
+                .build();
     }
 }

@@ -10,7 +10,7 @@ spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5434/payment_db}
     username: ${DB_USERNAME:postgres}
-    password: 12345qwert
+    password: ${DB_PASSWORD:12345qwert}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -20,7 +20,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   kafka:
-    bootstrap-servers: localhost:29092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
@@ -29,8 +29,8 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   cache:
     type: redis
 
@@ -54,3 +54,9 @@ management:
         enabled: true
     tags:
       application: ${spring.application.name:unknown}
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+     tracing:
+       endpoint: http://localhost:9411/api/v2/spans

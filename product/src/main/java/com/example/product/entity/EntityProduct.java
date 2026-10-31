@@ -3,6 +3,8 @@ package com.example.product.entity;
 import com.example.core.status.ProductStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -14,6 +16,8 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SQLDelete(sql = "UPDATE product SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class EntityProduct {
 
     @Id
@@ -39,13 +43,16 @@ public class EntityProduct {
     @Column(name = "status")
     private ProductStatus status;
 
-    // ★ НОВОЕ: связь с категорией
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private EntityCategory category;
 
     @Column(name = "created_at")
     private Instant createdAt;
+
+    // ★ НОВОЕ ПОЛЕ
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 
     public EntityProduct(String productName, Integer quantity, BigDecimal price) {
         this.productName = productName;

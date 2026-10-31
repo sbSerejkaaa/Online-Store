@@ -52,7 +52,9 @@ public class OrderKafkaConfig {
 
     @Bean
     public KafkaTemplate<String, Object> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
+        KafkaTemplate<String, Object> template = new KafkaTemplate<>(producerFactory());
+        template.setObservationEnabled(true);  // ★
+        return template;
     }
 
     @Bean
@@ -111,6 +113,7 @@ public class OrderKafkaConfig {
         factory.setConsumerFactory(consumerFactory);
         factory.setCommonErrorHandler(errorHandler);
         factory.setConcurrency(3);
+        factory.getContainerProperties().setObservationEnabled(true);
         return factory;
     }
 }

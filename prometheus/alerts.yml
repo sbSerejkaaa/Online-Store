@@ -1,0 +1,71 @@
+groups:
+  - name: product-service-alerts
+    rules:
+      # 1. Сервис упал (метрика up == 0)
+      - alert: ProductServiceDown
+        expr: up{job="product-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Product Service упал"
+          description: "Сервис {{ $labels.instance }} недоступен больше 1 минуты."
+
+      # 2. Высокий процент ошибок 500
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_server_requests_seconds_count{application="product-service", status="500"}[5m]))
+          /
+          sum(rate(http_server_requests_seconds_count{application="product-service"}[5m]))
+          > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокий процент ошибок в Product Service"
+          description: "Больше 5% запросов падают с 500. Текущее значение: {{ $value | humanizePercentage }}"
+
+      # 3. SLO: 99% успешных запросов
+      - alert: SloViolation
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{application="product-service", status="200"}[5m]))
+            /
+            sum(rate(http_server_requests_seconds_count{application="product-service"}[5m]))
+          ) < 0.99
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Нарушение SLO (успешность < 99%)"
+          description: "Процент успешных запросов упал до {{ $value | humanizePercentage }}. SLO = 99%."
+
+      # 4. SLO: 95% запросов быстрее 500 мс
+      - alert: SloLatencyViolation
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_bucket{application="product-service", le="0.5"}[5m]))
+            /
+            sum(rate(http_server_requests_seconds_count{application="product-service"}[5m]))
+          ) < 0.95
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Нарушение SLO по скорости (95% < 500 мс)"
+          description: "Только {{ $value | humanizePercentage }} запросов быстрее 500 мс. SLO = 95%."
+
+      # 5. Error Budget: если бюджет ошибок исчерпан (больше 1% ошибок)
+      - alert: ErrorBudgetExhausted
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{application="product-service", status=~"5.."}[1h]))
+            /
+            sum(rate(http_server_requests_seconds_count{application="product-service"}[1h]))
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Error Budget исчерпан (ошибок больше 1%)"
+          description: "За последний час {{ $value | humanizePercentage }} запросов упали с 5xx. Бюджет ошибок = 1%."

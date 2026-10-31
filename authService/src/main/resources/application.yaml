@@ -2,6 +2,7 @@ server:
   port: 8081
   forward-headers-strategy: native
   shutdown: graceful
+
 spring:
   application:
     name: auth-service
@@ -21,13 +22,14 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
 eureka:
   client:
     service-url:
@@ -36,7 +38,24 @@ eureka:
     hostname: ${EUREKA_HOSTNAME:localhost}
     instance-id: ${spring.application.name}:${server.port}
     prefer-ip-address: false
+
 jwt:
   secret: ${JWT_SECRET:superSecretKeyForAuthService2025MustBeLongEnoughForHS256}
   expiration: 900000
   refresh-expiration: 604800000
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://host.docker.internal:9411/api/v2/spans
+      connect-timeout: 1s
+      read-timeout: 5s
+
+logging:
+  level:
+    io.micrometer: DEBUG
+    brave: DEBUG
+    zipkin2: DEBUG

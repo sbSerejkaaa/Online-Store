@@ -3,6 +3,7 @@ package com.example.core.model;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 @Setter
@@ -17,5 +18,6 @@ public class Product {
     private String imageUrl;
     private Integer quantity;
     private BigDecimal price;
+    private Instant createdAt;
 
 }

@@ -1,6 +1,8 @@
 package com.example.product.controller;
 
 import com.example.core.model.Product;
+
+import com.example.product.controller.rest.user.dto.ProductPageResponse;
 import com.example.product.service.CategoryService;
 import com.example.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,8 @@ public class ProductPageController {
     private final ProductService productService;
     private final CategoryService categoryService;
 
+    private static final int PAGE_SIZE = 20;
+
     @GetMapping({"/", "/catalog"})
     public String showCatalog(
             @RequestParam(required = false) String category,
@@ -34,9 +38,12 @@ public class ProductPageController {
             model.addAttribute("searchQuery", q);
             model.addAttribute("activeCategory", null);
         } else if (category == null || category.isBlank()) {
-            products = productService.findAll();
+            // ★ Чистый каталог — берём только первые 20 (пагинация)
+            ProductPageResponse page = productService.findPage(null, PAGE_SIZE);
+            products = page.getItems();
             model.addAttribute("activeCategory", null);
         } else {
+            // ★ Категория — все товары категории (можно потом тоже пагинировать)
             products = productService.findByCategorySlug(category);
             model.addAttribute("activeCategory", category);
         }

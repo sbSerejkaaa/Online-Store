@@ -1,6 +1,7 @@
 package com.example.product.controller.rest.user;
 
 import com.example.core.model.Product;
+import com.example.product.controller.rest.user.dto.ProductPageResponse;
 import com.example.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.List;
 
 @Slf4j
@@ -27,5 +29,12 @@ public class ProductController {
     public List<Product> getFeatured(@RequestParam(defaultValue = "6") int limit) {
         log.debug("Запрос featured товаров, limit={}", limit);
         return productService.findFeatured(limit);
+    }
+    @GetMapping("/page")
+    public ProductPageResponse getPage(
+            @RequestParam(required = false) Instant cursor,
+            @RequestParam(defaultValue = "20") int size) {
+        log.debug("Запрос страницы товаров: cursor={}, size={}", cursor, size);
+        return productService.findPage(cursor, Math.min(size, 100));  // защита от size=999999
     }
 }

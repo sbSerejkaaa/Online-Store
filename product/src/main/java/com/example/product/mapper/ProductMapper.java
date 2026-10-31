@@ -42,6 +42,7 @@ public class ProductMapper {
         productModel.setImageUrl(entityProduct.getImageUrl());
         productModel.setQuantity(entityProduct.getQuantity());
         productModel.setPrice(entityProduct.getPrice());
+        productModel.setCreatedAt(entityProduct.getCreatedAt());
 
         // ★ НОВОЕ: маппинг категории
         if (entityProduct.getCategory() != null) {

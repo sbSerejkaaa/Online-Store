@@ -83,7 +83,7 @@
 
         <!-- ★ КОНТЕНТ: ТОВАРЫ (справа) -->
         <main class="catalog-main">
-            <div class="products-grid">
+            <div class="products-grid" id="products-grid">
                 <div class="product-card" th:each="product : ${products}">
                     <div class="product-image">
                         <img th:src="${product.imageUrl}" th:alt="${product.productName}">
@@ -101,11 +101,95 @@
             <div class="empty-message" th:if="${#lists.isEmpty(products)}">
                 📦 Товаров в этой категории пока нет
             </div>
+
+            <!-- ★ Кнопка "Загрузить ещё" -->
+            <div id="load-more-wrapper" style="text-align: center; margin-top: 40px; display: none;">
+                <button id="load-more-btn" class="btn-detail" style="max-width: 300px; margin: 0 auto;">
+                    ⬇ Загрузить ещё
+                </button>
+            </div>
         </main>
 
     </div>
 </div>
 
 <script th:src="@{/product/js/space-script.js}"></script>
+
+<!-- ★ Пагинация (только для чистого каталога, без поиска/категории) -->
+<script th:inline="javascript">
+    (function() {
+        // Если на странице есть фильтр (поиск/категория) — пагинацию не включаем
+        const isFiltered = /*[[${searchQuery != null && !searchQuery.isEmpty()}]]*/ false
+                        || /*[[${activeCategory != null}]]*/ false;
+        if (isFiltered) return;
+
+        const grid = document.getElementById('products-grid');
+        const wrapper = document.getElementById('load-more-wrapper');
+        const btn = document.getElementById('load-more-btn');
+        if (!grid || !wrapper || !btn) return;
+
+        let nextCursor = null;
+        let loading = false;
+
+        // Первый запрос — узнаём nextCursor (товары уже отрендерены Thymeleaf)
+        async function initCursor() {
+            try {
+                const r = await fetch('/api/products/page?size=20');
+                if (!r.ok) return;
+                const data = await r.json();
+                nextCursor = data.nextCursor;
+                if (nextCursor) wrapper.style.display = 'block';
+            } catch (e) {
+                console.error('Paginate init error:', e);
+            }
+        }
+
+        // Загрузка следующей страницы
+        async function loadMore() {
+            if (loading || !nextCursor) return;
+            loading = true;
+            btn.disabled = true;
+            btn.textContent = '⏳ Загрузка...';
+
+            try {
+                const r = await fetch('/api/products/page?size=20&cursor=' + encodeURIComponent(nextCursor));
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                const data = await r.json();
+
+                (data.items || []).forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.innerHTML = `
+                        <div class="product-image">
+                            <img src="${p.imageUrl || ''}" alt="${p.productName}">
+                        </div>
+                        <div class="product-name">${p.productName}</div>
+                        <div class="product-divider"></div>
+                        <div class="product-price">${p.price} ₽</div>
+                        <div class="quantity">Остаток: ${p.quantity} шт</div>
+                        <a href="/product/${p.productId}" class="btn-detail">Подробнее</a>
+                    `;
+                    grid.appendChild(card);
+                });
+
+                nextCursor = data.nextCursor;
+                if (!nextCursor) {
+                    wrapper.style.display = 'none';
+                }
+            } catch (e) {
+                console.error('Load more error:', e);
+                alert('Не удалось загрузить товары');
+            } finally {
+                loading = false;
+                btn.disabled = false;
+                btn.textContent = '⬇ Загрузить ещё';
+            }
+        }
+
+        btn.addEventListener('click', loadMore);
+        initCursor();
+    })();
+</script>
+
 </body>
 </html>

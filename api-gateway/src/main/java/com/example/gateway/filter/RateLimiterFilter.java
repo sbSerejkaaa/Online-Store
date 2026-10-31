@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component
+@Profile("!test")
 @RequiredArgsConstructor
 public class RateLimiterFilter implements GlobalFilter, Ordered {
 
@@ -45,7 +47,9 @@ public class RateLimiterFilter implements GlobalFilter, Ordered {
         if (forwarded != null && !forwarded.isBlank()) {
             return forwarded.split(",")[0].trim();
         }
-        if (exchange.getRequest().getRemoteAddress() != null) {
+
+        if (exchange.getRequest().getRemoteAddress() != null
+                && exchange.getRequest().getRemoteAddress().getAddress() != null) {
             return exchange.getRequest().getRemoteAddress().getAddress().getHostAddress();
         }
         return "unknown";

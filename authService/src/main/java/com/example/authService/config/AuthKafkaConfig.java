@@ -56,6 +56,8 @@ public class AuthKafkaConfig {
 
     @Bean
     public KafkaTemplate<String, UserRegisteredEvent> kafkaTemplate(){
-        return new KafkaTemplate<>(producerFactory());
+        KafkaTemplate<String, UserRegisteredEvent> template = new KafkaTemplate<>(producerFactory());
+        template.setObservationEnabled(true);
+        return template;
     }
 }

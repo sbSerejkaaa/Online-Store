@@ -2,8 +2,10 @@ package com.example.product.service;
 
 import com.example.core.commandSaga.ReserveProductCommand;
 import com.example.core.model.Product;
+import com.example.product.controller.rest.user.dto.ProductPageResponse;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,4 +28,6 @@ public interface ProductService {
     List<Product> findByCategorySlug(String slug);
 
     List<Product> searchByName(String query);
+
+    ProductPageResponse findPage(Instant cursor, int size);
 }

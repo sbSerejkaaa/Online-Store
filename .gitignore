@@ -19,5 +19,17 @@ bin/
 Thumbs.db 
 application-secret.yaml
 
- 
+# Docker
+backups/
+*.sql
+
+# jqwik
+.jqwik-database
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# IDEA
+*.iws
+*.ipr
  
