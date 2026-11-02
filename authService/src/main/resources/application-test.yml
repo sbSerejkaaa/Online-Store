@@ -1,0 +1,26 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    producer:
+      properties:
+        delivery.timeout.ms: 5000
+        request.timeout.ms: 3000
+
+eureka:
+  client:
+    enabled: false
+
+jwt:
+  secret: testSecretKeyForAuthServiceTestsMustBeLongEnoughForHS256Algorithm
+  expiration: 900000
+  refresh-expiration: 604800000
+
+logging:
+  level:
+    root: WARN
+    com.example.authService: INFO
