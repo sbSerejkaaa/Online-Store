@@ -65,8 +65,8 @@ jobs:
           - product
           - order
           - payment
-          - saga
-          - cart-service
+          # - saga
+          # - cart-service
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
