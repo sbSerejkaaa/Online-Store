@@ -50,7 +50,6 @@ public class EntityProduct {
     @Column(name = "created_at")
     private Instant createdAt;
 
-    // ★ НОВОЕ ПОЛЕ
     @Column(name = "deleted_at")
     private Instant deletedAt;
 

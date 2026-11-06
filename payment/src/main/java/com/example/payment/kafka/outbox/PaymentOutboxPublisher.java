@@ -62,7 +62,6 @@ public class PaymentOutboxPublisher {
             } catch (Exception e) {
                 log.error("OutboxPublisher: failed {}: {}",
                         outbox.getEventId(), e.getMessage());
-                // Оставляем PENDING
             }
         }
     }

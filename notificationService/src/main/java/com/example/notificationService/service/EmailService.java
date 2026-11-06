@@ -25,7 +25,6 @@ public class EmailService {
 
     @Transactional
     public void sendWelcomeEmail(UserRegisteredEvent event){
-        log.info("=== НАЧАЛО ОТПРАВКИ EMAIL ===");
         NotificationLog notificationLog = NotificationLog.builder()
                 .userId(event.getUserId())
                 .email(event.getEmail())
@@ -51,17 +50,14 @@ public class EmailService {
 
 
         } catch (MailAuthenticationException | MailSendException | MessagingException e) {
-            // Фатальные ошибки - не повторяем
             handleError(notificationLog, "FAILED", e);
             throw new NonRetryableException("Ошибка отправки email: " + e.getMessage());
         }  catch (Exception e) {
-            // Любые другие ошибки - временные
             handleError(notificationLog, "RETRYING", e);
             throw new RetryableException("Временная ошибка почтового сервиса", e);
         }
 
         notificationRepository.save(notificationLog);
-        log.info("=== КОНЕЦ ОТПРАВКИ EMAIL ===");
     }
 
     private String buildEmailContent(String email) {
@@ -85,5 +81,4 @@ public class EmailService {
         log.error("Ошибка отправки email для {}: {}",
                 notificationLog.getEmail(), e.getMessage());
     }
-
 }

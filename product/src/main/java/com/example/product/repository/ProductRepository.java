@@ -23,7 +23,6 @@ public interface ProductRepository extends JpaRepository<EntityProduct, UUID> {
     @EntityGraph(attributePaths = {"category"})
     List<EntityProduct> findByCategory_Slug(String slug);
 
-    // ★ ИЗМЕНЕНО: Full-Text Search вместо LIKE
     @EntityGraph(attributePaths = {"category"})
     @Query(value = "SELECT * FROM product WHERE search_vector @@ plainto_tsquery('russian', :query) AND deleted_at IS NULL ORDER BY ts_rank(search_vector, plainto_tsquery('russian', :query)) DESC",
             nativeQuery = true)

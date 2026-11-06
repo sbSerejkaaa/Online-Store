@@ -47,7 +47,6 @@ public class OrderEntity {
         }
     }
 
-    // Удобный метод для добавления item (держит двустороннюю связь)
     public void addItem(OrderItemEntity item) {
         items.add(item);
         item.setOrder(this);

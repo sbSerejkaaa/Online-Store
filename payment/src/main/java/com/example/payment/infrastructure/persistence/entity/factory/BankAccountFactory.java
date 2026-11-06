@@ -19,8 +19,8 @@ public class BankAccountFactory {
 
         return BankAccount.builder()
                 .customerId(customerId)
-                .balance(BigDecimal.ZERO)  // Начальный баланс = 0
-                .status(BankAccountStatus.ACTIVE)  // Счет активен
+                .balance(BigDecimal.ZERO)
+                .status(BankAccountStatus.ACTIVE)
                 .build();
     }
 }

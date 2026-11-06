@@ -34,6 +34,5 @@ class OrderApplicationTests {
 
 	@Test
 	void contextLoads() {
-		// Контекст поднялся — тест пройден
 	}
 }

@@ -19,13 +19,10 @@ public class OrderProcessor {
     public OrderResponse handleCommand(CreateOrderCommand command) {
         log.info("OrderProcessor: обработка команды создания заказа");
 
-        // Делегируем всю работу хендлеру
-        // Заполняеи модель данными, для отправки на фронтенд
         Orders order = createOrderHandler.handle(command);
 
         log.info("OrderProcessor: заказ создан с ID: {}", order.getId());
 
-        // Конвертируем в Response
         return responseMapper.toResponse(order);
     }
 }

@@ -75,14 +75,12 @@ public class UserService {
         EntityUsers user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Неверный email или пароль"));
 
-        // Проверка блокировки
         if (user.getLockoutUntil() != null
                 && user.getLockoutUntil().isAfter(Instant.now())) {
             long minutes = java.time.Duration.between(Instant.now(), user.getLockoutUntil()).toMinutes();
             throw new RuntimeException("Аккаунт заблокирован на " + minutes + " мин");
         }
 
-        // Неверный пароль
         if (!passwordEncoder.matches(password, user.getPassword())) {
             int attempts = user.getFailedAttempts() == null ? 0 : user.getFailedAttempts();
             attempts++;
@@ -99,7 +97,6 @@ public class UserService {
             throw new RuntimeException("Неверный email или пароль. Осталось попыток: " + (5 - attempts));
         }
 
-        // Успех — сброс
         user.setFailedAttempts(0);
         user.setLockoutUntil(null);
         userRepository.save(user);
@@ -126,7 +123,6 @@ public class UserService {
                     user.getUserName(), user.getRegistrationDate()
             );
 
-            // ★ correlationId из MDC или fallback
             String correlationId = MDC.get("correlationId");
             if (correlationId == null || correlationId.isBlank()) {
                 correlationId = "auth-" + user.getId();

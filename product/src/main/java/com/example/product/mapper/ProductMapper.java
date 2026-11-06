@@ -44,7 +44,6 @@ public class ProductMapper {
         productModel.setPrice(entityProduct.getPrice());
         productModel.setCreatedAt(entityProduct.getCreatedAt());
 
-        // ★ НОВОЕ: маппинг категории
         if (entityProduct.getCategory() != null) {
             productModel.setCategory(toCategoryModel(entityProduct.getCategory()));
         }
@@ -61,7 +60,6 @@ public class ProductMapper {
         return productResponse;
     }
 
-    // ★ НОВЫЙ метод
     private Category toCategoryModel(EntityCategory entity) {
         return Category.builder()
                 .id(entity.getId())

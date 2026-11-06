@@ -24,7 +24,6 @@ public class AddMoneyBankAccountHandlerImpl implements PaymentCommandHandler<Add
     public AddFundsBankAccountResponse handle(AddingFundsToYourAccountCommand command) {
         log.info("Запуск процесса пополнения баланса. Trace ID: {}", command.getTraceId());
 
-        // ★ Никаких try/catch — пусть доменные исключения летят наружу
         addFundsValidator.validate(command);
         log.debug("Валидация команды пройдена");
 

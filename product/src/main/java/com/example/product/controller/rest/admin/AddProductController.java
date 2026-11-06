@@ -27,10 +27,8 @@ public class AddProductController {
 
         log.info("Заполнение склада товаром: {}", request.getNameProduct());
 
-        // Конвертируем DTO в команду
         AddProductOnWarehouseCommand command = converter.toAddProductCommand(request);
 
-        // Передаем команду в процессор
         ProductResponse response = productProcessor.handleCommand(command);
 
         log.info("Заказ создан: {}", response.getNameInventory());

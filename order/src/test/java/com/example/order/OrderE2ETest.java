@@ -74,7 +74,5 @@ class OrderE2ETest {
         // Проверяем, что он сохранился и получил ID
         assertNotNull(saved.getId());
         assertEquals(1, orderRepository.count());
-
-        System.out.println("✅ Testcontainers: Postgres и Kafka успешно запущены! Заказ сохранен с ID: " + saved.getId());
     }
 }

@@ -35,6 +35,6 @@ public class ProductController {
             @RequestParam(required = false) Instant cursor,
             @RequestParam(defaultValue = "20") int size) {
         log.debug("Запрос страницы товаров: cursor={}, size={}", cursor, size);
-        return productService.findPage(cursor, Math.min(size, 100));  // защита от size=999999
+        return productService.findPage(cursor, Math.min(size, 100));
     }
 }

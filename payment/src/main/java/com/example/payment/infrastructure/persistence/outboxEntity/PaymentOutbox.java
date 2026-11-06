@@ -32,7 +32,7 @@ public class PaymentOutbox {
     private UUID aggregateId;
 
     @Column(name = "payload", nullable = false, columnDefinition = "TEXT")
-    private String payload;  // JSON как текст (проще чем JSONB)
+    private String payload;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;

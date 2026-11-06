@@ -51,7 +51,6 @@ public class UserRegisteredConsumer {
             UserRegisteredEvent event,
             @Headers Map<String, Object> headers) {
 
-        // ★ Читаем correlationId из Kafka headers → кладём в MDC
         String correlationId = (String) headers.get("correlationId");
         if (correlationId == null || correlationId.isBlank()) {
             correlationId = "unknown-" + event.getUserId();

@@ -127,27 +127,21 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public ProductPageResponse findPage(Instant cursor, int size) {
-        // если курсора нет (первый запрос) — берём «сейчас» (то есть все записи)
         Instant effectiveCursor = cursor != null ? cursor : Instant.now();
 
-        // просим на 1 больше — чтобы узнать, есть ли ещё страницы
         List<EntityProduct> rows = productRepository.findPageByCursor(
                 effectiveCursor,
                 PageRequest.of(0, size + 1)
         );
 
-        // если вернулось больше чем size — значит есть следующая страница
         boolean hasNext = rows.size() > size;
 
-        // отрезаем лишний элемент
         List<EntityProduct> page = hasNext ? rows.subList(0, size) : rows;
 
-        // маппим в модели
         List<Product> items = page.stream()
                 .map(productMapper::toModel)
                 .collect(Collectors.toList());
 
-        // курсор = createdAt последнего товара на странице (или null если конец)
         Instant nextCursor = hasNext && !page.isEmpty()
                 ? page.get(page.size() - 1).getCreatedAt()
                 : null;

@@ -11,8 +11,8 @@ import java.util.UUID;
 @Builder
 public class Category {
     private UUID id;
-    private String name;        // "Телефоны"
-    private String slug;        // "phones"
-    private String icon;        // "📱"
-    private Integer sortOrder;  // порядок отображения
+    private String name;
+    private String slug;
+    private String icon;
+    private Integer sortOrder;
 }

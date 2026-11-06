@@ -85,17 +85,14 @@ public class AuthPageController {
         try {
             userService.registeredUser(request);
 
-            // Сразу логиним — получаем [access, refresh]
             String[] tokens = userService.loginUser(request.getEmail(), request.getPassword());
 
-            // Access token — 15 минут
             Cookie accessCookie = new Cookie("access_token", tokens[0]);
             accessCookie.setHttpOnly(true);
             accessCookie.setPath("/");
             accessCookie.setMaxAge(900);
             response.addCookie(accessCookie);
 
-            // Refresh token — 7 дней
             Cookie refreshCookie = new Cookie("refresh_token", tokens[1]);
             refreshCookie.setHttpOnly(true);
             refreshCookie.setPath("/");

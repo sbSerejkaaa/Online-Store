@@ -25,10 +25,10 @@ public class ProductOutbox {
     private UUID eventId;
 
     @Column(name = "event_type", nullable = false, length = 50)
-    private String eventType;  // PRODUCT_RESERVED, PRODUCT_RESERVATION_RELEASED, etc.
+    private String eventType;
 
     @Column(name = "aggregate_id", nullable = false)
-    private UUID aggregateId;  // orderId
+    private UUID aggregateId;
 
     @Column(name = "payload", nullable = false, columnDefinition = "TEXT")
     private String payload;

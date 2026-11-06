@@ -31,7 +31,6 @@ public class PaymentProcessor {
                  | BankAccountNotFoundException
                  | InsufficientFundsException
                  | InvalidAmountException e) {
-            // ★ Доменные исключения пропускаем наружу — их обработает GlobalExceptionHandler
             log.warn("Бизнес-ошибка при обработке {}: {}", commandType, e.getMessage());
             throw e;
 

@@ -33,17 +33,14 @@ public class ProductPageController {
         List<Product> products;
 
         if (q != null && !q.isBlank()) {
-            // ★ Поиск по имени — приоритет
             products = productService.searchByName(q);
             model.addAttribute("searchQuery", q);
             model.addAttribute("activeCategory", null);
         } else if (category == null || category.isBlank()) {
-            // ★ Чистый каталог — берём только первые 20 (пагинация)
             ProductPageResponse page = productService.findPage(null, PAGE_SIZE);
             products = page.getItems();
             model.addAttribute("activeCategory", null);
         } else {
-            // ★ Категория — все товары категории (можно потом тоже пагинировать)
             products = productService.findByCategorySlug(category);
             model.addAttribute("activeCategory", category);
         }

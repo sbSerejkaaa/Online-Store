@@ -1,0 +1,423 @@
+/* ============================================================
+   ★★★ БАЗОВЫЕ НАСТРОЙКИ ★★★
+   ============================================================ */
+body {
+    background: #000;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.presentation-bg {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: -2;
+    filter: saturate(1.4) contrast(1.1) brightness(0.3);
+}
+
+.bg-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(5,0,20,0.7) 60%, rgba(0,0,0,0.4) 100%);
+    z-index: -1;
+}
+
+/* Шрифты */
+.reveal h1, .reveal h2, .reveal h3, .reveal p, .reveal div, .reveal li {
+    font-family: 'Segoe UI', Arial, sans-serif !important;
+    text-transform: none;
+}
+.reveal .neon-title {
+    font-family: 'Cinzel', serif !important;
+}
+.reveal .gold-subtitle, .reveal .tech-stack, .reveal .section-title, .reveal .tech-label {
+    font-family: 'Orbitron', monospace !important;
+}
+
+/* Сдвиг текста влево */
+.reveal .slides section {
+    text-align: left !important;
+    padding: 0 6% !important;
+}
+
+/* Центрируем второй слайд (схему) и финальный */
+.reveal .slides section:nth-child(2),
+.reveal .slides section:last-child {
+    text-align: center !important;
+    padding: 0 2% !important;
+}
+
+/* ============================================================
+   ★★★ ПЕРВЫЙ СЛАЙД ★★★
+   ============================================================ */
+.speaker-intro {
+    font-size: 22px;
+    color: #b3f0ff;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
+}
+
+.neon-title {
+    font-size: 76px !important;
+    font-weight: 900;
+    margin: 0 !important;
+    background: linear-gradient(90deg, #fff4b8, #ffd700, #ff9500, #ffd700, #fff4b8);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.9));
+    animation: goldenShift 4s linear infinite;
+}
+
+.gold-subtitle {
+    color: #fff;
+    font-size: 18px !important;
+    letter-spacing: 5px;
+    margin-top: 5px !important;
+    margin-bottom: 25px !important;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.tech-stack-desc {
+    font-size: 16px !important;
+    color: #ddd;
+    margin: 0 0 25px 0 !important;
+    line-height: 1.6;
+}
+
+/* Матрица технологий */
+.tech-matrix {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 1000px;
+    margin-bottom: 35px;
+}
+
+.tech-row {
+    display: flex;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 12px;
+}
+
+.tech-row:last-child {
+    border-bottom: none;
+}
+
+.tech-label {
+    font-size: 12px;
+    color: #ffd700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    width: 130px;
+    flex-shrink: 0;
+    text-align: left;
+    padding-top: 6px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.tech-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-start;
+}
+
+.tech-badge {
+    background: rgba(0, 200, 255, 0.08);
+    border: 1px solid rgba(0, 200, 255, 0.4);
+    color: #b3f0ff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    box-shadow: 0 0 10px rgba(0, 200, 255, 0.1);
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.tech-badge:hover {
+    background: rgba(0, 200, 255, 0.25);
+    border-color: #00ffff;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(0, 200, 255, 0.6);
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* Кнопка "Исследовать проект" */
+.explore-btn {
+    display: inline-block;
+    padding: 16px 40px;
+    background: linear-gradient(135deg, #ff0080 0%, #a000ff 100%);
+    color: #fff !important;
+    font-family: 'Orbitron', monospace !important;
+    font-size: 18px !important;
+    font-weight: 700;
+    text-decoration: none !important;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 0 25px rgba(255, 0, 128, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+}
+
+.explore-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 45px rgba(255, 0, 128, 1), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    background: linear-gradient(135deg, #ff1a8c 0%, #b300ff 100%);
+}
+
+/* ============================================================
+   ★★★ КОМПАКТНЫЕ КНОПКИ СПИСКА (СЛАЙД 2) ★★★
+   ============================================================ */
+.nav-btn {
+    display: block;
+    padding: 5px 12px; /* Сделали кнопки тонкими */
+    background: rgba(0, 200, 255, 0.05);
+    border: 1px solid rgba(0, 200, 255, 0.3);
+    border-radius: 6px;
+    color: #b3f0ff !important;
+    font-family: 'Orbitron', monospace !important;
+    font-size: 11px !important; /* Уменьшили шрифт */
+    text-decoration: none !important;
+    text-align: left;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 5px rgba(0, 200, 255, 0.1);
+    line-height: 1.4;
+}
+
+.nav-btn:hover {
+    background: rgba(0, 200, 255, 0.2);
+    border-color: #00ffff;
+    box-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
+    transform: translateX(3px);
+    color: #fff !important;
+}
+
+.saga-btn {
+    border-color: #ff79c6;
+    color: #ff79c6 !important;
+    background: rgba(255, 0, 200, 0.05);
+}
+
+.saga-btn:hover {
+    background: rgba(255, 0, 200, 0.2);
+    box-shadow: 0 0 10px rgba(255, 0, 200, 0.5);
+    border-color: #ff79c6;
+}
+
+/* ============================================================
+   ★★★ ОСТАЛЬНЫЕ СЛАЙДЫ ★★★
+   ============================================================ */
+.section-title {
+    font-size: 44px !important;
+    color: #fff;
+    margin-bottom: 10px !important;
+    border-left: 4px solid #ff0080;
+    padding-left: 20px;
+    text-shadow: 0 0 15px rgba(255, 0, 200, 0.5);
+}
+
+.tech {
+    color: #50fa7b;
+    font-size: 16px !important;
+    margin-bottom: 30px !important;
+    padding-left: 24px;
+    text-shadow: 0 0 8px rgba(80, 250, 123, 0.5);
+}
+
+.custom-list {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding-left: 24px;
+    font-size: 0.7em;
+    text-align: left;
+}
+
+.reveal .custom-list li {
+    margin-bottom: 20px;
+    line-height: 1.6;
+    color: #ddd;
+}
+
+.custom-list strong {
+    color: #00ffff;
+}
+
+.custom-list code {
+    background: rgba(255, 0, 200, 0.2);
+    color: #ff66d9;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-family: 'Orbitron', monospace !important;
+    font-size: 0.9em;
+    border: 1px solid rgba(255, 0, 200, 0.4);
+}
+
+.back-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 20px;
+    color: #b3f0ff;
+    text-decoration: none;
+    border: 1px solid rgba(0, 200, 255, 0.4);
+    border-radius: 8px;
+    font-family: 'Orbitron', monospace !important;
+    font-size: 12px;
+    transition: 0.3s;
+    background: rgba(0, 200, 255, 0.1);
+}
+
+.back-btn:hover {
+    background: rgba(0, 200, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 200, 255, 0.6);
+    color: #fff;
+}
+
+/* ============================================================
+   ★★★ ФИНАЛ ★★★
+   ============================================================ */
+.github-link a {
+    color: #ffd700;
+    font-family: 'Orbitron', monospace !important;
+    font-size: 22px;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: 0.3s;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.github-link a:hover {
+    border-bottom-color: #ffd700;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+}
+
+@keyframes goldenShift {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+}
+/* ============================================================
+   ★★★ СТИЛИ ДЛЯ ТЕКСТА-ИСТОРИИ (СЛАЙДЫ С ОПИСАНИЕМ) ★★★
+   ============================================================ */
+.story-text {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #ccc;
+    max-width: 900px;
+}
+
+.story-text p {
+    margin-bottom: 15px;
+    color: #ddd;
+    font-size: 16px !important;
+}
+
+.story-text strong {
+    color: #00ffff; /* Голубой неон для акцентов */
+    text-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
+}
+
+/* ============================================================
+   ★★★ СТИЛИ ДЛЯ ТЕКСТА (ЧТОБЫ ВЛЕЗАЛО) ★★★
+   ============================================================ */
+.story-text {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #ccc;
+    max-width: 900px;
+}
+
+.story-text p {
+    margin-bottom: 10px;
+    color: #ddd;
+    font-size: 15px !important;
+}
+
+.story-text strong {
+    color: #00ffff;
+    text-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
+}
+
+/* Компактный список */
+.custom-list {
+    font-size: 0.85em;
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Уменьшили отступы между пунктами */
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.custom-list li {
+    line-height: 1.4;
+    color: #ddd;
+    text-shadow: 0 0 5px rgba(0,0,0,0.8);
+}
+
+.custom-list strong {
+    color: #ffd700; /* Золотые заголовки в списке */
+    font-family: 'Orbitron', monospace !important;
+    font-size: 0.95em;
+}
+
+.custom-list code {
+    background: rgba(255, 0, 200, 0.2);
+    color: #ff66d9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Orbitron', monospace !important;
+    font-size: 0.9em;
+    border: 1px solid rgba(255, 0, 200, 0.4);
+}
+/* ============================================================
+   ★★★ ФИНАЛЬНЫЙ СЛАЙД (ССЫЛКИ) ★★★
+   ============================================================ */
+.links-hub {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 500px;
+    margin: 30px auto 0;
+}
+
+.link-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(0, 200, 255, 0.05);
+    border: 1px solid rgba(0, 200, 255, 0.3);
+    border-radius: 12px;
+    padding: 15px 25px;
+    text-decoration: none !important;
+    transition: all 0.3s ease;
+}
+
+.link-card:hover {
+    background: rgba(0, 200, 255, 0.15);
+    border-color: #00ffff;
+    box-shadow: 0 0 20px rgba(0, 200, 255, 0.5);
+    transform: translateY(-3px);
+}
+
+.link-icon {
+    font-size: 24px;
+}
+
+.link-text {
+    color: #fff;
+    font-family: 'Orbitron', monospace !important;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Убираем стандартные стили ссылок Reveal.js для этого блока */
+.reveal .link-card {
+    color: #fff;
+}

@@ -22,13 +22,10 @@ public class ProductProcessor {
     public ProductResponse handleCommand(AddProductOnWarehouseCommand command) {
         log.info("OrderProcessor: обработка команды создания заказа");
 
-        // Делегируем всю работу хендлеру
-        // Заполняеи модель данными, для отправки на фронтенд
         Product product = createProductHandler.handle(command);
 
         log.info("OrderProcessor: заказ создан с ID: {}", product.getProductId());
 
-        // Конвертируем в Response
         return responseMapper.toResponse(product);
     }
 }

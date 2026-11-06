@@ -115,7 +115,6 @@
 			<version>3.10.0</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- Micrometer Tracing + Zipkin -->
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-tracing-bridge-brave</artifactId>
@@ -124,7 +123,6 @@
 			<groupId>io.zipkin.reporter2</groupId>
 			<artifactId>zipkin-reporter-brave</artifactId>
 		</dependency>
-		<!-- Testcontainers -->
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>testcontainers</artifactId>
@@ -162,7 +160,7 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>1.18.40</version> <!-- Добавлена явная версия -->
+							<version>1.18.40</version>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>

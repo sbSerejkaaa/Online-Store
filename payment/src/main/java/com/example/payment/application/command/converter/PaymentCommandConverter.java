@@ -1,8 +1,6 @@
 package com.example.payment.application.command.converter;
 
 import com.example.payment.application.command.AddingFundsToYourAccountCommand;
-import com.example.payment.application.command.RefundPaymentCommand;
-import com.example.payment.web.dto.request.RefundPaymentRequest;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -18,14 +16,6 @@ public class PaymentCommandConverter {
                 .timestamp(Instant.now())
                 .bankAccountId(bankAccountId)
                 .amount(amount)
-                .build();
-    }
-
-    public RefundPaymentCommand toRefundPaymentCommand(RefundPaymentRequest request) {
-        return RefundPaymentCommand.builder()
-                .refundTracedId(UUID.randomUUID())
-                .orderId(request.getOrderId())
-                .timestamp(Instant.now())
                 .build();
     }
 }

@@ -38,12 +38,10 @@ public class RefreshController {
 
             if (role == null) role = "USER";
 
-            // Проверяем, что токен есть в Redis
             if (!refreshTokenService.isValid(userId, refreshToken)) {
                 return ResponseEntity.status(401).body(Map.of("error", "Refresh token недействителен"));
             }
 
-            // Генерируем новый access token с ролью
             String newAccessToken = jwtService.generateAccessToken(userId, email, role);
 
             Cookie accessCookie = new Cookie("access_token", newAccessToken);

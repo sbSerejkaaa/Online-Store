@@ -19,7 +19,6 @@ public class RateLimiterConfig {
     }
 
     private Bucket newBucket(String key) {
-        // ★ 20 запросов в секунду на IP, пополнение по 20 токенов/сек
         Bandwidth limit = Bandwidth.classic(20, Refill.intervally(20, Duration.ofSeconds(1)));
         return Bucket.builder()
                 .addLimit(limit)

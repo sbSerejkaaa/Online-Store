@@ -11,5 +11,5 @@ public class CompensateProductReservationCommand {
     UUID orderId;
     String productName;
     Integer quantity;
-    String reason; // "PAYMENT_FAILED", "TIMEOUT", "SYSTEM_ERROR"
+    String reason;
 }

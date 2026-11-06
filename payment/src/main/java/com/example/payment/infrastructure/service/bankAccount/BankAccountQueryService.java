@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true) // ← ВСЕ МЕТОДЫ READ-ONLY!
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class BankAccountQueryService {
     private final BankAccountRepository bankAccountRepository;

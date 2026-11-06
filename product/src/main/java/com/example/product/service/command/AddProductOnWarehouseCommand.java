@@ -13,5 +13,5 @@ public class AddProductOnWarehouseCommand {
     String imageUrl;
     Integer quantity;
     BigDecimal price;
-    String categorySlug;   // ★ ДОБАВИЛИ
+    String categorySlug;
 }

@@ -43,7 +43,7 @@ public class EntityUsers {
         this.email = email;
         this.password = password;
         this.registrationDate = Instant.now();
-        this.role = "USER";  // по умолчанию USER
+        this.role = "USER";
     }
 
     @PrePersist

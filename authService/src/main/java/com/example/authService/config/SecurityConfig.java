@@ -33,7 +33,6 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        // Публичные страницы и статика
                         .requestMatchers(
                                 "/",
                                 "/register",
@@ -52,11 +51,7 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**"
                         ).permitAll()
-
-                        // Только для ADMIN
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                        // Всё остальное — для залогиненных
                         .anyRequest().authenticated()
                 )
 

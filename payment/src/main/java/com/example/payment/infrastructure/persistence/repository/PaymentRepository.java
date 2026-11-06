@@ -11,15 +11,12 @@ import java.util.UUID;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, UUID> {
-    // Найти платеж по ID заказа
+
     Optional<Payment> findByOrderId(UUID orderId);
 
-    // Найти все платежи пользователя
     List<Payment> findByBankAccount_CustomerId(UUID customerId);
 
-    // Найти платежи по статусу
     List<Payment> findByStatus(PaymentStatus status);
 
-    // Проверить существование платежа по заказу
     boolean existsByOrderId(UUID orderId);
 }

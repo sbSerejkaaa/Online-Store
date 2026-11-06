@@ -14,17 +14,14 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserRegisteredEvent {
 
-    // ОСНОВНЫЕ ДАННЫЕ
     private UUID userId;
     private String email;
     private String userName;
     private Instant registrationDate;
 
-    // МЕТАДАННЫЕ СОБЫТИЯ
     private String eventId;
     private Instant eventTimestamp;
 
-    // ★ Убрали final — теперь Jackson может десериализовать
     private String eventType = "USER_REGISTERED";
     private String eventVersion = "1.0";
 
@@ -38,8 +35,4 @@ public class UserRegisteredEvent {
         this.eventType = "USER_REGISTERED";
         this.eventVersion = "1.0";
     }
-
-    // ★ Инициализация в @PrePersist-стиле — Lombok @NoArgsConstructor вызовет пустой конструктор,
-    //   поэтому дефолты надо ставить здесь, но так как это POJO — делаем через @JsonIgnore?
-    //   Нет — просто полагаемся на AllArgsConstructor или кастомный конструктор.
 }

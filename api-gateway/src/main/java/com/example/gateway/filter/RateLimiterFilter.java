@@ -70,6 +70,6 @@ public class RateLimiterFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -1;  // ★ после CorrelationIdFilter, до JwtAuth
+        return -1;
     }
 }

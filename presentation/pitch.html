@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Store — Архитектура</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="pitch-style.css">
+</head>
+<body>
+<div class="presentation-bg" style="background-image: url('fon.jpg');"></div>
+<div class="bg-overlay"></div>
+
+<div class="reveal">
+    <div class="slides">
+
+        <!-- СЛАЙД 1: Титульный -->
+        <section class="slide-content-left">
+
+            <!-- Блок с именем и заголовком -->
+            <div style="border-left: 4px solid #ff0080; padding-left: 20px; margin-bottom: 20px; background: rgba(0,0,0,0.4); padding: 15px 20px; border-radius: 10px;">
+                <div style="font-family: 'Orbitron', monospace; font-size: 14px; color: #b3f0ff; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0, 200, 255, 0.5);">
+                    Java Backend Developer
+                </div>
+                <h1 class="neon-title" style="margin: 0;">ONLINE STORE</h1>
+                <h3 class="gold-subtitle" style="margin: 5px 0 0 0;">Event-Driven E-Commerce Platform</h3>
+            </div>
+
+            <!-- Блок с описанием (Манифест проекта) -->
+            <div style="background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); border-radius: 10px; border-left: 4px solid #00ffff; padding: 15px 20px; margin-bottom: 25px; max-width: 900px;">
+                <p style="font-size: 16px; color: #eeeeee; line-height: 1.6; margin: 0;">
+                    <strong style="color: #00ffff;">Production-ready платформа:</strong> 10 микросервисов, событийная архитектура, высокая доступность и сквозная наблюдаемость.
+                </p>
+            </div>
+
+            <!-- Заголовок стека с линиями -->
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px; max-width: 1000px;">
+                <div style="flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.5), transparent);"></div>
+                <div style="font-family: 'Orbitron', monospace; font-size: 18px; color: #ffd700; text-transform: uppercase; letter-spacing: 5px; text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);">TECH STACK</div>
+                <div style="flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.5), transparent);"></div>
+            </div>
+
+            <!-- Матрица технологий -->
+            <div class="tech-matrix">
+                <div class="tech-row">
+                    <div class="tech-label">Backend Core</div>
+                    <div class="tech-items">
+                        <span class="tech-badge">Java 17</span>
+                        <span class="tech-badge">Spring Boot 3.5</span>
+                        <span class="tech-badge">Spring Web</span>
+                        <span class="tech-badge">Spring Security</span>
+                        <span class="tech-badge">Spring Cloud</span>
+                        <span class="tech-badge">Spring Data JPA</span>
+                        <span class="tech-badge">Hibernate</span>
+                        <span class="tech-badge">Validation</span>
+                        <span class="tech-badge">JWT (JJWT)</span>
+                        <span class="tech-badge">HikariCP</span>
+                        <span class="tech-badge">Maven</span>
+                    </div>
+                </div>
+
+                <div class="tech-row">
+                    <div class="tech-label">Data & MQ</div>
+                    <div class="tech-items">
+                        <span class="tech-badge">PostgreSQL</span>
+                        <span class="tech-badge">Redis</span>
+                        <span class="tech-badge">Apache Kafka</span>
+                        <span class="tech-badge">Spring Cloud Stream</span>
+                        <span class="tech-badge">Flyway</span>
+                        <span class="tech-badge">Saga Pattern</span>
+                        <span class="tech-badge">Transactional Outbox</span>
+                        <span class="tech-badge">DLT</span>
+                    </div>
+                </div>
+
+                <div class="tech-row">
+                    <div class="tech-label">Infrastructure</div>
+                    <div class="tech-items">
+                        <span class="tech-badge">Docker / Compose</span>
+                        <span class="tech-badge">API Gateway</span>
+                        <span class="tech-badge">Eureka</span>
+                        <span class="tech-badge">Resilience4j</span>
+                        <span class="tech-badge">Bucket4j</span>
+                        <span class="tech-badge">Prometheus</span>
+                        <span class="tech-badge">Grafana</span>
+                        <span class="tech-badge">Zipkin</span>
+                        <span class="tech-badge">GitHub Actions</span>
+                        <span class="tech-badge">GHCR</span>
+                    </div>
+                </div>
+
+                <div class="tech-row">
+                    <div class="tech-label">Testing & Docs</div>
+                    <div class="tech-items">
+                        <span class="tech-badge">JUnit 5</span>
+                        <span class="tech-badge">Mockito</span>
+                        <span class="tech-badge">Testcontainers</span>
+                        <span class="tech-badge">jqwik (Property)</span>
+                        <span class="tech-badge">PIT (Mutation)</span>
+                        <span class="tech-badge">Gatling</span>
+                        <span class="tech-badge">Swagger / OpenAPI</span>
+                        <span class="tech-badge">Postman</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопка по центру -->
+            <div style="width: 100%; max-width: 1000px; text-align: center; margin-top: 15px;">
+                <a href="#/1" class="explore-btn">Исследовать проект</a>
+            </div>
+        </section>
+
+        <!-- СЛАЙД 2: Схема -->
+        <section>
+            <h3 class="section-title" style="margin-top: 0;">Архитектура системы</h3>
+            <p class="hint-small" style="margin-bottom: 10px;">Выберите компонент для подробностей</p>
+
+            <div style="display: grid; grid-template-columns: 260px 1fr; gap: 20px; align-items: start; width: 100%; height: 75vh;">
+
+                <!-- ЛЕВАЯ КОЛОНКА -->
+                <div style="display: flex; flex-direction: column; height: 100%;">
+
+                    <!-- Три кнопки наверху -->
+                    <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px;">
+                        <a href="#/13" class="nav-btn" style="border-color: #a000ff; color: #d6a2ff !important; font-weight: bold; text-align: center; padding: 4px 10px; font-size: 11px;">🌟 О проекте</a>
+                        <a href="#/17" class="nav-btn" style="border-color: #00ffff; color: #00ffff !important; text-align: center; padding: 4px 10px; font-size: 11px;">🎬 Видео и Ссылки</a>
+                        <a href="#/0" class="nav-btn" style="border-color: #ff0080; color: #ff66d9 !important; text-align: center; padding: 4px 10px; font-size: 11px;">← На главную</a>
+                    </div>
+
+                    <!-- Список сервисов и инфраструктуры -->
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                        <div style="font-family: 'Orbitron'; font-size: 10px; color: #ffd700; margin-bottom: 2px;">SERVICES</div>
+                        <a href="#/2" class="nav-btn" style="padding: 2px 10px;">API Gateway</a>
+                        <a href="#/3" class="nav-btn" style="padding: 2px 10px;">Auth Service</a>
+                        <a href="#/4" class="nav-btn" style="padding: 2px 10px;">Product Service</a>
+                        <a href="#/5" class="nav-btn" style="padding: 2px 10px;">Order Service</a>
+                        <a href="#/6" class="nav-btn" style="padding: 2px 10px;">Payment Service</a>
+                        <a href="#/7" class="nav-btn saga-btn" style="padding: 2px 10px;">Saga Orchestrator</a>
+                        <a href="#/8" class="nav-btn" style="padding: 2px 10px;">Cart Service</a>
+                        <a href="#/9" class="nav-btn" style="padding: 2px 10px;">Notification Service</a>
+
+                        <div style="font-family: 'Orbitron'; font-size: 10px; color: #ffd700; margin-top: 4px; margin-bottom: 2px;">INFRASTRUCTURE</div>
+                        <a href="#/10" class="nav-btn" style="padding: 2px 10px;">PostgreSQL (DB)</a>
+                        <a href="#/11" class="nav-btn" style="padding: 2px 10px;">Redis Cache</a>
+                        <a href="#/12" class="nav-btn" style="padding: 2px 10px;">Discovery Server</a>
+                        <a href="#/14" class="nav-btn" style="padding: 2px 10px;">Monitoring & Tracing</a>
+                        <a href="#/15" class="nav-btn" style="border-color: #ffd700; color: #ffd700 !important; padding: 2px 10px;">Apache Kafka</a>
+
+                        <div style="font-family: 'Orbitron'; font-size: 10px; color: #ffd700; margin-top: 4px; margin-bottom: 2px;">TESTING</div>
+                        <a href="#/16" class="nav-btn" style="border-color: #50fa7b; color: #50fa7b !important; padding: 2px 10px;">Testing Strategy</a>
+                    </div>
+                </div>
+
+                <!-- ПРАВАЯ КОЛОНКА (Картинка) -->
+                <div style="display: flex; justify-content: center; align-items: flex-start; height: 100%;">
+                    <img src="img.png" alt="Архитектура" style="max-height: 100%; max-width: 100%; object-fit: contain; filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.3));">
+                </div>
+            </div>
+        </section>
+
+        <!-- СЛАЙД 3: API Gateway -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">API Gateway</h3>
+            <p class="tech" style="margin-bottom: 15px;">Spring Cloud Gateway (WebFlux) · Resilience4j · Bucket4j</p>
+
+            <div class="story-text">
+                <p><strong>API Gateway</strong> — это наш Edge Server (пограничный сервер). Он принимает весь входящий трафик, скрывая за собой сложную топологию микросервисов и обеспечивая безопасность.</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Динамическая маршрутизация (Service Discovery):</strong> Использование Spring Cloud LoadBalancer и протокола <code>lb://</code> позволяет маршрутизировать запросы к нужным инстансам сервисов (Auth, Product, Cart, Order, Payment), не хардкодя IP-адреса. Для каталога настроен механизм Retry (3 попытки) на случай кратковременных сетевых сбоев.</li>
+
+                    <li><strong>Stateless-безопасность (JWT):</strong> Кастомный <code>JwtAuthGatewayFilter</code> берет на себя роль единого Auth-провайдера. Он извлекает токен из HttpOnly Cookie, валидирует подпись (HS256) и обогащает запрос заголовками <code>X-User-Id</code>, <code>X-User-Email</code> и <code>X-User-Role</code>. Downstream-сервисам больше не нужно парсить токен — они доверяют Gateway.</li>
+
+                    <li><strong>Защита периметра:</strong>
+                        <br>• <code>RateLimiterFilter</code> (Bucket4j) отсекает DDoS-атаки и брутфорс, ограничивая 20 запросов в секунду на IP.
+                        <br>• <code>AdminApiKeyFilter</code> защищает чувствительные эндпоинты (<code>/api/inv/**</code>, <code>/admin</code>), требуя специальный API-ключ, недоступный обычным клиентам.</li>
+
+                    <li><strong>Изоляция отказов (Resilience4j):</strong> Для каждого критичного сервиса настроен свой Circuit Breaker (productCB, orderCB, paymentCB). Если Payment Service начинает тормозить, Gateway размыкает цепь и мгновенно отдает <code>FallbackController</code> (HTTP 503), предотвращая каскадное падение всей системы.</li>
+
+                    <li><strong>Observability и Безопасность:</strong> Сквозной <code>CorrelationIdFilter</code> генерирует уникальный ID для каждого запроса для трассировки в Zipkin. <code>SecurityHeadersFilter</code> защищает браузер клиента, добавляя CSP и X-Frame-Options.</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 4: Auth Service -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">Auth Service</h3>
+            <p class="tech" style="margin-bottom: 15px;">Spring Security · JJWT · Redis · PostgreSQL · Kafka</p>
+
+            <div class="story-text">
+                <p><strong>Auth Service</strong> — это централизованный Identity Provider (IdP) системы. Он отвечает за безопасность, управление учетными записями и выдачу криптографических токенов для доступа к закрытым ресурсам.</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Безопасность сессий:</strong> Токены передаются через <code>HttpOnly Cookies</code> (защита от XSS). Access-токен (15 мин) и Refresh-токен (7 дней) генерируются по алгоритму HS256. Refresh-токены хранятся в Redis, что позволяет реализовать безопасный Logout (отзыв сессии).</li>
+
+                    <li><strong>Криптография и защита:</strong> Пароли хэшируются алгоритмом <code>BCrypt</code> (с солью). Реализован <code>Account Lockout</code>: при 5 неудачных попытках ввода аккаунт блокируется на 15 минут.</li>
+
+                    <li><strong>Обработка исключений:</strong> Глобальный <code>@RestControllerAdvice</code> перехватывает ошибки валидации и бизнес-логики, возвращая клиенту структурированный JSON (HTTP 400/409) вместо стандартных 500-х ошибок.</li>
+
+                    <li><strong>Качество кода (Testing):</strong> Валидация сложности паролей покрыта Property-based тестами (<code>jqwik</code>). Качество самих тестов проверяется с помощью мутационного тестирования (<code>PIT</code>).</li>
+
+                    <li><strong>Kafka Producer:</strong> При регистрации отправляется <code>UserRegisteredEvent</code>. Это асинхронно триггерит создание кошелька (Payment) и отправку email (Notification).</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 5: Product Service -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">Product Service</h3>
+            <p class="tech" style="margin-bottom: 15px;">Spring Data JPA · Redis Cache · PostgreSQL FTS · Hibernate</p>
+
+            <div class="story-text">
+                <p><strong>Product Service</strong> — это высоконагруженный сервис каталога. Он спроектирован так, чтобы выдерживать тысячи read-запросов в секунду, минимизируя нагрузку на дисковую подсистему БД за счет грамотного кэширования и оптимизации SQL.</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Оптимизация ORM (Hibernate):</strong> Решена проблема N+1 с помощью <code>@EntityGraph</code> (fetch-join для категорий). Использован паттерн <strong>Soft Delete</strong> (через <code>@SQLDelete</code> и <code>@SQLRestriction</code>): при удалении товара запись не стирается физически, а помечается <code>deleted_at</code>, сохраняя ссылочную целостность для истории заказов.</li>
+
+                    <li><strong>Keyset-пагинация (Cursor-based):</strong> Отказ от тяжелого <code>OFFSET</code> в пользу пагинации по ключу (<code>createdAt</code>). База данных использует B-Tree индекс, что дает сложность O(log n) и стабильную скорость листания независимо от глубины страницы.</li>
+
+                    <li><strong>Full-Text Search (PostgreSQL):</strong> Поиск по каталогу реализован на нативных типах <code>tsvector</code> и <code>tsquery</code>. Используется сортировка по релевантности (<code>ts_rank</code>) и создан GIN-индекс, что в разы быстрее, чем <code>LIKE '%...%'</code>.</li>
+
+                    <li><strong>Кэширование (Redis Cache-Aside):</strong> Тяжелые выборки (featured-товары) кэшируются с TTL. Применен параметр <code>@Cacheable(sync=true)</code> для защиты от <em>Cache Stampede</em> (лавинообразных запросов в БД при истечении TTL) — потоки блокируются, пока один обновляет кэш.</li>
+
+                    <li><strong>Обработка ошибок:</strong> Используются кастомные исключения (например, нехватка товара на складе), которые перехватываются глобальным обработчиком и возвращают корректные HTTP-статусы (404, 400) вместо 500.</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 6: Order Service -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">Order Service</h3>
+            <p class="tech" style="margin-bottom: 15px;">Spring Data JPA · Transactional Outbox · Kafka</p>
+
+            <div class="story-text">
+                <p><strong>Order Service</strong> — это участник распределенной транзакции (Saga Participant). Его главная задача — создать заказ и гарантировать доставку события <code>OrderCreatedEvent</code> в Kafka, используя паттерн <strong>Transactional Outbox</strong> для защиты от потери данных (Dual-Write Problem).</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Транзакционная целостность (Outbox):</strong> При создании заказа (статус <code>IN_PROCESS</code>) в одной транзакции с ним сохраняется запись в таблицу <code>order_outbox</code> (статус <code>PENDING</code>). Метод защищен аннотацией <code>@Transactional(propagation = MANDATORY)</code>, что гарантирует вызов только из существующей транзакции и исключает частичное сохранение.</li>
+
+                    <li><strong>Фоновый издатель (Scheduler):</strong> Шедулер с интервалом 500 мс (<code>@Scheduled(fixedDelay=500)</code>) в отдельной транзакции (<code>REQUIRES_NEW</code>) забирает пачку PENDING-событий, публикует их в Kafka (с гарантией <code>acks=all</code> и <code>enable.idempotence=true</code>) и переводит в статус <code>SENT</code>. Если Kafka недоступна — событие остается в БД и уйдет при следующей попытке.</li>
+
+                    <li><strong>Сквозная трассировка:</strong> При сохранении в Outbox туда записывается <code>correlationId</code> из MDC. При публикации он прокидывается в заголовки Kafka-сообщения, позволяя отследить путь заказа через Zipkin, даже если сервис перезапустится.</li>
+
+                    <li><strong>Взаимодействие с Saga (Оркестратор):</strong> Сервис не подтверждает заказ самостоятельно. После создания он ждет команду от <code>saga-service</code>: <code>ConfirmOrderCommand</code> (если оплата и резервация прошли) для смены статуса на <code>CONFIRMED</code>, либо <code>CompensateOrderCommand</code> для отмены (<code>CANCELLED</code>).</li>
+
+                    <li><strong>Изоляция данных:</strong> База данных PostgreSQL, схема управляется через Flyway. Для предотвращения гонок данных при обновлении статусов используются оптимистичные блокировки.</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 7: Payment Service -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">Payment Service</h3>
+            <p class="tech" style="margin-bottom: 15px;">Pessimistic Locking · Audit Log · Outbox Pattern · Strategy</p>
+
+            <div class="story-text">
+                <p><strong>Payment Service</strong> — это финансовое ядро системы, отвечающее за управление кошельками, списание средств и гарантию того, что деньги не спишутся дважды.</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Защита от Race Condition (Pessimistic Locking):</strong> При списании средств используется блокировка на уровне БД (<code>@Lock(PESSIMISTIC_WRITE)</code> и <code>SELECT ... FOR UPDATE</code>). Потоки выстраиваются в очередь, что полностью исключает двойное списание или уход баланса в минус.</li>
+
+                    <li><strong>Паттерн «Стратегия» (Command Processor):</strong> Вся логика разбита на изолированные обработчики (<code>PaymentCommandHandler</code>). Класс <code>PaymentProcessor</code> динамически находит нужный хендлер для конкретной команды (например, <code>AddingFundsToYourAccountCommand</code>), что позволяет легко добавлять новые типы операций без изменения существующего кода.</li>
+
+                    <li><strong>Аудит транзакций (Audit Log):</strong> Все операции (пополнение, оплата, ошибки) логируются в БД. Метод записи использует <code>@Transactional(propagation = REQUIRES_NEW)</code>, поэтому лог сохраняется, даже если основная транзакция бизнес-логики откатится.</li>
+
+                    <li><strong>Надежная публикация (Outbox):</strong> Для отправки событий в Kafka применяется паттерн Transactional Outbox. Сохранение транзакции и запись в таблицу <code>payment_outbox</code> происходят атомарно. При ошибке (<code>PaymentFailedEvent</code>) также пишется в Outbox для запуска компенсации в Саге.</li>
+
+                    <li><strong>Умная валидация:</strong> Перед списанием проверяется статус аккаунта (ACTIVE, BLOCKED, CLOSED) и достаточность средств (<code>InsufficientFundsException</code>). Валидаторы вынесены в отдельные компоненты (<code>AddFundsValidator</code>).</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 8: Saga Orchestration -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">Saga Orchestration</h3>
+            <p class="tech" style="margin-bottom: 15px;">Kafka · SagaState · Compensations · Saga Outbox</p>
+
+            <div class="story-text">
+                <p><strong>Saga Service</strong> — это центральный оркестратор распределенных транзакций. Он решает проблему консистентности данных (Eventual Consistency) без использования блокирующих ACID-транзакций между микросервисами.</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Управление состоянием (SagaState):</strong> Жизненный цикл заказа (от <code>STARTED</code> до <code>COMPLETED</code> или <code>FAILED</code>) сохраняется в PostgreSQL. Для защиты от конкурентных изменений статуса используется оптимистичная блокировка (<code>@Version</code>), что гарантирует целостность даже при параллельной обработке.</li>
+
+                    <li><strong>Хореография через команды:</strong> Сага слушает события из топиков (<code>order.event.topic</code>, <code>product.event.topic</code>) и генерирует команды в другие сервисы (например, <code>ReserveProductCommand</code> в <code>saga.products.commands</code>). Это изолирует бизнес-логику: участники саги не знают друг о друге.</li>
+
+                    <li><strong>Механизм компенсаций (Rollback):</strong> Если на этапе оплаты происходит сбой, Сага ловит <code>PaymentFailedEvent</code> и инициирует обратные транзакции. Она отправляет <code>CompensateOrderCommand</code>, чтобы отменить заказ, и <code>CompensateProductReservationCommand</code>, чтобы вернуть товары на склад.</li>
+
+                    <li><strong>Надежность (Saga Outbox):</strong> Для отправки команд применяется паттерн Outbox. Шедулер (<code>SagaOutboxScheduler</code>) публикует команды в Kafka и помечает их как <code>SENT</code>. Если сервис упадет до публикации, команда не потеряется.</li>
+
+                    <li><strong>Идемпотентность и трассировка:</strong> Консьюмеры используют уникальные заголовки (<code>eventId</code>, <code>correlationId</code>). Это позволяет отсекать дубликаты сообщений (at-least-once delivery) и связывать все логи Саги в Zipkin.</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 9: Cart Service -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">Cart Service</h3>
+            <p class="tech" style="margin-bottom: 15px;">Spring Data Redis · Jackson Serialization · TTL</p>
+
+            <div class="story-text">
+                <p><strong>Cart Service</strong> — это stateless-микросервис, спроектированный для обработки высокочастотных операций записи. В качестве хранилища данных выбран Redis (In-Memory), что позволяет исключить блокировки строк, характерные для реляционных СУБД.</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Хранение и жизненный цикл:</strong> Данные сериализуются в JSON и хранятся по ключу <code>cart:{userId}</code>. Настроен механизм TTL (Time-To-Live) — 30 дней. Это реализует паттерн автоматической очистки (Garbage Collection) неактивных сессий, предотвращая утечки памяти.</li>
+
+                    <li><strong>Отказоустойчивость сериализации (Schema Evolution):</strong> Используется кастомный <code>ObjectMapper</code> с флагом <code>FAIL_ON_UNKNOWN_PROPERTIES = false</code>. Это критически важно для обратной совместимости: при добавлении новых полей в DTO, старые корзины в кэше не вызовут <code>JsonMappingException</code>.</li>
+
+                    <li><strong>Бизнес-логика (Idempotency):</strong> Операция добавления реализована как Upsert. Если товар уже присутствует, происходит атомарный инкремент поля <code>quantity</code>, что защищает корзину от дубликатов позиций (Data Duplication).</li>
+
+                    <li><strong>Безопасность (Multi-tenancy):</strong> Сервис спроектирован как stateless (не хранит сессию). Идентификация пользователя происходит через заголовок <code>X-User-Id</code>, проброшенный API Gateway, что гарантирует строгую изоляцию клиентских данных.</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 10: Notification Service -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">Notification Service</h3>
+            <p class="tech" style="margin-bottom: 15px;">Spring Mail · Kafka Consumer · Retry & DLT</p>
+
+            <div class="story-text">
+                <p><strong>Notification Service</strong> — это асинхронный воркер, отвечающий за коммуникацию с пользователями. Он изолирован от основной бизнес-логики и работает исключительно на чтение событий из Kafka.</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Event-Driven архитектура:</strong> Сервис не имеет REST-контроллеров для отправки писем. Он подписан на топик <code>user-registered-topic</code> и реагирует на событие <code>UserRegisteredEvent</code>, забирая данные (email, имя) прямо из payload сообщения.</li>
+
+                    <li><strong>Обработка сбоев (Error Handling):</strong> Интеграция с почтовым сервером — ненадежный процесс. Настроен <code>DefaultErrorHandler</code> с политикой Retry (3 попытки с интервалом 3 секунды). Если SMTP-сервер недоступен, сервис не теряет сообщение, а пытается отправить его снова.</li>
+
+                    <li><strong>Dead Letter Topic (DLT):</strong> Если после всех ретраев письмо так и не ушло (или произошла фатальная ошибка), сообщение отправляется в <code>user-registered-topic.DLT</code>. Это защищает партицию от блокировки «ядовитым» сообщением.</li>
+
+                    <li><strong>Идемпотентность и аудит:</strong> Каждая попытка отправки фиксируется в таблице <code>NotificationLog</code> (статусы: <code>SENDING</code>, <code>SENT</code>, <code>FAILED</code>). Это позволяет отслеживать историю и не отправлять дубликаты при повторной доставке события.</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 11: PostgreSQL -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">PostgreSQL</h3>
+            <p class="tech" style="margin-bottom: 15px;">Relational Database · Database-per-service · ACID</p>
+
+            <div class="story-text">
+                <p><strong>PostgreSQL</strong> — это основная реляционная СУБД проекта. Она обеспечивает надежное хранение структурированных данных и строгое соблюдение принципов <strong>ACID</strong> (Атомарность, Согласованность, Изолированность, Долговечность).</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Архитектура (Database-per-service):</strong> В микросервисах запрещено использовать общую БД. Каждый сервис (Auth, Order, Payment) имеет свою изолированную базу. Это предотвращает Loose Coupling и позволяет независимо масштабировать хранилища.</li>
+
+                    <li><strong>Миграции (Flyway):</strong> Схема БД управляется кодом (SQL-миграции). Это защищает от рассинхрона между Dev, Test и Prod окружениями.</li>
+
+                    <li><strong>Конкурентный доступ (MVCC):</strong> PostgreSQL использует Multi-Version Concurrency Control. Читатели не блокируют писателей, а писатели — читателей. В критичных местах (например, списание денег) мы используем явные пессимистичные блокировки (<code>SELECT FOR UPDATE</code>).</li>
+
+                    <li><strong>Производительность:</strong> Настроен пул соединений <strong>HikariCP</strong>. Решена проблема <strong>N+1</strong> через <code>@EntityGraph</code> в JPA. Для пагинации используется <strong>Keyset-пагинация</strong> (по индексу), что в разы быстрее классического <code>OFFSET</code>.</li>
+
+                    <li><strong>Поиск и индексы:</strong> Полнотекстовый поиск (FTS) реализован на типах <code>tsvector</code> и <code>tsquery</code> с сортировкой по релевантности (<code>ts_rank</code>). Настроены индексы (B-Tree) на внешние ключи (FK) и уникальные поля (UNIQUE).</li>
+
+                    <li><strong>Сохранность данных:</strong> Применен паттерн <strong>Soft Delete</strong> (поле <code>deleted_at</code>) вместо физического удаления, чтобы не ломать историю заказов. Настроена стратегия бэкапов (pg_dump + cron).</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 12: Redis Cache -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">Redis Cache</h3>
+            <p class="tech" style="margin-bottom: 15px;">In-Memory Data Store · Cache-Aside · TTL</p>
+
+            <div class="story-text">
+                <p><strong>Redis</strong> — это высокопроизводительное хранилище данных в оперативной памяти (Key-Value). В проекте используется как многофункциональный компонент: для кэширования, хранения сессий и временных данных (корзины).</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Кэширование (Cache-Aside):</strong> Для разгрузки PostgreSQL используется паттерн Cache-Aside. Тяжелые выборки (например, featured-товары в Product Service) кэшируются на 10 минут. Для защиты от <em>Cache Stampede</em> (лавинообразных запросов в БД после истечения TTL) используется параметр <code>@Cacheable(sync=true)</code> — потоки блокируются, пока один из них не обновит кэш.</li>
+
+                    <li><strong>Управление сессиями (Auth Service):</strong> Redis выступает как централизованное хранилище Refresh-токенов. Это позволяет реализовать stateless-аутентификацию с возможностью мгновенного отзыва сессии (Logout). TTL токенов автоматически удаляет их по истечении срока действия (7 дней).</li>
+
+                    <li><strong>Быстрые операции (Cart Service):</strong> Корзина пользователя хранится в Redis по ключу <code>cart:{userId}</code>. Благодаря настройке TTL (30 дней), «брошенные» корзины автоматически очищаются, предотвращая утечку памяти. Используется кастомная JSON-сериализация для поддержки эволюции схемы.</li>
+
+                    <li><strong>Отказоустойчивость и Консистентность:</strong> Redis используется как Best-Effort хранилище. При его недоступности система продолжает работать (для кэша — идем в БД), но критические данные (Refresh-токены) требуют настройки репликации (Redis Sentinel/Cluster) в Production (Roadmap).</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 13: Discovery Server -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">Discovery Server</h3>
+            <p class="tech" style="margin-bottom: 15px;">Spring Cloud Netflix (Eureka) · Service Discovery · Load Balancing</p>
+
+            <div class="story-text">
+                <p><strong>Discovery Server</strong> — это централизованный реестр сервисов (Service Registry). Он решает проблему динамической топологии: когда у микросервисов меняются IP-адреса, порты или добавляются новые инстансы, клиентам (например, API Gateway) не нужно об этом знать.</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Service Discovery (Регистрация):</strong> При старте каждый микросервис (Auth, Product, Order и др.) регистрирует себя в реестре, отправляя свой IP, порт и статус здоровья (Actuator Health Check).</li>
+
+                    <li><strong>Клиентская балансировка (lb://):</strong> API Gateway использует клиент Discovery для получения актуального списка инстансов. Запросы маршрутизируются по имени сервиса (например, <code>lb://AUTH-SERVICE</code>), а Spring Cloud LoadBalancer распределяет трафик между доступными репликами (Round Robin).</li>
+
+                    <li><strong>Отказоустойчивость (Heartbeats):</strong> Инстансы отправляют «пульс» (heartbeat) каждые 30 секунд. Если сервис не отвечает (например, упал или завис), Discovery Server исключает его из реестра (Eviction), и Gateway перестает слать туда запросы.</li>
+
+                    <li><strong>Кэширование реестра:</strong> Клиенты кэшируют список сервисов локально, чтобы не делать запрос к реестру на каждый HTTP-вызов. Это снижает нагрузку на сервер и повышает скорость работы системы.</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 14: О проекте -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">О проекте Online Store</h3>
+            <p class="tech" style="margin-bottom: 15px;">Микросервисная архитектура уровня Production</p>
+
+            <div class="story-text">
+                <p><strong>Online Store</strong> — это распределенная, событийно-ориентированная (Event-Driven) система, состоящая из 10 независимых микросервисов. Проект спроектирован с упором на отказоустойчивость, безопасность и высокую нагрузку.</p>
+
+                <p>Бизнес-логика охватывает полный цикл e-commerce: от регистрации пользователя и работы каталога (с полнотекстовым поиском и кэшированием) до управления корзиной, оформления заказов и проведения платежей с жестким контролем баланса.</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Микросервисы и Spring Cloud:</strong> 10 сервисов (Auth, Product, Order, Payment, Cart, Saga, Notification и др.), объединенных через Eureka (Service Discovery) и API Gateway (WebFlux). Изоляция баз данных (Database-per-service).</li>
+                    <li><strong>Событийная шина (Kafka):</strong> Асинхронный обмен событиями. Настроены гарантии доставки (acks=all), идемпотентность, партиционирование по ключам и Dead Letter Topics (DLT) для обработки сбоев.</li>
+                    <li><strong>Надежность (Resilience):</strong> Защита от каскадных отказов (Circuit Breaker, Retry, Fallback на Gateway), ограничение частоты запросов (Rate Limiting на базе Bucket4j) и оптимистичные/пессимистичные блокировки в БД.</li>
+                    <li><strong>Безопасность:</strong> Stateless-аутентификация на базе JWT (Access + Refresh). Централизованная валидация токенов на Gateway, хранение сессий в Redis и защита от Brute-force атак (Account Lockout).</li>
+                    <li><strong>Observability:</strong> Сквозной Correlation ID (проходит через HTTP, Kafka и БД), сбор метрик (Prometheus + Grafana) и распределенная трассировка (Zipkin).</li>
+                    <li><strong>Тестирование и CI/CD:</strong> Интеграционные тесты с реальными БД через Testcontainers, Property-based тесты (jqwik), Mutation-тесты (PIT). Автоматическая сборка и Docker-пушинг через GitHub Actions.</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 15: Monitoring -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">Monitoring & Tracing</h3>
+            <p class="tech" style="margin-bottom: 15px;">Prometheus · Grafana · Zipkin · Micrometer</p>
+
+            <div class="story-text">
+                <p><strong>Observability</strong> (Наблюдаемость) — это фундамент надежной системы. Мы не просто собираем логи, мы используем три столпа: метрики, распределенную трассировку и централизованное логирование.</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Сбор метрик (Prometheus + Micrometer):</strong> Каждый сервис через Spring Actuator экспортирует бизнес- и техметрики (RPS, задержки, ошибки 5xx, состояние пула соединений БД). Prometheus использует <code>Pull-модель</code> — сам опрашивает эндпоинты <code>/actuator/prometheus</code> раз в 15 секунд и хранит их в виде Time-Series.</li>
+
+                    <li><strong>Визуализация и Алертинг (Grafana):</strong> Grafana строит дашборды на основе PromQL-запросов. Отслеживаются "Golden Signals" (Latency, Traffic, Errors, Saturation). Настроены Alert Rules: если p99 Latency превышает 1 секунду, система отправляет уведомление дежурному.</li>
+
+                    <li><strong>Распределенная трассировка (Zipkin + Brave):</strong> При поступлении запроса Micrometer генерирует <code>TraceId</code> и <code>SpanId</code>. Они передаются через HTTP-заголовки (<code>traceparent</code>) и Kafka. Zipkin собирает эти спаны в единое дерево, показывая, на каком именно шаге (в БД, сети или логике сервиса) возникла задержка.</li>
+
+                    <li><strong>Связка Метрик и Трейсов (Exemplars):</strong> В Grafana настроена поддержка Exemplars. Глядя на график в Prometheus (например, всплеск задержки), можно кликнуть на точку и мгновенно перейти к конкретному трейсу в Zipkin, чтобы увидеть детали этого запроса.</li>
+
+                    <li><strong>Сэмплирование (Sampling) и Correlation ID:</strong> В dev-окружении настроено 100% сэмплирование, в prod — 10% (для экономии ресурсов). Сквозной <code>X-Correlation-Id</code> прокидывается от Gateway до БД (включая таблицы Outbox), что позволяет найти все логи одного запроса в Kibana.</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 16: Apache Kafka -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">Apache Kafka</h3>
+            <p class="tech" style="margin-bottom: 15px;">Event Bus · Reliability · Consumer Groups · DLT</p>
+
+            <div class="story-text">
+                <p><strong>Apache Kafka</strong> — это центральная событийная шина (Event Bus). Она обеспечивает асинхронное взаимодействие микросервисов, позволяя им оставаться слабо связанными (Loose Coupling).</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Топики и партиции (Ordering):</strong> Сообщения распределяются по партициям с помощью ключа (например, <code>OrderId</code>). Это гарантирует, что все события по одному заказу попадут в одну партицию и будут обработаны строго по порядку.</li>
+
+                    <li><strong>Надежность продюсера:</strong> Настроен <code>acks=all</code> (подтверждение от всех реплик), идемпотентность (<code>enable.idempotence=true</code>) для защиты от дублей при ретраях и <code>max.in.flight.requests=5</code> для сохранения порядка.</li>
+
+                    <li><strong>Таймауты и Батчинг:</strong> Для отказоустойчивости заданы <code>delivery.timeout.ms=60000</code> и <code>retry.backoff.ms=500</code>. Для повышения пропускной способности используется <code>linger.ms=100</code>, батчи по 16KB и сжатие <code>snappy</code>.</li>
+
+                    <li><strong>Consumer Groups (Масштабирование):</strong> Каждый сервис имеет свой <code>groupId</code>. Если запустить несколько инстансов одного сервиса, Kafka автоматически распределит партиции между ними (Rebalancing). Параметр <code>concurrency=3</code> позволяет обрабатывать до 3 партиций параллельно в одном инстансе.</li>
+
+                    <li><strong>Безопасность и DLT:</strong> Настроен белый список пакетов (<code>spring.json.trusted.packages</code>) и <code>ErrorHandlingDeserializer</code>. При фатальных ошибках сообщение уходит в Dead Letter Topic (DLT), не блокируя партицию.</li>
+
+                    <li><strong>Observability:</strong> Включен <code>observationEnabled=true</code>, что позволяет Micrometer Tracing прокидывать <code>TraceId</code> через Kafka-сообщения и связывать их в Zipkin.</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 17: Testing Strategy -->
+        <section class="slide-content-left" style="padding-top: 0;">
+            <h3 class="section-title" style="margin-top: -10px; margin-bottom: 5px;">Testing Strategy</h3>
+            <p class="tech" style="margin-bottom: 15px;">JUnit 5 · Testcontainers · jqwik · PIT · Gatling</p>
+
+            <div class="story-text">
+                <p><strong>Стратегия тестирования</strong> построена по классической пирамиде. Для контроля качества используются метрики покрытия (JaCoCo). Покрытие ключевой бизнес-логики (UserService) составляет <strong>82%</strong>.</p>
+
+                <ul class="custom-list" style="margin-top: 15px;">
+                    <li><strong>Unit-тесты (JUnit 5 + Mockito):</strong> Покрывают изолированную бизнес-логику (валидация баланса, расчет цены, логин). Зависимости (БД, Kafka) заменяются моками (Mockito) для скорости выполнения.</li>
+
+                    <li><strong>Интеграционные тесты (Testcontainers):</strong> Поднимают реальные базы данных (PostgreSQL) и брокеры (Kafka) в Docker. Это позволяет проверить работу сервисов, транзакций и сериализации в условиях, максимально приближенных к продакшену (вместо использования H2).</li>
+
+                    <li><strong>Property-based тестирование (jqwik):</strong> Вместо ручного перебора данных генерируются тысячи случайных строк, чтобы проверить валидацию паролей на прочность (например, любой пароль без заглавной буквы будет отклонен).</li>
+
+                    <li><strong>Мутационное тестирование (PIT):</strong> Вносит искусственные баги (мутации) в байт-код, чтобы проверить, упадут ли написанные тесты. Это метрика качества самих тестов, а не просто покрытия кода.</li>
+
+                    <li><strong>Нагрузочное и Stress-тестирование (Gatling):</strong> Симулируется высокий RPS на каталог товаров. Stress-сценарии (на 100+ RPS) проверяют поведение системы в условиях перегрузки и помогают найти узкие места (Bottlenecks) — например, деградацию БД или нехватку памяти в Redis.</li>
+                </ul>
+            </div>
+
+            <a href="#/1" class="back-btn" style="margin-top: 10px;">← Вернуться к схеме</a>
+        </section>
+
+        <!-- СЛАЙД 18: Финал / Ссылки -->
+        <section>
+            <h1 class="neon-title">СПАСИБО ЗА ВНИМАНИЕ!</h1>
+            <p class="gold-subtitle">Полезные ссылки</p>
+
+            <div class="links-hub">
+                <a href="https://github.com/sbSerejkaaa/Online-Store" target="_blank" class="link-card">
+                    <span class="link-icon">📂</span>
+                    <span class="link-text">Исходный код проекта</span>
+                </a>
+
+                <a href="https://github.com/sbSerejkaaa" target="_blank" class="link-card">
+                    <span class="link-icon">👨‍💻</span>
+                    <span class="link-text">Мой профиль GitHub</span>
+                </a>
+
+                <a href="#" target="_blank" class="link-card">
+                    <span class="link-icon">🎬</span>
+                    <span class="link-text">Видео-демонстрация (Скоро)</span>
+                </a>
+            </div>
+
+            <!-- Кнопка возврата на схему -->
+            <div style="margin-top: 30px;">
+                <a href="#/1" class="back-btn">← Вернуться к схеме</a>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+<script>
+    Reveal.initialize({
+        hash: true,
+        transition: 'fade',
+        slideNumber: true,
+        controls: false,
+        progress: true
+    });
+</script>
+</body>
+</html>

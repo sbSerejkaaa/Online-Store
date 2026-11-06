@@ -9,9 +9,9 @@ import java.util.UUID;
 @Value
 @Builder
 public class PaymentCreatedEvent {
-    UUID paymentId;      // ID платежа для трейсинга и аудита
-    UUID orderId;        // Связь с заказом (ключевое поле)
-    UUID customerId;     // Кто платил
-    BigDecimal amount;   // Сумма платежа
+    UUID paymentId;
+    UUID orderId;
+    UUID customerId;
+    BigDecimal amount;
     String accountId;
 }

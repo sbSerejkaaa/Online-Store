@@ -18,7 +18,6 @@ public class ProductStressTest extends Simulation {
     HttpProtocolBuilder httpProtocol = http
             .baseUrl("http://localhost:8080")
             .acceptHeader("application/json")
-            // ★ Обходим Rate Limiter, подставляя случайный IP
             .header("X-Forwarded-For", session -> getRandomIp());
 
     ScenarioBuilder scn = scenario("Stress Test")
@@ -30,7 +29,6 @@ public class ProductStressTest extends Simulation {
             .pause(Duration.ofMillis(100)); // Пауза 100мс
 
     {
-        // ★ Умеренная нагрузка: 50 юзеров, держим 20 секунд
         setUp(
                 scn.injectOpen(
                         rampUsers(50).during(Duration.ofSeconds(5)), // Разгон до 50 за 5 сек

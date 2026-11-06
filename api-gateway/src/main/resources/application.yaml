@@ -65,7 +65,6 @@ spring:
                     name: productCB
                     fallbackUri: forward:/fallback/product
 
-            # ★ ДОБАВЛЕННЫЙ БЛОК: публичный доступ к каталогу и пагинации
             - id: product-public
               uri: lb://PRODUCT-SERVICE
               predicates:
@@ -76,7 +75,6 @@ spring:
                     name: productCB
                     fallbackUri: forward:/fallback/product
 
-            # ★ ИЗМЕНЕНО: убрали /api/products/** из JwtAuth, оставили только админку
             - id: product-service
               uri: lb://PRODUCT-SERVICE
               predicates:

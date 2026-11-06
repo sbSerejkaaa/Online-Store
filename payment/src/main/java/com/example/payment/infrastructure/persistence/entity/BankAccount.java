@@ -17,27 +17,18 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class BankAccount extends BaseEntity {
-    // Также передается ID из BaseEntity, который является айди кошелька пользователя
 
     @NotNull
     @Column(name = "customer_id")
     private UUID customerId;
-    // ID пользователя в вашей системе
-    // Связывает банковский счет с конкретным клиентом
 
     @Builder.Default
     @Column(name = "balance", precision = 19, scale = 2)
     private BigDecimal balance = BigDecimal.ZERO;
-    // Текущий баланс счета в рублях
-    // precision=19, scale=2 = 17 цифр до запятой, 2 после
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private BankAccountStatus status = BankAccountStatus.ACTIVE;
-    // Статус счета:
-    // ACTIVE - можно проводить операции
-    // BLOCKED - временно заблокирован
-    // CLOSED - закрыт навсегда
 
     @OneToMany(mappedBy = "bankAccount", cascade = CascadeType.ALL)
     private List<Payment> payments;

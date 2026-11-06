@@ -25,7 +25,6 @@ public class AddFundsService {
      */
     public BankAccount deposit(UUID bankAccountId, BigDecimal amount) {
 
-
         BankAccount account = bankAccountQueryService.findById(bankAccountId);
         BigDecimal newBalance = account.getBalance().add(amount);
         account.setBalance(newBalance);

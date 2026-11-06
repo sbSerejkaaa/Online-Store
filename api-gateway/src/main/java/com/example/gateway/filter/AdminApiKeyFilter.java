@@ -23,7 +23,6 @@ public class AdminApiKeyFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getPath().value();
 
-        // ★ Только для admin endpoints
         if (path.startsWith("/api/inv") || path.startsWith("/admin")) {
             String apiKey = exchange.getRequest().getHeaders().getFirst("X-API-Key");
 
@@ -45,6 +44,6 @@ public class AdminApiKeyFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -75;  // ★ после RateLimiter(-1) и CorrelationId(-100), до JwtAuth
+        return -75;
     }
 }

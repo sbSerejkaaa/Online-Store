@@ -42,17 +42,14 @@ public class AddFundsValidator {
      * ВАЛИДАЦИЯ СУММЫ ПОПОЛНЕНИЯ
      */
     private void validateAmount(BigDecimal amount) {
-        // ★ НОВОЕ: проверка на null
         if (amount == null) {
             throw new InvalidAmountException("Сумма пополнения не может быть пустой");
         }
 
-        // ★ НОВОЕ: проверка на положительность
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidAmountException("Сумма пополнения должна быть больше нуля");
         }
 
-        // Проверка максимальной суммы
         BigDecimal maxAmount = new BigDecimal("1000000.00");
         if (amount.compareTo(maxAmount) > 0) {
             throw new InvalidAmountException("Сумма пополнения превышает максимальный лимит. Максимум: " + maxAmount);
@@ -82,22 +79,13 @@ public class AddFundsValidator {
 
         switch (account.getStatus()) {
             case ACTIVE:
-                //  Все хорошо - можно пополнять
                 break;
-
             case BLOCKED:
-                //  Счет заблокирован - нельзя пополнять
                 throw new AccountBlockedException("Невозможно пополнить счет. Счет заблокирован.");
-
             case CLOSED:
-                // Счет закрыт - нельзя пополнять
                 throw new AccountBlockedException("Невозможно пополнить счет. Счет закрыт.");
-
             default:
-                // Неизвестный статус - на всякий случай блокируем
                 throw new AccountBlockedException("Невозможно пополнить счет. Неизвестный статус счета: " + account.getStatus());
         }
     }
-
-
 }

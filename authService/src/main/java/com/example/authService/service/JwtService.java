@@ -33,7 +33,7 @@ public class JwtService {
         return Jwts.builder()
                 .subject(userId)
                 .claim("email", email)
-                .claim("role", role)          // ← новое
+                .claim("role", role)
                 .claim("type", "access")
                 .issuedAt(now)
                 .expiration(expiryDate)
@@ -47,8 +47,8 @@ public class JwtService {
 
         return Jwts.builder()
                 .subject(userId)
-                .claim("email", email)        // ← новое
-                .claim("role", role)          // ← новое
+                .claim("email", email)
+                .claim("role", role)
                 .claim("type", "refresh")
                 .issuedAt(now)
                 .expiration(expiryDate)

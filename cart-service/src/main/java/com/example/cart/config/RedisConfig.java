@@ -19,18 +19,14 @@ public class RedisConfig {
         RedisTemplate<String, Cart> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // ObjectMapper с поддержкой Java 8 Date/Time (Instant)
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
-        // ★ ДОБАВЛЕНО: игнорировать неизвестные поля (например, старое totalAmount из Redis)
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        // Ключ — строка
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
 
-        // Значение — JSON
         Jackson2JsonRedisSerializer<Cart> serializer =
                 new Jackson2JsonRedisSerializer<>(objectMapper, Cart.class);
         template.setValueSerializer(serializer);

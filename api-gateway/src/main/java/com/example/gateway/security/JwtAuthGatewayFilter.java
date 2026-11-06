@@ -50,7 +50,6 @@ public class JwtAuthGatewayFilter extends AbstractGatewayFilterFactory<JwtAuthGa
 
                 if (role == null) role = "USER";
 
-                // Прокидываем данные в downstream-сервисы через заголовки
                 ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                         .header("X-User-Id", userId)
                         .header("X-User-Email", email != null ? email : "")
@@ -85,6 +84,5 @@ public class JwtAuthGatewayFilter extends AbstractGatewayFilterFactory<JwtAuthGa
     }
 
     public static class Config {
-        // Пока пусто — параметры не нужны
     }
 }

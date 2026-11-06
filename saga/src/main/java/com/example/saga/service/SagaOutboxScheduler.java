@@ -73,7 +73,6 @@ public class SagaOutboxScheduler {
 
             } catch (Exception e) {
                 log.error("Outbox send failed: {} - {}", outbox.getId(), e.getMessage(), e);
-                // Оставляем PENDING для следующей попытки
             }
         }
     }

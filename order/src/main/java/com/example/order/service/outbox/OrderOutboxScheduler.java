@@ -64,7 +64,6 @@ public class OrderOutboxScheduler {
             } catch (Exception e) {
                 log.error("OutboxScheduler: ошибка публикации {}: {}",
                         outbox.getEventId(), e.getMessage());
-                // Оставляем PENDING для следующей попытки
             }
         }
     }
@@ -92,7 +91,6 @@ public class OrderOutboxScheduler {
                 .setHeader("sourceService", "order-service")
                 .build();
 
-        // ❗ ВАЖНО: .get() — но вне транзакции БД (в scheduler'е), поэтому ок
         kafkaTemplate.send(message).get();
     }
 }

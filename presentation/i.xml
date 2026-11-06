@@ -1,0 +1,117 @@
+<mxfile host="app.diagrams.net">
+    <diagram name="Online Store" id="1">
+        <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="800" math="0" shadow="0">
+            <root>
+                <mxCell id="0" />
+                <mxCell id="1" parent="0" />
+
+                <!-- Eureka -->
+                <mxCell id="eureka" value="Eureka Server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1500;strokeColor=#ffd700;fontColor=#ffffff;fontFamily=Orbitron;" vertex="1" parent="1">
+                    <mxGeometry x="500" y="50" width="120" height="40" as="geometry" />
+                </mxCell>
+
+                <!-- Клиент -->
+                <mxCell id="client" value="Клиент" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a001e;strokeColor=#50fa7b;fontColor=#ffffff;fontFamily=Orbitron;" vertex="1" parent="1">
+                    <mxGeometry x="50" y="300" width="80" height="50" as="geometry" />
+                </mxCell>
+
+                <!-- Gateway -->
+                <mxCell id="gateway" value="API Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a0010;strokeColor=#ff0080;fontColor=#ffffff;fontFamily=Orbitron;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="290" width="100" height="70" as="geometry" />
+                </mxCell>
+
+                <!-- Kafka -->
+                <mxCell id="kafka" value="Apache Kafka" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a0b1c;strokeColor=#ffd700;fontColor=#ffd700;fontFamily=Orbitron;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="500" y="300" width="140" height="80" as="geometry" />
+                </mxCell>
+
+                <!-- Saga -->
+                <mxCell id="saga" value="Saga Orchestrator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f001e;strokeColor=#ff79c6;fontColor=#ff79c6;fontFamily=Orbitron;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="500" width="100" height="50" as="geometry" />
+                </mxCell>
+
+                <!-- Микросервисы -->
+                <mxCell id="auth" value="Auth Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a001e;strokeColor=#00ffff;fontColor=#ffffff;fontFamily=Orbitron;" vertex="1" parent="1">
+                    <mxGeometry x="320" y="100" width="100" height="40" as="geometry" />
+                </mxCell>
+
+                <mxCell id="order" value="Order Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a001e;strokeColor=#00ffff;fontColor=#ffffff;fontFamily=Orbitron;" vertex="1" parent="1">
+                    <mxGeometry x="480" y="180" width="100" height="40" as="geometry" />
+                </mxCell>
+
+                <mxCell id="product" value="Product Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a001e;strokeColor=#00ffff;fontColor=#ffffff;fontFamily=Orbitron;" vertex="1" parent="1">
+                    <mxGeometry x="320" y="500" width="100" height="40" as="geometry" />
+                </mxCell>
+
+                <mxCell id="payment" value="Payment Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a001e;strokeColor=#00ffff;fontColor=#ffffff;fontFamily=Orbitron;" vertex="1" parent="1">
+                    <mxGeometry x="700" y="400" width="100" height="40" as="geometry" />
+                </mxCell>
+
+                <mxCell id="cart" value="Cart Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a001e;strokeColor=#00ffff;fontColor=#ffffff;fontFamily=Orbitron;" vertex="1" parent="1">
+                    <mxGeometry x="700" y="200" width="100" height="40" as="geometry" />
+                </mxCell>
+
+                <mxCell id="notif" value="Notification" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a001e;strokeColor=#00ffff;fontColor=#ffffff;fontFamily=Orbitron;" vertex="1" parent="1">
+                    <mxGeometry x="700" y="600" width="100" height="40" as="geometry" />
+                </mxCell>
+
+                <!-- Базы данных -->
+                <mxCell id="db_auth" value="auth_db" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#0a1520;strokeColor=#00ffff;fontColor=#aaaaaa;" vertex="1" parent="1">
+                    <mxGeometry x="920" y="100" width="80" height="40" as="geometry" />
+                </mxCell>
+                <mxCell id="db_order" value="order_db" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#0a1520;strokeColor=#00ffff;fontColor=#aaaaaa;" vertex="1" parent="1">
+                    <mxGeometry x="920" y="180" width="80" height="40" as="geometry" />
+                </mxCell>
+                <mxCell id="db_inventory" value="inventory_db" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#0a1520;strokeColor=#00ffff;fontColor=#aaaaaa;" vertex="1" parent="1">
+                    <mxGeometry x="920" y="260" width="80" height="40" as="geometry" />
+                </mxCell>
+                <mxCell id="db_payment" value="payment_db" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#0a1520;strokeColor=#00ffff;fontColor=#aaaaaa;" vertex="1" parent="1">
+                    <mxGeometry x="920" y="340" width="80" height="40" as="geometry" />
+                </mxCell>
+                <mxCell id="db_saga" value="saga_db" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#0a1520;strokeColor=#ff79c6;fontColor=#aaaaaa;" vertex="1" parent="1">
+                    <mxGeometry x="920" y="420" width="80" height="40" as="geometry" />
+                </mxCell>
+                <mxCell id="redis" value="Redis" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#0a1520;strokeColor=#ff0000;fontColor=#ff8888;" vertex="1" parent="1">
+                    <mxGeometry x="920" y="500" width="80" height="40" as="geometry" />
+                </mxCell>
+
+                <!-- ================= СТРЕЛКИ ================= -->
+
+                <!-- Клиент -> Gateway -->
+                <mxCell id="edge1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#50fa7b;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="client" target="gateway">
+                    <mxGeometry relative="1" as="geometry" />
+                </mxCell>
+
+                <!-- Gateway -> Сервисы (пунктиром) -->
+                <mxCell id="edge2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ff0080;strokeWidth=2;endArrow=block;dashed=1;" edge="1" parent="1" source="gateway" target="auth"><mxGeometry relative="1" as="geometry" /></mxCell>
+                <mxCell id="edge3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ff0080;strokeWidth=2;endArrow=block;dashed=1;" edge="1" parent="1" source="gateway" target="order"><mxGeometry relative="1" as="geometry" /></mxCell>
+                <mxCell id="edge4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ff0080;strokeWidth=2;endArrow=block;dashed=1;" edge="1" parent="1" source="gateway" target="product"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+                <!-- Сервисы -> Kafka (двойные) -->
+                <mxCell id="edge5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#00ffff;strokeWidth=2;endArrow=block;startArrow=block;" edge="1" parent="1" source="auth" target="kafka"><mxGeometry relative="1" as="geometry" /></mxCell>
+                <mxCell id="edge6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#00ffff;strokeWidth=2;endArrow=block;startArrow=block;" edge="1" parent="1" source="order" target="kafka"><mxGeometry relative="1" as="geometry" /></mxCell>
+                <mxCell id="edge7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#00ffff;strokeWidth=2;endArrow=block;startArrow=block;" edge="1" parent="1" source="product" target="kafka"><mxGeometry relative="1" as="geometry" /></mxCell>
+                <mxCell id="edge8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#00ffff;strokeWidth=2;endArrow=block;startArrow=block;" edge="1" parent="1" source="payment" target="kafka"><mxGeometry relative="1" as="geometry" /></mxCell>
+                <mxCell id="edge9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#00ffff;strokeWidth=2;endArrow=block;startArrow=block;" edge="1" parent="1" source="cart" target="kafka"><mxGeometry relative="1" as="geometry" /></mxCell>
+                <mxCell id="edge10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#00ffff;strokeWidth=2;endArrow=block;startArrow=block;" edge="1" parent="1" source="notif" target="kafka"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+                <!-- Saga -> Kafka (двойная) -->
+                <mxCell id="edge11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ff79c6;strokeWidth=2;endArrow=block;startArrow=block;" edge="1" parent="1" source="saga" target="kafka"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+                <!-- Сервисы -> БД (пунктир) -->
+                <mxCell id="edge12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ffd700;strokeWidth=1;endArrow=block;dashed=1;" edge="1" parent="1" source="auth" target="db_auth"><mxGeometry relative="1" as="geometry" /></mxCell>
+                <mxCell id="edge13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ffd700;strokeWidth=1;endArrow=block;dashed=1;" edge="1" parent="1" source="order" target="db_order"><mxGeometry relative="1" as="geometry" /></mxCell>
+                <mxCell id="edge14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ffd700;strokeWidth=1;endArrow=block;dashed=1;" edge="1" parent="1" source="product" target="db_inventory"><mxGeometry relative="1" as="geometry" /></mxCell>
+                <mxCell id="edge15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ffd700;strokeWidth=1;endArrow=block;dashed=1;" edge="1" parent="1" source="payment" target="db_payment"><mxGeometry relative="1" as="geometry" /></mxCell>
+                <mxCell id="edge16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ff79c6;strokeWidth=1;endArrow=block;dashed=1;" edge="1" parent="1" source="saga" target="db_saga"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+                <!-- Product/Cart -> Redis -->
+                <mxCell id="edge17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ff0000;strokeWidth=1;endArrow=block;dashed=1;" edge="1" parent="1" source="cart" target="redis"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+                <!-- Eureka (пунктир ко всем) -->
+                <mxCell id="edge18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ffd700;strokeWidth=1;endArrow=block;dashed=1;opacity=50;" edge="1" parent="1" source="eureka" target="gateway"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
